@@ -1,0 +1,6 @@
+@defaultMessage Use java.time types instead of legacy date/time APIs.
+java.util.Date
+java.util.Calendar
+java.sql.Date
+java.sql.Time
+java.sql.Timestamp

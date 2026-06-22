@@ -13,4 +13,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "wuli3-build-logic"
+rootProject.name = "wuli3-gradle-build-logic"

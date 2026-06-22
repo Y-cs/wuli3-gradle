@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
     api(project(":wuli3-core"))
-    implementation(project(":wuli3-jackson"))
+    implementation(project(":wuli3-json"))
     api("org.springframework.boot:spring-boot-starter-web")
     api("org.springframework.boot:spring-boot-starter-validation")
 }

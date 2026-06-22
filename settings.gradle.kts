@@ -18,7 +18,7 @@ rootProject.name = "wuli3-gradle"
 include(
     "wuli3-dependencies",
     "wuli3-core",
-    "wuli3-jackson",
+    "wuli3-json",
     "wuli3-event-core",
     "wuli3-event-inmemory",
     "wuli3-web-spring-boot-starter",

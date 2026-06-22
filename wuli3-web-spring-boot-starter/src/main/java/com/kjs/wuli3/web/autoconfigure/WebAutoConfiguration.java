@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.autoconfigure;
 
 import com.fasterxml.jackson.databind.Module;
-import com.kjs.wuli3.jackson.JavaTimeModuleFactory;
+import com.kjs.wuli3.json.JacksonProvider;
 import com.kjs.wuli3.web.error.GlobalExceptionHandler;
 import com.kjs.wuli3.web.filter.RequestIdFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -35,6 +35,6 @@ public class WebAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "javaTimeModule")
     public Module javaTimeModule() {
-        return JavaTimeModuleFactory.create();
+        return JacksonProvider.create();
     }
 }

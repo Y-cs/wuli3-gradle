@@ -1,5 +1,6 @@
 plugins {
     `java-platform`
+    `maven-publish`
 }
 
 javaPlatform {
@@ -19,5 +20,18 @@ dependencies {
         api("org.junit.jupiter:junit-jupiter:5.12.2")
         api("org.assertj:assertj-core:3.27.3")
         api("org.apache.rocketmq:rocketmq-spring-boot-starter:2.3.4")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenBom") {
+            from(components["javaPlatform"])
+
+            pom {
+                name.set("wuli3 dependencies")
+                description.set("Dependency management BOM for wuli3 projects.")
+            }
+        }
     }
 }

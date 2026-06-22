@@ -36,6 +36,31 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 ./gradlew test
 ./gradlew check
 ./gradlew clean check
+./gradlew :wuli3-dependencies:publishToMavenLocal
+```
+
+## Maven 项目使用 BOM
+
+先发布到本地 Maven 仓库：
+
+```bash
+./gradlew :wuli3-dependencies:publishToMavenLocal
+```
+
+Maven 项目引入：
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.kjs.wuli3</groupId>
+      <artifactId>wuli3-dependencies</artifactId>
+      <version>0.1.0-SNAPSHOT</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
 ```
 
 ## 约定

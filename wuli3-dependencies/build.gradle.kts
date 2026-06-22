@@ -29,7 +29,7 @@ publishing {
             from(components["javaPlatform"])
 
             pom {
-                name.set("wuli3 dependencies")
+                name.set("wuli3-dependencies")
                 description.set("Dependency management BOM for wuli3 projects.")
             }
         }

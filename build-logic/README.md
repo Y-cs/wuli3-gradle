@@ -1,6 +1,6 @@
 # wuli3-gradle-build-logic
 
-Gradle 构建逻辑模块，不作为业务依赖发布。
+Gradle 构建逻辑模块，提供可复用、可发布的约定插件。
 
 根工程通过 `settings.gradle.kts` 引入：
 
@@ -10,12 +10,12 @@ pluginManagement {
 }
 ```
 
-`rootProject.name = "wuli3-gradle-build-logic"` 只用于标识这个 included build；业务模块不需要直接引用该名称。
+included build 名称只用于本仓库识别；业务模块不需要直接引用该名称。
 
 提供约定插件：
 
 - `com.kjs.wuli3.java-conventions`：JDK 21、测试、基础依赖约定。
-- `com.kjs.wuli3.quality-conventions`：Checkstyle、Forbidden APIs、Error Prone、NullAway。
+- `com.kjs.wuli3.quality-conventions`：Checkstyle、SpotBugs、Forbidden APIs、Error Prone、NullAway。
 - `com.kjs.wuli3.spring-conventions`：Spring Boot starter 模块约定。
 
 普通 Java 模块使用：
@@ -35,3 +35,81 @@ plugins {
 ```
 
 业务模块只应用约定插件，不重复配置质量规则。
+
+## 业务项目使用
+
+发布到 Maven 仓库后，业务 Gradle 项目可以通过插件版本使用：
+
+```kotlin
+pluginManagement {
+    repositories {
+        maven("https://maven.example.com/repository/releases")
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+```
+
+```kotlin
+plugins {
+    id("com.kjs.wuli3.java-conventions") version "0.1.0-SNAPSHOT"
+}
+```
+
+默认会导入 `com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT` 作为 BOM，并启用 Checkstyle、SpotBugs、Forbidden APIs、Error Prone 和 NullAway。
+业务项目可在 `gradle.properties` 覆盖默认值：
+
+```properties
+wuli3.conventions.bom-coordinates=com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
+wuli3.conventions.java-version=21
+wuli3.conventions.nullaway.annotated-packages=com.example.service
+wuli3.conventions.nullaway.enabled=true
+wuli3.conventions.spotbugs.enabled=true
+wuli3.conventions.forbidden-apis.enabled=true
+wuli3.conventions.forbidden-apis.test-enabled=false
+```
+
+本仓库通过以下属性继续使用本地 BOM 项目：
+
+```properties
+wuli3.conventions.use-project-bom=true
+wuli3.conventions.project-bom-path=:wuli3-dependencies
+```
+
+## 发布到 Maven 仓库
+
+本模块可以作为 Gradle 插件发布。默认坐标：
+
+```text
+com.kjs.wuli3:build-logic:0.1.0-SNAPSHOT
+```
+
+默认版本配置在 `build-logic/gradle.properties`：
+
+```properties
+wuli3.build-logic.version=0.1.0-SNAPSHOT
+```
+
+发布到本地 Maven 仓库：
+
+```bash
+./gradlew -p build-logic publishToMavenLocal
+```
+
+发布到公司 Maven 仓库：
+
+```bash
+./gradlew -p build-logic publish \
+  -PcompanyMavenSnapshotsUrl=https://maven.example.com/repository/snapshots \
+  -PcompanyMavenReleasesUrl=https://maven.example.com/repository/releases \
+  -PcompanyMavenUsername=your-username \
+  -PcompanyMavenPassword=your-password
+```
+
+也可以使用环境变量提供凭据：
+
+```bash
+COMPANY_MAVEN_USERNAME=your-username COMPANY_MAVEN_PASSWORD=your-password ./gradlew -p build-logic publish
+```
+
+Maven 项目不能直接使用 Gradle 插件。后续如需统一 Maven 构建规则，应单独提供 parent POM。

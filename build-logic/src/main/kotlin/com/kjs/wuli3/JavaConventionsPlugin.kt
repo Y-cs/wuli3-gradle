@@ -4,6 +4,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.withType
@@ -16,9 +17,14 @@ class JavaConventionsPlugin : Plugin<Project> {
             pluginManager.apply("jacoco")
             pluginManager.apply("com.kjs.wuli3.quality-conventions")
 
+            val javaVersion = intProperty(
+                ConventionProperties.JAVA_VERSION,
+                ConventionProperties.DEFAULT_JAVA_VERSION,
+            )
+
             extensions.configure<JavaPluginExtension> {
                 toolchain {
-                    languageVersion.set(org.gradle.jvm.toolchain.JavaLanguageVersion.of(21))
+                    languageVersion.set(JavaLanguageVersion.of(javaVersion))
                 }
                 withSourcesJar()
             }
@@ -43,15 +49,31 @@ class JavaConventionsPlugin : Plugin<Project> {
             }
 
             dependencies {
-                "implementation"(platform(project(":wuli3-dependencies")))
-                "testImplementation"(platform(project(":wuli3-dependencies")))
-                "annotationProcessor"(platform(project(":wuli3-dependencies")))
-                "testAnnotationProcessor"(platform(project(":wuli3-dependencies")))
-                "compileOnly"("org.jspecify:jspecify")
+                val bomDependency = conventionBomDependency()
+                "implementation"(platform(bomDependency))
+                "testImplementation"(platform(bomDependency))
+                "annotationProcessor"(platform(bomDependency))
+                "testAnnotationProcessor"(platform(bomDependency))
                 "testImplementation"("org.junit.jupiter:junit-jupiter")
                 "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
                 "testImplementation"("org.assertj:assertj-core")
             }
         }
+    }
+
+    private fun Project.conventionBomDependency(): Any {
+        val useProjectBom = booleanProperty(ConventionProperties.USE_PROJECT_BOM, false)
+        if (useProjectBom) {
+            val projectBomPath = stringProperty(
+                ConventionProperties.PROJECT_BOM_PATH,
+                ConventionProperties.DEFAULT_PROJECT_BOM_PATH,
+            )
+            return project(projectBomPath)
+        }
+
+        return stringProperty(
+            ConventionProperties.BOM_COORDINATES,
+            ConventionProperties.DEFAULT_BOM_COORDINATES,
+        )
     }
 }

@@ -44,6 +44,14 @@ com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
 - `com.uber.nullaway:nullaway:0.13.7`
 - `com.puppycrawl.tools:checkstyle:13.6.0`
 - `org.redisson:redisson-spring-boot-starter:4.6.1`
+- `com.google.guava:guava:33.6.0-jre`
+- `cn.hutool:hutool-all:5.8.46`
+- `org.apache.commons:commons-lang3:3.20.0`
+- `org.apache.commons:commons-collections4:4.5.0`
+- `commons-io:commons-io:2.22.0`
+- `org.apache.commons:commons-text:1.15.0`
+- `it.unimi.dsi:fastutil:8.5.18`
+- `org.projectlombok:lombok:1.18.46`
 - `org.junit.jupiter:junit-jupiter:5.12.2`
 - `org.assertj:assertj-core:3.27.3`
 - `org.apache.rocketmq:rocketmq-spring-boot-starter:2.3.4`
@@ -67,6 +75,8 @@ dependencies {
 
 ```kotlin
 dependencies {
+    implementation("com.google.guava:guava")
+    implementation("org.apache.commons:commons-lang3")
     implementation("org.redisson:redisson-spring-boot-starter")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.assertj:assertj-core")
@@ -81,6 +91,7 @@ dependencies {
 dependencies {
     implementation(platform(project(":wuli3-dependencies")))
 
+    implementation("cn.hutool:hutool-all")
     implementation("org.redisson:redisson-spring-boot-starter")
 }
 ```
@@ -114,8 +125,22 @@ repositories {
 dependencies {
     implementation(platform("com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT"))
 
+    implementation("com.google.guava:guava")
+    implementation("it.unimi.dsi:fastutil")
     implementation("org.redisson:redisson-spring-boot-starter")
     testImplementation("org.junit.jupiter:junit-jupiter")
+}
+```
+
+使用 Lombok 时，编译期依赖和注解处理器都可以省略版本：
+
+```kotlin
+dependencies {
+    implementation(platform("com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT"))
+    annotationProcessor(platform("com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT"))
+
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
 }
 ```
 
@@ -156,6 +181,22 @@ Maven 项目在 `dependencyManagement` 中导入 BOM：
 
 ```xml
 <dependencies>
+  <dependency>
+    <groupId>com.google.guava</groupId>
+    <artifactId>guava</artifactId>
+  </dependency>
+
+  <dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+  </dependency>
+
+  <dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <scope>provided</scope>
+  </dependency>
+
   <dependency>
     <groupId>org.redisson</groupId>
     <artifactId>redisson-spring-boot-starter</artifactId>
@@ -234,4 +275,3 @@ dependencies {
 ```bash
 ./gradlew :wuli3-redis-spring-boot-starter:dependencyInsight --dependency redisson --configuration runtimeClasspath
 ```
-

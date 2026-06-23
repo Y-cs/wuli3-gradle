@@ -1,12 +1,22 @@
+import org.gradle.api.publish.maven.MavenPublication
+
 plugins {
     `kotlin-dsl`
+    `maven-publish`
 }
 
+group = "com.kjs.wuli3"
+version = providers.gradleProperty("wuli3.build-logic.version").get()
+
 dependencies {
-    implementation("com.diffplug.spotless:spotless-plugin-gradle:8.7.0")
     implementation("com.github.spotbugs.snom:spotbugs-gradle-plugin:6.5.8")
     implementation("de.thetaphi:forbiddenapis:3.10")
     implementation("net.ltgt.gradle:gradle-errorprone-plugin:5.1.0")
+}
+
+repositories {
+    gradlePluginPortal()
+    mavenCentral()
 }
 
 gradlePlugin {
@@ -22,6 +32,39 @@ gradlePlugin {
         register("springConventions") {
             id = "com.kjs.wuli3.spring-conventions"
             implementationClass = "com.kjs.wuli3.SpringConventionsPlugin"
+        }
+    }
+}
+
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        if (name == "pluginMaven") {
+            artifactId = "build-logic"
+        }
+    }
+
+    repositories {
+        val releaseRepository = providers.gradleProperty("companyMavenReleasesUrl")
+        val snapshotRepository = providers.gradleProperty("companyMavenSnapshotsUrl")
+        val fallbackRepository = providers.gradleProperty("companyMavenUrl")
+        val repositoryUrl = when {
+            version.toString().endsWith("-SNAPSHOT") -> snapshotRepository.orElse(fallbackRepository)
+            else -> releaseRepository.orElse(fallbackRepository)
+        }
+
+        if (repositoryUrl.isPresent) {
+            maven {
+                name = "companyMaven"
+                url = uri(repositoryUrl.get())
+                credentials {
+                    username = providers.gradleProperty("companyMavenUsername")
+                        .orElse(providers.environmentVariable("COMPANY_MAVEN_USERNAME"))
+                        .orNull
+                    password = providers.gradleProperty("companyMavenPassword")
+                        .orElse(providers.environmentVariable("COMPANY_MAVEN_PASSWORD"))
+                        .orNull
+                }
+            }
         }
     }
 }

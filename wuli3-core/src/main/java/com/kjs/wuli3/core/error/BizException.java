@@ -1,9 +1,11 @@
 package com.kjs.wuli3.core.error;
 
+import java.io.Serial;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 public final class BizException extends ApplicationException {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public BizException(ErrorCode errorCode) {

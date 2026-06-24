@@ -3,7 +3,7 @@ package com.kjs.wuli3.core;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.kjs.wuli3.core.error.CommonErrorCode;
+import com.kjs.wuli3.core.exception.CommonErrorCode;
 import com.kjs.wuli3.core.error.SystemException;
 import com.kjs.wuli3.core.function.Functions;
 import com.kjs.wuli3.core.page.PageQuery;

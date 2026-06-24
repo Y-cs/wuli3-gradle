@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.kjs.wuli3.core.error.BizException;
-import com.kjs.wuli3.core.error.CommonErrorCode;
+import com.kjs.wuli3.core.exception.CommonErrorCode;
 import com.kjs.wuli3.web.autoconfigure.WebAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

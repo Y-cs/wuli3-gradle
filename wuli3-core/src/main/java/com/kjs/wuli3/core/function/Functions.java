@@ -1,6 +1,6 @@
 package com.kjs.wuli3.core.function;
 
-import com.kjs.wuli3.core.error.CommonErrorCode;
+import com.kjs.wuli3.core.exception.CommonErrorCode;
 import com.kjs.wuli3.core.error.SystemException;
 import java.util.function.Consumer;
 import java.util.function.Function;

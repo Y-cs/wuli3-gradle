@@ -2,6 +2,7 @@ package com.kjs.wuli3
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
@@ -21,6 +22,7 @@ class JavaConventionsPlugin : Plugin<Project> {
                 ConventionProperties.JAVA_VERSION,
                 ConventionProperties.DEFAULT_JAVA_VERSION,
             )
+            val lombokEnabled = booleanProperty(ConventionProperties.LOMBOK_ENABLED, true)
 
             extensions.configure<JavaPluginExtension> {
                 toolchain {
@@ -54,6 +56,9 @@ class JavaConventionsPlugin : Plugin<Project> {
                 "testImplementation"(platform(bomDependency))
                 "annotationProcessor"(platform(bomDependency))
                 "testAnnotationProcessor"(platform(bomDependency))
+                if (lombokEnabled) {
+                    lombok()
+                }
                 "testImplementation"("org.junit.jupiter:junit-jupiter")
                 "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
                 "testImplementation"("org.assertj:assertj-core")
@@ -75,5 +80,12 @@ class JavaConventionsPlugin : Plugin<Project> {
             ConventionProperties.BOM_COORDINATES,
             ConventionProperties.DEFAULT_BOM_COORDINATES,
         )
+    }
+
+    private fun DependencyHandler.lombok() {
+        add("compileOnly", "org.projectlombok:lombok")
+        add("annotationProcessor", "org.projectlombok:lombok")
+        add("testCompileOnly", "org.projectlombok:lombok")
+        add("testAnnotationProcessor", "org.projectlombok:lombok")
     }
 }

@@ -12,6 +12,7 @@ internal object ConventionProperties {
     const val FORBIDDEN_APIS_ENABLED = "wuli3.conventions.forbidden-apis.enabled"
     const val FORBIDDEN_APIS_TEST_ENABLED = "wuli3.conventions.forbidden-apis.test-enabled"
     const val JAVA_VERSION = "wuli3.conventions.java-version"
+    const val LOMBOK_ENABLED = "wuli3.conventions.lombok.enabled"
     const val NULL_AWAY_ANNOTATED_PACKAGES = "wuli3.conventions.nullaway.annotated-packages"
     const val NULL_AWAY_ENABLED = "wuli3.conventions.nullaway.enabled"
     const val NULL_AWAY_JSPECIFY = "wuli3.conventions.nullaway.jspecify"

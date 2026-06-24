@@ -60,7 +60,13 @@ com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
 
 ### 本仓库子模块
 
-本仓库的 Java 子模块已经通过 `build-logic` 中的 `com.kjs.wuli3` Java 约定插件自动接入：
+本仓库的 Java 子模块已经通过 `build-logic` 中的 `com.kjs.wuli3.java-conventions` 约定插件自动接入。根项目 `gradle.properties` 中设置了：
+
+```properties
+wuli3.conventions.use-project-bom=true
+```
+
+因此约定插件会使用本仓库内的 `project(":wuli3-dependencies")`：
 
 ```kotlin
 dependencies {
@@ -108,7 +114,9 @@ dependencies {
 
 ### 外部 Gradle 项目接入
 
-先发布 BOM 到本地 Maven 仓库：
+如果外部 Gradle 项目不使用 `build-logic` 约定插件，可以直接导入已发布的 BOM。
+
+本地验证时，先发布 BOM 到本地 Maven 仓库：
 
 ```bash
 ./gradlew :wuli3-dependencies:publishToMavenLocal
@@ -152,6 +160,60 @@ repositories {
     mavenCentral()
 }
 ```
+
+### 外部 Gradle 业务服务使用约定插件
+
+如果业务服务使用 `build-logic` 发布出的约定插件：
+
+```kotlin
+plugins {
+    id("com.kjs.wuli3.java-conventions") version "0.1.0-SNAPSHOT"
+}
+```
+
+则默认会自动导入：
+
+```text
+com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
+```
+
+业务服务只需要声明无版本依赖：
+
+```kotlin
+dependencies {
+    implementation("com.google.guava:guava")
+    implementation("org.apache.commons:commons-lang3")
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
+```
+
+业务服务切换 `wuli3-dependencies` 版本时，在业务服务自己的 `gradle.properties` 中覆盖 BOM 坐标：
+
+```properties
+wuli3.conventions.bom-coordinates=com.kjs.wuli3:wuli3-dependencies:0.1.1-SNAPSHOT
+```
+
+外部业务服务一般不要设置 `wuli3.conventions.use-project-bom=true`。该开关用于本仓库或 composite build 场景，会让约定插件从 Gradle project path 读取 BOM，而不是从 Maven 仓库读取已发布坐标。
+
+### 版本切换规则
+
+Gradle 项目直接导入 BOM 时，切换这里的版本：
+
+```kotlin
+dependencies {
+    implementation(platform("com.kjs.wuli3:wuli3-dependencies:0.1.1-SNAPSHOT"))
+}
+```
+
+Gradle 项目使用 `build-logic` 约定插件时，切换这里的版本：
+
+```properties
+wuli3.conventions.bom-coordinates=com.kjs.wuli3:wuli3-dependencies:0.1.1-SNAPSHOT
+```
+
+Maven 项目使用 BOM 时，切换 `dependencyManagement` 中的 `<version>`。
+
+`build-logic` 插件版本和 `wuli3-dependencies` BOM 版本是两个独立入口。升级构建规则时改插件版本；只切换依赖版本基线时改 BOM 坐标。
 
 ## Maven 项目使用
 

@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web;
 
-import com.kjs.wuli3.core.exception.CommonErrorCode;
-import com.kjs.wuli3.core.exception.ErrorCode;
+import com.kjs.wuli3.core.error.CommonErrorCode;
+import com.kjs.wuli3.core.error.ErrorCode;
 import org.jspecify.annotations.Nullable;
 
 public record ApiResponse<T>(String code, String message, @Nullable T data, @Nullable String requestId) {

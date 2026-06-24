@@ -1,9 +1,9 @@
 package com.kjs.wuli3.web.error;
 
 import com.google.common.collect.Maps;
-import com.kjs.wuli3.core.exception.ErrorCode;
-import com.kjs.wuli3.core.exception.ErrorCodeResolver;
-import com.kjs.wuli3.core.exception.ErrorModule;
+import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.ErrorModule;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;

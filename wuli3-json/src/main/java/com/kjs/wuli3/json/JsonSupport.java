@@ -3,7 +3,7 @@ package com.kjs.wuli3.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjs.wuli3.core.exception.CommonErrorCode;
+import com.kjs.wuli3.core.error.CommonErrorCode;
 import com.kjs.wuli3.core.error.SystemException;
 
 public final class JsonSupport {

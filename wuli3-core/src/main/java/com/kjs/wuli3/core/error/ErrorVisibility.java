@@ -1,4 +1,4 @@
-package com.kjs.wuli3.core.exception;
+package com.kjs.wuli3.core.error;
 
 /**
  * ErrorVisibility

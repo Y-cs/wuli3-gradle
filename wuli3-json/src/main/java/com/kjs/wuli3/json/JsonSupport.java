@@ -3,8 +3,8 @@ package com.kjs.wuli3.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjs.wuli3.core.error.CommonErrorCode;
-import com.kjs.wuli3.core.error.SystemException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.SystemErrors;
 
 public final class JsonSupport {
     private static final ObjectMapper OBJECT_MAPPER = JacksonProvider.defaultObjectMapper();
@@ -40,7 +40,7 @@ public final class JsonSupport {
         return OBJECT_MAPPER;
     }
 
-    private static SystemException jsonException(String message, JsonProcessingException ex) {
-        return new SystemException(CommonErrorCode.INTERNAL_ERROR, message, ex);
+    private static ErrorCodeException jsonException(String message, JsonProcessingException ex) {
+        return new ErrorCodeException(SystemErrors.ILLEGAL_STATE, message, ex);
     }
 }

@@ -1,4 +1,4 @@
 @NullMarked
-package com.kjs.wuli3.core.page;
+package com.kjs.wuli3.propagation.api;
 
 import org.jspecify.annotations.NullMarked;

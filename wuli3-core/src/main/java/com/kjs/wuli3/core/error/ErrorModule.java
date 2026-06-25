@@ -13,4 +13,8 @@ import java.lang.annotation.Target;
 public @interface ErrorModule {
 
     String value();
+
+    ErrorSeverity severity() default ErrorSeverity.NORMAL;
+
+    ErrorVisibility visibility() default ErrorVisibility.PUBLIC;
 }

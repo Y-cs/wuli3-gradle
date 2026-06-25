@@ -1,23 +1,41 @@
 package com.kjs.wuli3.core.error;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * ErrorPolicy
  *
  * @author GuoYang create on 2026/6/24 14:15
  */
-@Getter
-@Setter
-@Accessors(chain = true, fluent = true)
-public class ErrorPolicy {
+public record ErrorPolicy(ErrorSeverity severity, ErrorVisibility visibility) implements Serializable {
 
-    // 错误严重程度
-    private ErrorSeverity severity = ErrorSeverity.NORMAL;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    // 错误可见级别
-    private ErrorVisibility visibility = ErrorVisibility.PUBLIC;
+    public ErrorPolicy {
+        if (severity == null) {
+            severity = ErrorSeverity.NORMAL;
+        }
+        if (visibility == null) {
+            visibility = ErrorVisibility.PUBLIC;
+        }
+    }
+
+    public static ErrorPolicy defaults() {
+        return new ErrorPolicy(ErrorSeverity.NORMAL, ErrorVisibility.PUBLIC);
+    }
+
+    public ErrorPolicy withSeverity(ErrorSeverity severity) {
+        return new ErrorPolicy(severity, visibility);
+    }
+
+    public ErrorPolicy withVisibility(ErrorVisibility visibility) {
+        return new ErrorPolicy(severity, visibility);
+    }
+
+    public ErrorPolicy with(ErrorSeverity severity, ErrorVisibility visibility) {
+        return new ErrorPolicy(severity, visibility);
+    }
 
 }

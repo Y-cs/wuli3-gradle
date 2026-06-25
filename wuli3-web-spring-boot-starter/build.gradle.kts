@@ -4,7 +4,8 @@ plugins {
 
 dependencies {
     api(project(":wuli3-core"))
-    implementation(project(":wuli3-json"))
+    api(project(":wuli3-json"))
+    api(project(":wuli3-context-propagation"))
     api("com.google.guava:guava")
     api("cn.hutool:hutool-all")
     api("org.apache.commons:commons-lang3")

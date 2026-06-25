@@ -8,9 +8,9 @@ import lombok.RequiredArgsConstructor;
  *
  * @author GuoYang create on 2026/6/24 14:39
  */
-@ErrorModule("ERROR_FRAMEWORK")
 @Getter
 @RequiredArgsConstructor
+@ErrorModule(value = "ERROR_FRAMEWORK", visibility = ErrorVisibility.INTERNAL)
 public enum ErrorFrameworkErrors implements ErrorCode {
 
     ERROR_CODE_RESOLVE_FAILED("错误代码解释失败"),
@@ -21,3 +21,4 @@ public enum ErrorFrameworkErrors implements ErrorCode {
 
     private final String message;
 }
+

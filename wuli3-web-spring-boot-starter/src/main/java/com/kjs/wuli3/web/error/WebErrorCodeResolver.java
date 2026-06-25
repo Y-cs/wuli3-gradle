@@ -2,31 +2,23 @@ package com.kjs.wuli3.web.error;
 
 import com.google.common.collect.Maps;
 import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.ErrorFrameworkErrors;
 import com.kjs.wuli3.core.error.ErrorModule;
+import com.kjs.wuli3.core.error.ErrorSeverity;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 /**
- * DefaultErrorCodeResolver
- *
- * @author GuoYang create on 2026/6/24 11:17
+ * 使用错误码所属模块前缀格式化错误码。
  */
 public class WebErrorCodeResolver implements ErrorCodeResolver {
 
     private final Map<Class<?>, ErrorModule> errorCodeCache = Maps.newConcurrentMap();
-
-    private WebErrorCodeResolver() {}
-
-    public static WebErrorCodeResolver instance() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    private static class SingletonHolder {
-        private static final WebErrorCodeResolver INSTANCE = new WebErrorCodeResolver();
-    }
 
     @Override
     public String formatErrorCode(ErrorCode errorCode) {
@@ -35,8 +27,9 @@ public class WebErrorCodeResolver implements ErrorCodeResolver {
                 .filter(StringUtils::isNotBlank)
                 .map(String::trim)
                 .map(moduleName -> moduleName + "." + errorCode.getName())
-                .map(String::toUpperCase)
-                .orElseThrow(() -> new IllegalArgumentException("Error code module name is blank"));
+                .map(errorCodeValue -> errorCodeValue.toUpperCase(Locale.ROOT))
+                .orElseThrow(() -> new ErrorCodeException(ErrorFrameworkErrors.MODULE_NOT_FOUND).severity(
+                        ErrorSeverity.WARNING));
     }
 
     private ErrorModule getErrorModule(ErrorCode errorCode) {

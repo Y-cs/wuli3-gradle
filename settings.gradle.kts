@@ -1,4 +1,5 @@
 @file:Suppress("UnstableApiUsage")
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {
@@ -22,6 +23,7 @@ include(
     "wuli3-json",
     "wuli3-event-core",
     "wuli3-event-inmemory",
+    "wuli3-context-propagation",
     "wuli3-web-spring-boot-starter",
     "wuli3-mysql-spring-boot-starter",
     "wuli3-redis-spring-boot-starter",

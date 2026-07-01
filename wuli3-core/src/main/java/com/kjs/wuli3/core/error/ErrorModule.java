@@ -14,7 +14,5 @@ public @interface ErrorModule {
 
     String value();
 
-    ErrorSeverity severity() default ErrorSeverity.NORMAL;
-
-    ErrorVisibility visibility() default ErrorVisibility.PUBLIC;
+    ErrorPolicy policy() default @ErrorPolicy;
 }

@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorPolicy;
 import com.kjs.wuli3.core.error.ErrorSeverity;
 import com.kjs.wuli3.core.error.ErrorVisibility;
+import com.kjs.wuli3.core.error.ResolvedErrorPolicy;
 import com.kjs.wuli3.core.error.SystemErrors;
 import com.kjs.wuli3.core.function.Functions;
 import com.kjs.wuli3.core.page.PageQuery;
@@ -47,8 +47,8 @@ class CoreSmokeTest {
                 .severity(ErrorSeverity.CRITICAL)
                 .visibility(ErrorVisibility.INTERNAL);
 
-        assertThat(exception.getErrorPolicy().severity()).isEqualTo(ErrorSeverity.CRITICAL);
-        assertThat(exception.getErrorPolicy().visibility()).isEqualTo(ErrorVisibility.INTERNAL);
+        assertThat(exception.getResolvedErrorPolicy().severity()).isEqualTo(ErrorSeverity.CRITICAL);
+        assertThat(exception.getResolvedErrorPolicy().visibility()).isEqualTo(ErrorVisibility.INTERNAL);
     }
 
     @Test
@@ -57,8 +57,8 @@ class CoreSmokeTest {
                 .policy(policy -> policy.withSeverity(ErrorSeverity.WARNING)
                         .withVisibility(ErrorVisibility.CODE_ONLY));
 
-        assertThat(exception.getErrorPolicy().severity()).isEqualTo(ErrorSeverity.WARNING);
-        assertThat(exception.getErrorPolicy().visibility()).isEqualTo(ErrorVisibility.CODE_ONLY);
+        assertThat(exception.getResolvedErrorPolicy().severity()).isEqualTo(ErrorSeverity.WARNING);
+        assertThat(exception.getResolvedErrorPolicy().visibility()).isEqualTo(ErrorVisibility.CODE_ONLY);
     }
 
     @Test
@@ -68,17 +68,17 @@ class CoreSmokeTest {
                 .policy(null)
                 .policy(policy -> null);
 
-        assertThat(exception.getErrorPolicy().severity()).isEqualTo(ErrorSeverity.WARNING);
-        assertThat(exception.getErrorPolicy().visibility()).isEqualTo(ErrorVisibility.PUBLIC);
+        assertThat(exception.getResolvedErrorPolicy().severity()).isEqualTo(ErrorSeverity.WARNING);
+        assertThat(exception.getResolvedErrorPolicy().visibility()).isEqualTo(ErrorVisibility.PUBLIC);
     }
 
     @Test
     void errorPolicyReturnedByExceptionIsImmutable() {
         ErrorCodeException exception = new ErrorCodeException(SystemErrors.INTERNAL_ERROR);
-        ErrorPolicy policy = exception.getErrorPolicy();
-        ErrorPolicy updatedPolicy = policy.withSeverity(ErrorSeverity.FATAL);
+        ResolvedErrorPolicy policy = exception.getResolvedErrorPolicy();
+        ResolvedErrorPolicy updatedPolicy = policy.withSeverity(ErrorSeverity.FATAL);
 
         assertThat(updatedPolicy.severity()).isEqualTo(ErrorSeverity.FATAL);
-        assertThat(exception.getErrorPolicy().severity()).isEqualTo(ErrorSeverity.NORMAL);
+        assertThat(exception.getResolvedErrorPolicy().severity()).isEqualTo(ErrorSeverity.NORMAL);
     }
 }

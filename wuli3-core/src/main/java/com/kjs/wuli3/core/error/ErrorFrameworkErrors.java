@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@ErrorModule(value = "ERROR_FRAMEWORK", visibility = ErrorVisibility.INTERNAL)
+@ErrorModule(value = "ERROR_FRAMEWORK", policy = @ErrorPolicy(visibility = ErrorVisibility.INTERNAL))
 public enum ErrorFrameworkErrors implements ErrorCode {
 
     ERROR_CODE_RESOLVE_FAILED("错误代码解释失败"),
@@ -20,5 +20,5 @@ public enum ErrorFrameworkErrors implements ErrorCode {
     MODULE_NOT_FOUND("未找到错误模型");
 
     private final String message;
-}
 
+}

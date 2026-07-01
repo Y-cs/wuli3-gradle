@@ -5,21 +5,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.holder.ContextHolder;
-import com.kjs.wuli3.propagation.holder.ContextHolderOperator;
 import org.junit.jupiter.api.Test;
 
 class DefaultContextPropagatorTest {
 
     private final ContextHolder holder = new ContextHolder();
-    private final ContextHolderOperator operator = new ContextHolderOperator(holder);
     private final DefaultContextPropagator propagator = new DefaultContextPropagator(holder);
 
     @Test
     void captureIsIsolatedFromLaterCurrentContextChanges() {
-        operator.put(authContext(1L));
+        holder.put(authContext(1L));
         ContextSnapshot snapshot = propagator.capture();
 
-        operator.put(authContext(2L));
+        holder.put(authContext(2L));
 
         try (ContextScope ignored = propagator.restore(snapshot)) {
             assertThat(holder.get(AuthContext.class))
@@ -30,7 +28,7 @@ class DefaultContextPropagatorTest {
 
     @Test
     void restoreRestoresPreviousContextWhenScopeClosed() {
-        operator.put(authContext(1L));
+        holder.put(authContext(1L));
         ContextSnapshot snapshot = snapshotWith(authContext(2L));
 
         try (ContextScope ignored = propagator.restore(snapshot)) {
@@ -46,7 +44,7 @@ class DefaultContextPropagatorTest {
 
     @Test
     void restoreSupportsNestedScopes() {
-        operator.put(authContext(1L));
+        holder.put(authContext(1L));
         ContextSnapshot second = snapshotWith(authContext(2L));
         ContextSnapshot third = snapshotWith(authContext(3L));
 
@@ -89,7 +87,7 @@ class DefaultContextPropagatorTest {
         ContextSnapshot snapshot = snapshotWith(authContext(1L));
 
         try (ContextScope ignored = propagator.restore(snapshot)) {
-            operator.put(authContext(2L));
+            holder.put(authContext(2L));
         }
 
         try (ContextScope ignored = propagator.restore(snapshot)) {
@@ -101,7 +99,7 @@ class DefaultContextPropagatorTest {
 
     @Test
     void containerUsesContextTypeAsStorageKey() {
-        operator.put(new CustomAuthContext(1L, "user-1"));
+        holder.put(new CustomAuthContext(1L, "user-1"));
 
         assertThat(holder.get(AuthContext.class))
                 .map(AuthContext::getUserId)
@@ -109,9 +107,9 @@ class DefaultContextPropagatorTest {
     }
 
     private static ContextSnapshot snapshotWith(AuthContext authContext) {
-        ContextHolder holder = new ContextHolder();
-        new ContextHolderOperator(holder).put(authContext);
-        return new DefaultContextPropagator(holder).capture();
+        ContextHolder h = new ContextHolder();
+        h.put(authContext);
+        return new DefaultContextPropagator(h).capture();
     }
 
     private static AuthContext authContext(Long userId) {

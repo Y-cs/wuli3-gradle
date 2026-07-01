@@ -17,7 +17,7 @@ public interface ErrorCode extends Serializable {
         if (this instanceof Enum<?> errorEnum) {
             return errorEnum.getDeclaringClass();
         }
-        throw new ErrorCodeException(ErrorFrameworkErrors.MODULE_NOT_FOUND).severity(ErrorSeverity.WARNING);
+        throw new ErrorCodeException(ErrorFrameworkErrors.INVALID_ERROR_CODE).severity(ErrorSeverity.WARNING);
     }
 
 }

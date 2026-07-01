@@ -1,32 +1,28 @@
 package com.kjs.wuli3.propagation.accessor;
 
 import com.kjs.wuli3.propagation.context.AuthContext;
-import com.kjs.wuli3.propagation.holder.ContextHolder;
+import com.kjs.wuli3.propagation.holder.ContextReader;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 
 /**
- * AuthContextAccessor
- *
- * @author GuoYang create on 2026/6/25 15:58
+ * Accessor for authentication context values.
  */
 @RequiredArgsConstructor
 public class AuthContextAccessor {
 
-    private final ContextHolder holder;
+    private final ContextReader holder;
 
     public Optional<AuthContext> current() {
         return holder.get(AuthContext.class);
     }
 
-    public Optional<Long> currentUserId() {
+    public Optional<Long> userId() {
         return current().map(AuthContext::getUserId);
     }
 
-    public Optional<String> currentUser() {
+    public Optional<String> username() {
         return current().map(AuthContext::getUsername);
     }
-
-
 }

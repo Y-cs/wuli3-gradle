@@ -37,6 +37,6 @@ public class ContextContainer {
     }
 
     public ContextContainer copy() {
-        return new ContextContainer(contexts);
+        return new ContextContainer(Map.copyOf(contexts));
     }
 }

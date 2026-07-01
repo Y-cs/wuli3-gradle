@@ -31,7 +31,12 @@ public final class BigDecimalCollectors {
     public static <T> Collector<T, ?, BigDecimalSummary> summarizing(
             final Function<? super T, ? extends @Nullable BigDecimal> mapper) {
         Objects.requireNonNull(mapper, "mapper");
-        return Collector.of(Accumulator::new, (final Accumulator accumulator, final T value) -> accumulator.accept(mapper.apply(value)), Accumulator::combine, Accumulator::toSummary, Collector.Characteristics.UNORDERED);
+        return Collector.of(
+                Accumulator::new,
+                (final Accumulator accumulator, final T value) -> accumulator.accept(mapper.apply(value)),
+                Accumulator::combine,
+                Accumulator::toSummary,
+                Collector.Characteristics.UNORDERED);
     }
 
     private static final class Accumulator {

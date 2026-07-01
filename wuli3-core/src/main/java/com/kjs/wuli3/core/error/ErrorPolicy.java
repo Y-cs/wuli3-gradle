@@ -1,41 +1,25 @@
 package com.kjs.wuli3.core.error;
 
-import java.io.Serial;
-import java.io.Serializable;
+import org.jspecify.annotations.NullMarked;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * ErrorPolicy
  *
- * @author GuoYang create on 2026/6/24 14:15
+ * @author GuoYang create on 2026/6/26 18:25
  */
-public record ErrorPolicy(ErrorSeverity severity, ErrorVisibility visibility) implements Serializable {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.FIELD)
+@NullMarked
+public @interface ErrorPolicy {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    ErrorSeverity severity() default ErrorSeverity.NORMAL;
 
-    public ErrorPolicy {
-        if (severity == null) {
-            severity = ErrorSeverity.NORMAL;
-        }
-        if (visibility == null) {
-            visibility = ErrorVisibility.PUBLIC;
-        }
-    }
+    ErrorVisibility visibility() default ErrorVisibility.PUBLIC;
 
-    public static ErrorPolicy defaults() {
-        return new ErrorPolicy(ErrorSeverity.NORMAL, ErrorVisibility.PUBLIC);
-    }
-
-    public ErrorPolicy withSeverity(ErrorSeverity severity) {
-        return new ErrorPolicy(severity, visibility);
-    }
-
-    public ErrorPolicy withVisibility(ErrorVisibility visibility) {
-        return new ErrorPolicy(severity, visibility);
-    }
-
-    public ErrorPolicy with(ErrorSeverity severity, ErrorVisibility visibility) {
-        return new ErrorPolicy(severity, visibility);
-    }
 
 }

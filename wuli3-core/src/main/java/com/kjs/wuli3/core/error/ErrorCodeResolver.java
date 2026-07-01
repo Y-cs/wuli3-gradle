@@ -7,6 +7,6 @@ package com.kjs.wuli3.core.error;
  */
 public interface ErrorCodeResolver {
 
-    String formatErrorCode(ErrorCode errorCode);
+    String resolver(ErrorCode errorCode);
 
 }

@@ -16,7 +16,7 @@ public enum WebErrors implements ErrorCode {
     SUCCESS("成功"),
     BAD_REQUEST("请求参数错误"),
     INTERNAL_ERROR("内部错误"),
-    ;
+    SERVICE_CODE_NOT_FOUND("服务编码未设置");
 
     private final String message;
 }

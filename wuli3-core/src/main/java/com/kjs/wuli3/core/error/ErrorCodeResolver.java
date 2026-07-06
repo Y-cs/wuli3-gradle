@@ -1,12 +1,10 @@
 package com.kjs.wuli3.core.error;
 
 /**
- * ErrorCodeResolver
- *
- * @author GuoYang create on 2026/6/24 11:05
+ * Converts an {@link ErrorCode} into the external code string exposed by adapters such as web responses.
  */
 public interface ErrorCodeResolver {
 
-    String resolver(ErrorCode errorCode);
+    String resolver(final ErrorCode errorCode);
 
 }

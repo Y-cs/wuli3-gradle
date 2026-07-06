@@ -6,9 +6,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.Serial;
 
 /**
- * ErrorCodeException
- *
- * @author GuoYang create on 2026/6/24 10:59
+ * Runtime exception carrying a domain {@link ErrorCode} plus the resolved response policy.
  */
 @Getter
 public class ErrorCodeException extends RuntimeException {
@@ -22,57 +20,57 @@ public class ErrorCodeException extends RuntimeException {
 
     private transient @Nullable Object detail;
 
-    public ErrorCodeException(ErrorCode errorCode, String message, @Nullable Throwable cause) {
+    public ErrorCodeException(final ErrorCode errorCode, final String message, final @Nullable Throwable cause) {
         super(message != null ? message : errorCode.getMessage(), cause);
         this.errorCode = errorCode;
         this.resolvedErrorPolicy = ErrorMetadataParser.instance()
                 .getErrorPolicy(errorCode);
     }
 
-    public ErrorCodeException(ErrorCode errorCode) {
+    public ErrorCodeException(final ErrorCode errorCode) {
         this(errorCode, errorCode.getMessage(), null);
     }
 
-    public ErrorCodeException(ErrorCode errorCode, Throwable cause) {
+    public ErrorCodeException(final ErrorCode errorCode, final Throwable cause) {
         this(errorCode, errorCode.getMessage(), cause);
     }
 
-    public ErrorCodeException(ErrorCode errorCode, String message) {
+    public ErrorCodeException(final ErrorCode errorCode, final String message) {
         this(errorCode, message, null);
     }
 
-    public ErrorCodeException policy(@Nullable ErrorPolicyUpdater errorPolicyUpdater) {
+    public ErrorCodeException policy(final @Nullable ErrorPolicyUpdater errorPolicyUpdater) {
         if (errorPolicyUpdater == null) {
             return this;
         }
-        ResolvedErrorPolicy policy = errorPolicyUpdater.apply(resolvedErrorPolicy);
+        final ResolvedErrorPolicy policy = errorPolicyUpdater.apply(this.resolvedErrorPolicy);
         if (policy != null) {
             this.resolvedErrorPolicy = policy;
         }
         return this;
     }
 
-    public ErrorCodeException visibility(ErrorVisibility visibility) {
+    public ErrorCodeException visibility(final ErrorVisibility visibility) {
         if (visibility != null) {
-            resolvedErrorPolicy = resolvedErrorPolicy.withVisibility(visibility);
+            this.resolvedErrorPolicy = this.resolvedErrorPolicy.withVisibility(visibility);
         }
         return this;
     }
 
-    public ErrorCodeException severity(ErrorSeverity severity) {
+    public ErrorCodeException severity(final ErrorSeverity severity) {
         if (severity != null) {
-            resolvedErrorPolicy = resolvedErrorPolicy.withSeverity(severity);
+            this.resolvedErrorPolicy = this.resolvedErrorPolicy.withSeverity(severity);
         }
         return this;
     }
 
-    public ErrorCodeException detail(Object detail) {
+    public ErrorCodeException detail(final Object detail) {
         this.detail = detail;
         return this;
     }
 
     @FunctionalInterface
     public interface ErrorPolicyUpdater {
-        @Nullable ResolvedErrorPolicy apply(ResolvedErrorPolicy policy);
+        @Nullable ResolvedErrorPolicy apply(final ResolvedErrorPolicy policy);
     }
 }

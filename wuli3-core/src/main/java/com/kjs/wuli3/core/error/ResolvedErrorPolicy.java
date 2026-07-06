@@ -16,15 +16,15 @@ public record ResolvedErrorPolicy(ErrorSeverity severity, ErrorVisibility visibi
         }
     }
 
-    public static ResolvedErrorPolicy from(ErrorPolicy policy) {
+    public static ResolvedErrorPolicy from(final ErrorPolicy policy) {
         return new ResolvedErrorPolicy(policy.severity(), policy.visibility());
     }
 
-    public ResolvedErrorPolicy withSeverity(ErrorSeverity newSeverity) {
-        return new ResolvedErrorPolicy(newSeverity, visibility);
+    public ResolvedErrorPolicy withSeverity(final ErrorSeverity newSeverity) {
+        return new ResolvedErrorPolicy(newSeverity, this.visibility);
     }
 
-    public ResolvedErrorPolicy withVisibility(ErrorVisibility newVisibility) {
-        return new ResolvedErrorPolicy(severity, newVisibility);
+    public ResolvedErrorPolicy withVisibility(final ErrorVisibility newVisibility) {
+        return new ResolvedErrorPolicy(this.severity, newVisibility);
     }
 }

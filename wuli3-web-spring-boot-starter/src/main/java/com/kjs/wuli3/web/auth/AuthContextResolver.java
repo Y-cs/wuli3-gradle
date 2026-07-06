@@ -9,5 +9,5 @@ import jakarta.servlet.http.HttpServletRequest;
 @FunctionalInterface
 public interface AuthContextResolver {
 
-    AuthContext resolve(HttpServletRequest request);
+    AuthContext resolve(final HttpServletRequest request);
 }

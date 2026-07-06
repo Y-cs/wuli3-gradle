@@ -10,20 +10,20 @@ public final class Functions {
     private Functions() {
     }
 
-    public static <T> Supplier<T> uncheckedSupplier(CheckedSupplier<T> supplier) {
+    public static <T> Supplier<T> uncheckedSupplier(final CheckedSupplier<T> supplier) {
         return () -> {
             try {
                 return supplier.get();
             } catch (ErrorCodeException ex) {
                 throw ex;
             } catch (Exception ex) {
-                throw new ErrorCodeException(SystemErrors.INTERNAL_ERROR, message(ex), ex);
+                throw new ErrorCodeException(SystemErrors.INTERNAL_ERROR, Functions.message(ex), ex);
             }
         };
     }
 
-    private static String message(Exception ex) {
-        String message = ex.getMessage();
+    private static String message(final Exception ex) {
+        final String message = ex.getMessage();
         return message == null ? ex.getClass()
                 .getName() : message;
     }

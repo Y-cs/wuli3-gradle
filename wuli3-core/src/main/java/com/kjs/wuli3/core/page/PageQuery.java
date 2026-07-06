@@ -12,6 +12,6 @@ public record PageQuery(long pageNo, long pageSize) {
     }
 
     public long offset() {
-        return (pageNo - 1) * pageSize;
+        return (this.pageNo - 1) * this.pageSize;
     }
 }

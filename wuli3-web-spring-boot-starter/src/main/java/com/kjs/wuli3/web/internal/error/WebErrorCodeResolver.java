@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web.error;
+package com.kjs.wuli3.web.internal.error;
 
 import com.kjs.wuli3.core.error.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
@@ -14,13 +14,13 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * 使用错误码所属模块前缀格式化错误码。
+ * Formats external web error codes as SERVICE.MODULE.ERROR_NAME.
  */
 public class WebErrorCodeResolver implements ErrorCodeResolver {
 
     private final String serviceCode;
 
-    public WebErrorCodeResolver(ApplicationServiceProperties applicationServiceProperties) {
+    public WebErrorCodeResolver(final ApplicationServiceProperties applicationServiceProperties) {
         this.serviceCode = Optional.of(applicationServiceProperties)
                 .map(ApplicationServiceProperties::getServiceCode)
                 .map(String::trim)
@@ -30,20 +30,20 @@ public class WebErrorCodeResolver implements ErrorCodeResolver {
     }
 
     @Override
-    public String resolver(ErrorCode errorCode) {
+    public String resolver(final ErrorCode errorCode) {
         final ErrorModule errorModule = ErrorMetadataParser.instance()
                 .getErrorModule(errorCode);
         return Optional.of(errorModule)
                 .map(ErrorModule::value)
                 .filter(StringUtils::isNotBlank)
                 .map(String::trim)
-                .map(moduleName -> prefix() + moduleName + "." + errorCode.getName())
+                .map(moduleName -> this.prefix() + moduleName + "." + errorCode.getName())
                 .map(v -> v.toUpperCase(Locale.ROOT))
                 .orElseThrow(() -> new ErrorCodeException(ErrorFrameworkErrors.MODULE_NOT_FOUND).severity(
                         ErrorSeverity.WARNING));
     }
 
     private String prefix() {
-        return serviceCode.isBlank() ? "" : serviceCode + ".";
+        return this.serviceCode.isBlank() ? "" : this.serviceCode + ".";
     }
 }

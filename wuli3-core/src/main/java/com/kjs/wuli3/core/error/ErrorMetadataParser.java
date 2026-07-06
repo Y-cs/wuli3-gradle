@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * ErrorModuleHolder
- *
- * @author GuoYang create on 2026/6/24 11:17
+ * Parses and caches error metadata declared on {@link ErrorCode} enum types and constants.
  */
 public final class ErrorMetadataParser {
 
@@ -25,9 +23,9 @@ public final class ErrorMetadataParser {
         return INSTANCE;
     }
 
-    public ErrorModule getErrorModule(ErrorCode errorCode) {
+    public ErrorModule getErrorModule(final ErrorCode errorCode) {
         final Class<?> errorType = errorCode.getErrorType();
-        return errorCodeCache.computeIfAbsent(errorType, type -> {
+        return this.errorCodeCache.computeIfAbsent(errorType, type -> {
             final ErrorModule errorModule = type.getAnnotation(ErrorModule.class);
             if (errorModule == null) {
                 throw new ErrorCodeException(ErrorFrameworkErrors.MODULE_NOT_FOUND);
@@ -36,8 +34,8 @@ public final class ErrorMetadataParser {
         });
     }
 
-    public ResolvedErrorPolicy getErrorPolicy(ErrorCode errorCode) {
-        return policyCache.computeIfAbsent(errorCode, code -> {
+    public ResolvedErrorPolicy getErrorPolicy(final ErrorCode errorCode) {
+        return this.policyCache.computeIfAbsent(errorCode, code -> {
             if (code instanceof Enum<?> errorEnum) {
                 final Optional<ErrorPolicy> fieldPolicy = fieldPolicy(errorEnum);
                 if (fieldPolicy.isPresent()) {
@@ -49,7 +47,7 @@ public final class ErrorMetadataParser {
         });
     }
 
-    private static Optional<ErrorPolicy> fieldPolicy(Enum<?> errorEnum) {
+    private static Optional<ErrorPolicy> fieldPolicy(final Enum<?> errorEnum) {
         try {
             final Field field = errorEnum.getDeclaringClass()
                     .getField(errorEnum.name());

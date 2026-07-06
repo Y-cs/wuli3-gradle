@@ -19,55 +19,58 @@ public final class TimeFormatters {
     private TimeFormatters() {
     }
 
-    public static String formatDate(LocalDate value) {
+    /**
+     * Uses {@link Locale#ROOT} for all custom patterns so formatting stays stable across JVM locales.
+     */
+    public static String formatDate(final LocalDate value) {
         return value.format(DATE_FORMATTER);
     }
 
-    public static String formatDate(LocalDate value, String pattern) {
-        return value.format(formatter(pattern));
+    public static String formatDate(final LocalDate value, final String pattern) {
+        return value.format(TimeFormatters.formatter(pattern));
     }
 
-    public static String formatTime(LocalTime value) {
+    public static String formatTime(final LocalTime value) {
         return value.format(TIME_FORMATTER);
     }
 
-    public static String formatTime(LocalTime value, String pattern) {
-        return value.format(formatter(pattern));
+    public static String formatTime(final LocalTime value, final String pattern) {
+        return value.format(TimeFormatters.formatter(pattern));
     }
 
-    public static String formatDateTime(LocalDateTime value) {
+    public static String formatDateTime(final LocalDateTime value) {
         return value.format(DATE_TIME_FORMATTER);
     }
 
-    public static String formatDateTime(LocalDateTime value, String pattern) {
-        return value.format(formatter(pattern));
+    public static String formatDateTime(final LocalDateTime value, final String pattern) {
+        return value.format(TimeFormatters.formatter(pattern));
     }
 
-    public static LocalDate parseDate(String value) {
+    public static LocalDate parseDate(final String value) {
         return LocalDate.parse(value, DATE_FORMATTER);
     }
 
-    public static LocalDate parseDate(String value, String pattern) {
-        return LocalDate.parse(value, formatter(pattern));
+    public static LocalDate parseDate(final String value, final String pattern) {
+        return LocalDate.parse(value, TimeFormatters.formatter(pattern));
     }
 
-    public static LocalTime parseTime(String value) {
+    public static LocalTime parseTime(final String value) {
         return LocalTime.parse(value, TIME_FORMATTER);
     }
 
-    public static LocalTime parseTime(String value, String pattern) {
-        return LocalTime.parse(value, formatter(pattern));
+    public static LocalTime parseTime(final String value, final String pattern) {
+        return LocalTime.parse(value, TimeFormatters.formatter(pattern));
     }
 
-    public static LocalDateTime parseDateTime(String value) {
+    public static LocalDateTime parseDateTime(final String value) {
         return LocalDateTime.parse(value, DATE_TIME_FORMATTER);
     }
 
-    public static LocalDateTime parseDateTime(String value, String pattern) {
-        return LocalDateTime.parse(value, formatter(pattern));
+    public static LocalDateTime parseDateTime(final String value, final String pattern) {
+        return LocalDateTime.parse(value, TimeFormatters.formatter(pattern));
     }
 
-    private static DateTimeFormatter formatter(String pattern) {
+    private static DateTimeFormatter formatter(final String pattern) {
         return DateTimeFormatter.ofPattern(pattern, Locale.ROOT);
     }
 }

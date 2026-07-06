@@ -17,9 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 当前请求的本地上下文快照。
- *
- * @author GuoYang create on 2026/6/25 19:06
+ * Immutable local snapshot of the current HTTP request.
  */
 @Getter
 @ToString
@@ -36,19 +34,19 @@ public final class WebContext extends AbstractContext implements LocalContext {
     private final @Nullable String queryString;
 
     private WebContext(
-            String requestId,
-            Map<String, List<String>> headers,
-            Map<String, List<String>> parameters,
-            Locale locale,
-            String remoteAddr,
-            String requestUri,
-            String requestUrl,
-            String method,
-            @Nullable String queryString
+            final String requestId,
+            final Map<String, List<String>> headers,
+            final Map<String, List<String>> parameters,
+            final Locale locale,
+            final String remoteAddr,
+            final String requestUri,
+            final String requestUrl,
+            final String method,
+            final @Nullable String queryString
     ) {
         this.requestId = requestId;
-        this.headers = Map.copyOf(headers);
-        this.parameters = Map.copyOf(parameters);
+        this.headers = WebContext.immutableValues(headers);
+        this.parameters = WebContext.immutableValues(parameters);
         this.locale = locale;
         this.remoteAddr = remoteAddr;
         this.requestUri = requestUri;
@@ -57,11 +55,11 @@ public final class WebContext extends AbstractContext implements LocalContext {
         this.queryString = queryString;
     }
 
-    public static WebContext from(HttpServletRequest request, String requestId) {
+    public static WebContext from(final HttpServletRequest request, final String requestId) {
         return new WebContext(
                 requestId,
-                headers(request),
-                parameters(request),
+                WebContext.headers(request),
+                WebContext.parameters(request),
                 request.getLocale(),
                 request.getRemoteAddr(),
                 request.getRequestURI(),
@@ -71,25 +69,25 @@ public final class WebContext extends AbstractContext implements LocalContext {
         );
     }
 
-    public Optional<String> header(String name) {
-        return headers.getOrDefault(name, List.of())
+    public Optional<String> header(final String name) {
+        return this.headers.getOrDefault(name, List.of())
                 .stream()
                 .findFirst();
     }
 
-    public Optional<List<String>> headers(String name) {
-        List<String> values = headers.get(name);
+    public Optional<List<String>> headers(final String name) {
+        final List<String> values = this.headers.get(name);
         return values == null ? Optional.empty() : Optional.of(values);
     }
 
-    public Optional<String> parameter(String name) {
-        return parameters.getOrDefault(name, List.of())
+    public Optional<String> parameter(final String name) {
+        return this.parameters.getOrDefault(name, List.of())
                 .stream()
                 .findFirst();
     }
 
-    public Optional<List<String>> parameters(String name) {
-        List<String> values = parameters.get(name);
+    public Optional<List<String>> parameters(final String name) {
+        final List<String> values = this.parameters.get(name);
         return values == null ? Optional.empty() : Optional.of(values);
     }
 
@@ -98,26 +96,32 @@ public final class WebContext extends AbstractContext implements LocalContext {
         return WebContext.class;
     }
 
-    private static Map<String, List<String>> headers(HttpServletRequest request) {
-        Map<String, List<String>> values = new LinkedHashMap<>();
-        var names = request.getHeaderNames();
+    private static Map<String, List<String>> headers(final HttpServletRequest request) {
+        final Map<String, List<String>> values = new LinkedHashMap<>();
+        final var names = request.getHeaderNames();
         while (names != null && names.hasMoreElements()) {
-            String name = names.nextElement();
+            final String name = names.nextElement();
             values.put(name, Collections.unmodifiableList(new ArrayList<>(Collections.list(request.getHeaders(name)))));
         }
         return values;
     }
 
-    private static Map<String, List<String>> parameters(HttpServletRequest request) {
-        Map<String, List<String>> values = new LinkedHashMap<>();
+    private static Map<String, List<String>> parameters(final HttpServletRequest request) {
+        final Map<String, List<String>> values = new LinkedHashMap<>();
         request.getParameterMap()
-                .forEach((name, rawValues) -> values.put(name, listOf(rawValues)));
+                .forEach((name, rawValues) -> values.put(name, WebContext.listOf(rawValues)));
         return values;
     }
 
-    private static List<String> listOf(String[] rawValues) {
-        List<String> values = new ArrayList<>(rawValues.length);
+    private static List<String> listOf(final String[] rawValues) {
+        final List<String> values = new ArrayList<>(rawValues.length);
         Collections.addAll(values, rawValues);
         return Collections.unmodifiableList(values);
+    }
+
+    private static Map<String, List<String>> immutableValues(final Map<String, List<String>> source) {
+        final Map<String, List<String>> values = new LinkedHashMap<>();
+        source.forEach((name, rawValues) -> values.put(name, List.copyOf(rawValues)));
+        return Map.copyOf(values);
     }
 }

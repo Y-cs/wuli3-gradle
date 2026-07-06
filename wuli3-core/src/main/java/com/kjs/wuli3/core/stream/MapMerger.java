@@ -1,10 +1,9 @@
 package com.kjs.wuli3.core.stream;
 
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.SystemErrors;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-
-import static com.kjs.wuli3.core.error.SystemErrors.ILLEGAL_STATE;
 
 @NullMarked
 public final class MapMerger {
@@ -25,6 +24,6 @@ public final class MapMerger {
     }
 
     public static <V> V throwDuplicate(final V left, final V right) {
-        throw new ErrorCodeException(ILLEGAL_STATE, "Duplicate key values " + left + " and " + right);
+        throw new ErrorCodeException(SystemErrors.ILLEGAL_STATE, "Duplicate key values " + left + " and " + right);
     }
 }

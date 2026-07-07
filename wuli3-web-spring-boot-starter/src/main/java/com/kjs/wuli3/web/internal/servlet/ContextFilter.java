@@ -3,7 +3,7 @@ package com.kjs.wuli3.web.internal.servlet;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
-import com.kjs.wuli3.propagation.holder.ContextWriter;
+import com.kjs.wuli3.propagation.store.ContextWriter;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.config.properties.WebContextProperties;
 import com.kjs.wuli3.web.context.ClientIpResolver;

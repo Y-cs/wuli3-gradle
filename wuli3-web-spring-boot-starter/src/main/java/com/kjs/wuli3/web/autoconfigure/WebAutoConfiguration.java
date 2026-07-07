@@ -2,7 +2,7 @@ package com.kjs.wuli3.web.autoconfigure;
 
 import com.kjs.wuli3.core.error.ErrorCodeResolver;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
-import com.kjs.wuli3.propagation.holder.ContextWriter;
+import com.kjs.wuli3.propagation.store.ContextWriter;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.config.properties.ApplicationServiceProperties;
 import com.kjs.wuli3.web.config.properties.WebContextProperties;

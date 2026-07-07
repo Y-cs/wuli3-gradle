@@ -1,6 +1,6 @@
 package com.kjs.wuli3.web.context;
 
-import com.kjs.wuli3.propagation.holder.ContextReader;
+import com.kjs.wuli3.propagation.store.ContextReader;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;

@@ -11,6 +11,7 @@ Spring MVC Web 能力增强 starter。
 - 参数校验错误映射。
 - `X-Request-Id` 生成和透传。
 - MDC `requestId` 写入。
+- `ContextPropagator`、`ContextTransmitter` 等上下文传播基础 Bean。
 - Java Time Jackson 配置。
 
 统一响应和异常处理的完整使用说明见 [Web 统一响应处理使用文档](docs/response-handling.md)。

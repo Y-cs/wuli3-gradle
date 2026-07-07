@@ -1,15 +1,19 @@
-package com.kjs.wuli3.propagation.propagation;
+package com.kjs.wuli3.propagation.snapshot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.Context;
-import com.kjs.wuli3.propagation.holder.ContextHolder;
+import com.kjs.wuli3.propagation.store.ContextContainer;
+import com.kjs.wuli3.propagation.store.ContextStore;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 class DefaultContextPropagatorTest {
 
-    private final ContextHolder holder = new ContextHolder();
+    private final ContextStore holder = new ContextStore();
     private final DefaultContextPropagator propagator = new DefaultContextPropagator(holder);
 
     @Test
@@ -19,11 +23,11 @@ class DefaultContextPropagatorTest {
 
         holder.put(authContext(2L));
 
-        try (ContextScope ignored = propagator.restore(snapshot)) {
+        this.withRestored(snapshot, () -> {
             assertThat(holder.get(AuthContext.class))
                     .map(AuthContext::getUserId)
                     .contains(1L);
-        }
+        });
     }
 
     @Test
@@ -31,11 +35,11 @@ class DefaultContextPropagatorTest {
         holder.put(authContext(1L));
         ContextSnapshot snapshot = snapshotWith(authContext(2L));
 
-        try (ContextScope ignored = propagator.restore(snapshot)) {
+        this.withRestored(snapshot, () -> {
             assertThat(holder.get(AuthContext.class))
                     .map(AuthContext::getUserId)
                     .contains(2L);
-        }
+        });
 
         assertThat(holder.get(AuthContext.class))
                 .map(AuthContext::getUserId)
@@ -48,21 +52,21 @@ class DefaultContextPropagatorTest {
         ContextSnapshot second = snapshotWith(authContext(2L));
         ContextSnapshot third = snapshotWith(authContext(3L));
 
-        try (ContextScope ignored = propagator.restore(second)) {
+        this.withRestored(second, () -> {
             assertThat(holder.get(AuthContext.class))
                     .map(AuthContext::getUserId)
                     .contains(2L);
 
-            try (ContextScope ignoredNested = propagator.restore(third)) {
+            this.withRestored(third, () -> {
                 assertThat(holder.get(AuthContext.class))
                         .map(AuthContext::getUserId)
                         .contains(3L);
-            }
+            });
 
             assertThat(holder.get(AuthContext.class))
                     .map(AuthContext::getUserId)
                     .contains(2L);
-        }
+        });
 
         assertThat(holder.get(AuthContext.class))
                 .map(AuthContext::getUserId)
@@ -73,11 +77,11 @@ class DefaultContextPropagatorTest {
     void restoreClearsContextWhenNoPreviousContextExists() {
         ContextSnapshot snapshot = snapshotWith(authContext(2L));
 
-        try (ContextScope ignored = propagator.restore(snapshot)) {
+        this.withRestored(snapshot, () -> {
             assertThat(holder.get(AuthContext.class))
                     .map(AuthContext::getUserId)
                     .contains(2L);
-        }
+        });
 
         assertThat(holder.get(AuthContext.class)).isEmpty();
     }
@@ -86,15 +90,80 @@ class DefaultContextPropagatorTest {
     void restoredContainerDoesNotMutateSnapshot() {
         ContextSnapshot snapshot = snapshotWith(authContext(1L));
 
-        try (ContextScope ignored = propagator.restore(snapshot)) {
+        this.withRestored(snapshot, () -> {
             holder.put(authContext(2L));
-        }
+        });
 
-        try (ContextScope ignored = propagator.restore(snapshot)) {
+        this.withRestored(snapshot, () -> {
             assertThat(holder.get(AuthContext.class))
                     .map(AuthContext::getUserId)
                     .contains(1L);
-        }
+        });
+    }
+
+    @Test
+    void snapshotDoesNotExposeMutableContainer() {
+        final ContextContainer container = new ContextContainer();
+        container.put(authContext(1L));
+        final ContextSnapshot snapshot = new ContextSnapshot(container);
+
+        container.put(authContext(2L));
+        snapshot.getContextContainer()
+                .put(authContext(3L));
+
+        this.withRestored(snapshot, () -> {
+            assertThat(holder.get(AuthContext.class))
+                    .map(AuthContext::getUserId)
+                    .contains(1L);
+        });
+    }
+
+    @Test
+    void wrappedRunnableRestoresCapturedContext() {
+        holder.put(authContext(1L));
+        final Runnable wrapped = propagator.wrap(() -> {
+            assertThat(holder.get(AuthContext.class))
+                    .map(AuthContext::getUserId)
+                    .contains(1L);
+        });
+
+        holder.put(authContext(2L));
+
+        wrapped.run();
+
+        assertThat(holder.get(AuthContext.class))
+                .map(AuthContext::getUserId)
+                .contains(2L);
+    }
+
+    @Test
+    void wrappedCallableRestoresCapturedContext() throws Exception {
+        holder.put(authContext(1L));
+        final Callable<Long> wrapped = propagator.wrap(() -> holder.get(AuthContext.class)
+                .map(AuthContext::getUserId)
+                .orElse(-1L));
+
+        holder.put(authContext(2L));
+
+        assertThat(wrapped.call()).isEqualTo(1L);
+        assertThat(holder.get(AuthContext.class))
+                .map(AuthContext::getUserId)
+                .contains(2L);
+    }
+
+    @Test
+    void wrappedSupplierRestoresCapturedContext() {
+        holder.put(authContext(1L));
+        final Supplier<Long> wrapped = propagator.wrapSupplier(() -> holder.get(AuthContext.class)
+                .map(AuthContext::getUserId)
+                .orElse(-1L));
+
+        holder.put(authContext(2L));
+
+        assertThat(wrapped.get()).isEqualTo(1L);
+        assertThat(holder.get(AuthContext.class))
+                .map(AuthContext::getUserId)
+                .contains(2L);
     }
 
     @Test
@@ -107,9 +176,18 @@ class DefaultContextPropagatorTest {
     }
 
     private static ContextSnapshot snapshotWith(AuthContext authContext) {
-        ContextHolder h = new ContextHolder();
+        ContextStore h = new ContextStore();
         h.put(authContext);
         return new DefaultContextPropagator(h).capture();
+    }
+
+    private void withRestored(final ContextSnapshot snapshot, final Runnable task) {
+        final ContextScope scope = this.propagator.restore(snapshot);
+        try {
+            task.run();
+        } finally {
+            scope.close();
+        }
     }
 
     private static AuthContext authContext(Long userId) {

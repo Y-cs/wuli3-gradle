@@ -2,13 +2,11 @@ package com.kjs.wuli3.core.function;
 
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.SystemErrors;
-
 import java.util.function.Supplier;
 
 public final class Functions {
 
-    private Functions() {
-    }
+    private Functions() {}
 
     public static <T> Supplier<T> uncheckedSupplier(final CheckedSupplier<T> supplier) {
         return () -> {
@@ -24,8 +22,7 @@ public final class Functions {
 
     private static String message(final Exception ex) {
         final String message = ex.getMessage();
-        return message == null ? ex.getClass()
-                .getName() : message;
+        return message == null ? ex.getClass().getName() : message;
     }
 
     @FunctionalInterface

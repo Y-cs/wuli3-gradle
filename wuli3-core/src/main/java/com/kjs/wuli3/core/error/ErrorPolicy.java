@@ -1,11 +1,10 @@
 package com.kjs.wuli3.core.error;
 
-import org.jspecify.annotations.NullMarked;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * ErrorPolicy
@@ -20,6 +19,4 @@ public @interface ErrorPolicy {
     ErrorSeverity severity() default ErrorSeverity.NORMAL;
 
     ErrorVisibility visibility() default ErrorVisibility.PUBLIC;
-
-
 }

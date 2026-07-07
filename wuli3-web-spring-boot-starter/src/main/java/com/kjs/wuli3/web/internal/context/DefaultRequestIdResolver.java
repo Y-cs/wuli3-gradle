@@ -2,11 +2,10 @@ package com.kjs.wuli3.web.internal.context;
 
 import com.kjs.wuli3.web.config.properties.WebContextProperties;
 import com.kjs.wuli3.web.context.RequestIdResolver;
-import org.jspecify.annotations.Nullable;
-
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default request id resolver with bounded external input.
@@ -42,13 +41,11 @@ public final class DefaultRequestIdResolver implements RequestIdResolver {
     }
 
     private boolean valid(final String requestId) {
-        return requestId.length() <= this.properties.getRequestIdMaxLength() &&
-                REQUEST_ID_PATTERN.matcher(requestId)
-                        .matches();
+        return requestId.length() <= this.properties.getRequestIdMaxLength()
+                && REQUEST_ID_PATTERN.matcher(requestId).matches();
     }
 
     private static String generate() {
-        return UUID.randomUUID()
-                .toString();
+        return UUID.randomUUID().toString();
     }
 }

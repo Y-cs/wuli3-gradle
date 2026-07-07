@@ -30,15 +30,20 @@ import com.kjs.wuli3.web.response.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.annotation.ImportCandidates;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.context.annotation.ImportCandidates;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -48,23 +53,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 @SpringBootTest(
         classes = {
-                WebAutoConfigurationTest.TestApplication.class,
-                WebAutoConfiguration.class,
-                WebAutoConfigurationTest.ControllerConfiguration.class,
-        }
-)
+            WebAutoConfigurationTest.TestApplication.class,
+            WebAutoConfiguration.class,
+            WebAutoConfigurationTest.ControllerConfiguration.class,
+        })
 @AutoConfigureMockMvc
 class WebAutoConfigurationTest {
     @Autowired
@@ -89,8 +87,9 @@ class WebAutoConfigurationTest {
 
     @Test
     void autoConfigurationIsListedInBootImports() {
-        assertThat(ImportCandidates.load(AutoConfiguration.class, this.getClass()
-                .getClassLoader())).contains(WebAutoConfiguration.class.getName());
+        assertThat(ImportCandidates.load(
+                        AutoConfiguration.class, this.getClass().getClassLoader()))
+                .contains(WebAutoConfiguration.class.getName());
     }
 
     @Test
@@ -112,15 +111,12 @@ class WebAutoConfigurationTest {
 
     @Test
     void requestIdIsGenerated() throws Exception {
-        mockMvc.perform(get("/ok"))
-                .andExpect(status().isOk())
-                .andExpect(header().exists(RequestIds.HEADER_NAME));
+        mockMvc.perform(get("/ok")).andExpect(status().isOk()).andExpect(header().exists(RequestIds.HEADER_NAME));
     }
 
     @Test
     void contextIsAvailableThroughAccessors() throws Exception {
-        mockMvc.perform(get("/context")
-                        .header(RequestIds.HEADER_NAME, "rid-context"))
+        mockMvc.perform(get("/context").header(RequestIds.HEADER_NAME, "rid-context"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.requestId").value("rid-context"));
     }
@@ -141,9 +137,7 @@ class WebAutoConfigurationTest {
 
     @Test
     void requestBodyCanBeReadMoreThanOnce() throws Exception {
-        mockMvc.perform(post("/body")
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("payload"))
+        mockMvc.perform(post("/body").contentType(MediaType.TEXT_PLAIN).content("payload"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.first").value("payload"))
                 .andExpect(jsonPath("$.data.second").value("payload"));
@@ -151,8 +145,7 @@ class WebAutoConfigurationTest {
 
     @Test
     void contextIsClearedAfterRequest() throws Exception {
-        mockMvc.perform(get("/ok").header(RequestIds.HEADER_NAME, "rid-clear"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/ok").header(RequestIds.HEADER_NAME, "rid-clear")).andExpect(status().isOk());
 
         assertThat(invocationContextAccessor.requestId()).isEmpty();
     }
@@ -217,9 +210,7 @@ class WebAutoConfigurationTest {
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(jsonPath("$.code").value("WEB.BAD_REQUEST"));
 
-        mockMvc.perform(post("/json-only")
-                        .contentType(MediaType.TEXT_PLAIN)
-                        .content("payload"))
+        mockMvc.perform(post("/json-only").contentType(MediaType.TEXT_PLAIN).content("payload"))
                 .andExpect(status().isUnsupportedMediaType())
                 .andExpect(jsonPath("$.code").value("WEB.BAD_REQUEST"));
     }
@@ -305,8 +296,7 @@ class WebAutoConfigurationTest {
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    static class TestApplication {
-    }
+    static class TestApplication {}
 
     @TestConfiguration
     static class ControllerConfiguration {
@@ -314,8 +304,7 @@ class WebAutoConfigurationTest {
         TestController testController(
                 InvocationContextAccessor invocationContextAccessor,
                 AuthContextAccessor authContextAccessor,
-                WebContextAccessor webContextAccessor
-        ) {
+                WebContextAccessor webContextAccessor) {
             return new TestController(invocationContextAccessor, authContextAccessor, webContextAccessor);
         }
 
@@ -349,8 +338,7 @@ class WebAutoConfigurationTest {
             this.requestUri.set(context.requestUri());
             this.status.set(context.status());
             this.responseCode.set(context.responseCode());
-            this.latch.get()
-                    .countDown();
+            this.latch.get().countDown();
         }
 
         private void reset() {
@@ -358,8 +346,7 @@ class WebAutoConfigurationTest {
         }
 
         private boolean await() throws InterruptedException {
-            return this.latch.get()
-                    .await(2, TimeUnit.SECONDS);
+            return this.latch.get().await(2, TimeUnit.SECONDS);
         }
 
         private @Nullable Throwable error() {
@@ -384,8 +371,7 @@ class WebAutoConfigurationTest {
 
         @Override
         public void alert(final ErrorAlertContext context) {
-            this.latch.get()
-                    .countDown();
+            this.latch.get().countDown();
             throw new IllegalStateException("alert failed");
         }
 
@@ -394,8 +380,7 @@ class WebAutoConfigurationTest {
         }
 
         private boolean await() throws InterruptedException {
-            return this.latch.get()
-                    .await(2, TimeUnit.SECONDS);
+            return this.latch.get().await(2, TimeUnit.SECONDS);
         }
     }
 
@@ -408,8 +393,7 @@ class WebAutoConfigurationTest {
         TestController(
                 InvocationContextAccessor invocationContextAccessor,
                 AuthContextAccessor authContextAccessor,
-                WebContextAccessor webContextAccessor
-        ) {
+                WebContextAccessor webContextAccessor) {
             this.invocationContextAccessor = invocationContextAccessor;
             this.authContextAccessor = authContextAccessor;
             this.webContextAccessor = webContextAccessor;
@@ -422,28 +406,18 @@ class WebAutoConfigurationTest {
 
         @GetMapping("/context")
         ContextView context() {
-            return new ContextView(
-                    invocationContextAccessor.requestId()
-                            .orElse("")
-            );
+            return new ContextView(invocationContextAccessor.requestId().orElse(""));
         }
 
         @GetMapping("/web-context")
         WebContextView webContext() {
             return new WebContextView(
-                    webContextAccessor.requestId()
-                            .orElse(""),
-                    webContextAccessor.method()
-                            .orElse(""),
-                    webContextAccessor.requestUri()
-                            .orElse(""),
-                    webContextAccessor.queryString()
-                            .orElse(""),
-                    webContextAccessor.header("X-Test")
-                            .orElse(""),
-                    webContextAccessor.parameter("keyword")
-                            .orElse("")
-            );
+                    webContextAccessor.requestId().orElse(""),
+                    webContextAccessor.method().orElse(""),
+                    webContextAccessor.requestUri().orElse(""),
+                    webContextAccessor.queryString().orElse(""),
+                    webContextAccessor.header("X-Test").orElse(""),
+                    webContextAccessor.parameter("keyword").orElse(""));
         }
 
         @PostMapping("/body")
@@ -454,11 +428,8 @@ class WebAutoConfigurationTest {
         @GetMapping("/security")
         SecurityView security() {
             return new SecurityView(
-                    authContextAccessor.userId()
-                            .orElse(-1L),
-                    authContextAccessor.username()
-                            .orElse("")
-            );
+                    authContextAccessor.userId().orElse(-1L),
+                    authContextAccessor.username().orElse(""));
         }
 
         @GetMapping("/wrapped")
@@ -468,9 +439,7 @@ class WebAutoConfigurationTest {
 
         @GetMapping("/entity")
         ResponseEntity<ContextView> entity() {
-            return ResponseEntity.status(201)
-                    .header("X-Custom", "yes")
-                    .body(new ContextView("entity"));
+            return ResponseEntity.status(201).header("X-Custom", "yes").body(new ContextView("entity"));
         }
 
         @NativeResponse
@@ -531,30 +500,18 @@ class WebAutoConfigurationTest {
         }
 
         private static String readBody(HttpServletRequest request) throws IOException {
-            return new String(request.getInputStream()
-                    .readAllBytes(), StandardCharsets.UTF_8);
+            return new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 
-    record ContextView(String requestId) {
-    }
+    record ContextView(String requestId) {}
 
-    record SecurityView(Long userId, String username) {
-    }
+    record SecurityView(Long userId, String username) {}
 
     record WebContextView(
-            String requestId,
-            String method,
-            String requestUri,
-            String queryString,
-            String header,
-            String parameter
-    ) {
-    }
+            String requestId, String method, String requestUri, String queryString, String header, String parameter) {}
 
-    record BodyView(String first, String second) {
-    }
+    record BodyView(String first, String second) {}
 
-    record ValidatedRequest(@NotBlank(message = "不能为空") String name) {
-    }
+    record ValidatedRequest(@NotBlank(message = "不能为空") String name) {}
 }

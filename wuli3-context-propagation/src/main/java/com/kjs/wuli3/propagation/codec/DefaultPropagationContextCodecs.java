@@ -1,7 +1,6 @@
 package com.kjs.wuli3.propagation.codec;
 
 import com.kjs.wuli3.propagation.context.PropagationContext;
-
 import java.util.List;
 
 /**
@@ -9,8 +8,7 @@ import java.util.List;
  */
 public final class DefaultPropagationContextCodecs {
 
-    private DefaultPropagationContextCodecs() {
-    }
+    private DefaultPropagationContextCodecs() {}
 
     public static List<PropagationContextCodec<? extends PropagationContext>> invocationOnly() {
         return List.of(new InvocationContextCodec());

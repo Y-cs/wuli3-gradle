@@ -5,9 +5,13 @@ import org.jspecify.annotations.Nullable;
 
 public interface ContextWriter {
     <T extends Context> void put(T context);
+
     void remove(Class<? extends Context> type);
     /** Returns an isolated copy of the current container, or null if none exists. */
-    @Nullable ContextContainer snapshot();
+    @Nullable
+    ContextContainer snapshot();
+
     void restore(ContextContainer snapshot);
+
     void clear();
 }

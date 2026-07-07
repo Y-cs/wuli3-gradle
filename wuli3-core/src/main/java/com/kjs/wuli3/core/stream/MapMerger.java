@@ -8,8 +8,7 @@ import org.jspecify.annotations.Nullable;
 @NullMarked
 public final class MapMerger {
 
-    private MapMerger() {
-    }
+    private MapMerger() {}
 
     public static <V> V keepFirstValue(final V left, final V right) {
         return left;

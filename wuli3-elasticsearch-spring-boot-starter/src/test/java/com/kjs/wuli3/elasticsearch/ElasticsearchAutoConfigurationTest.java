@@ -11,7 +11,6 @@ class ElasticsearchAutoConfigurationTest {
 
     @Test
     void contextLoads() {
-        contextRunner.run(context -> {
-        });
+        contextRunner.run(context -> {});
     }
 }

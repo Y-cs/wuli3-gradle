@@ -21,6 +21,5 @@ class JsonSupportTest {
         assertThat(sample.time()).isEqualTo(LocalDateTime.of(2026, 6, 22, 10, 30));
     }
 
-    record Sample(String name, LocalDateTime time) {
-    }
+    record Sample(String name, LocalDateTime time) {}
 }

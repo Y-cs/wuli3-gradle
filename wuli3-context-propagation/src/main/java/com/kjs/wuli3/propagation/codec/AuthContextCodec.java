@@ -3,7 +3,6 @@ package com.kjs.wuli3.propagation.codec;
 import com.kjs.wuli3.propagation.carrier.ContextCarrierReader;
 import com.kjs.wuli3.propagation.carrier.ContextCarrierWriter;
 import com.kjs.wuli3.propagation.context.AuthContext;
-
 import java.util.Optional;
 
 /**
@@ -23,8 +22,7 @@ public final class AuthContextCodec implements PropagationContextCodec<AuthConte
     public Optional<AuthContext> read(final ContextCarrierReader reader) {
         return reader.get(USER_ID)
                 .flatMap(AuthContextCodec::parseUserId)
-                .map(userId -> new AuthContext(userId, reader.get(USERNAME)
-                        .orElse("")));
+                .map(userId -> new AuthContext(userId, reader.get(USERNAME).orElse("")));
     }
 
     @Override
@@ -40,5 +38,4 @@ public final class AuthContextCodec implements PropagationContextCodec<AuthConte
             return Optional.empty();
         }
     }
-
 }

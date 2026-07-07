@@ -4,6 +4,7 @@ import com.github.spotbugs.snom.Confidence
 import com.github.spotbugs.snom.Effort
 import com.github.spotbugs.snom.SpotBugsExtension
 import com.github.spotbugs.snom.SpotBugsTask
+import com.diffplug.gradle.spotless.SpotlessExtension
 import de.thetaphi.forbiddenapis.gradle.CheckForbiddenApis
 import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
@@ -21,6 +22,7 @@ class QualityConventionsPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         with(project) {
             pluginManager.apply("checkstyle")
+            pluginManager.apply("com.diffplug.spotless")
             pluginManager.apply("com.github.spotbugs")
             pluginManager.apply("de.thetaphi.forbiddenapis")
             pluginManager.apply("net.ltgt.errorprone")
@@ -29,10 +31,15 @@ class QualityConventionsPlugin : Plugin<Project> {
             val forbiddenApisTestEnabled = booleanProperty(ConventionProperties.FORBIDDEN_APIS_TEST_ENABLED, false)
             val nullAwayEnabled = booleanProperty(ConventionProperties.NULL_AWAY_ENABLED, true)
             val nullAwayJSpecify = booleanProperty(ConventionProperties.NULL_AWAY_JSPECIFY, true)
+            val spotlessEnabled = booleanProperty(ConventionProperties.SPOTLESS_ENABLED, true)
             val spotBugsEnabled = booleanProperty(ConventionProperties.SPOTBUGS_ENABLED, true)
             val nullAwayAnnotatedPackages = stringProperty(
                 ConventionProperties.NULL_AWAY_ANNOTATED_PACKAGES,
                 ConventionProperties.DEFAULT_NULL_AWAY_ANNOTATED_PACKAGES,
+            )
+            val palantirJavaFormatVersion = stringProperty(
+                ConventionProperties.PALANTIR_JAVA_FORMAT_VERSION,
+                ConventionProperties.DEFAULT_PALANTIR_JAVA_FORMAT_VERSION,
             )
 
             extensions.configure<CheckstyleExtension> {
@@ -47,6 +54,15 @@ class QualityConventionsPlugin : Plugin<Project> {
                 reportLevel.set(Confidence.HIGH)
                 ignoreFailures.set(false)
                 showStackTraces.set(true)
+            }
+
+            extensions.configure<SpotlessExtension> {
+                java {
+                    target("src/*/java/**/*.java")
+                    palantirJavaFormat(palantirJavaFormatVersion)
+                    trimTrailingWhitespace()
+                    endWithNewline()
+                }
             }
 
             dependencies {
@@ -70,6 +86,10 @@ class QualityConventionsPlugin : Plugin<Project> {
                 reports.create("html") {
                     required.set(true)
                 }
+            }
+
+            tasks.matching { it.name.startsWith("spotless") }.configureEach {
+                enabled = spotlessEnabled
             }
 
             tasks.withType<CheckForbiddenApis>().configureEach {

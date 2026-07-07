@@ -20,6 +20,7 @@ import com.kjs.wuli3.web.internal.response.ApiResponseBodyAdvice;
 import com.kjs.wuli3.web.internal.response.ApiResponseFactory;
 import com.kjs.wuli3.web.internal.response.WebExceptionHandler;
 import com.kjs.wuli3.web.internal.servlet.ContextFilter;
+import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -31,8 +32,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-
-import java.util.List;
 
 /**
  * Wires the web starter defaults while keeping every bean replaceable by user applications.
@@ -69,13 +68,20 @@ public class WebAutoConfiguration {
     @ConditionalOnBean(ContextWriter.class)
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "wuli3.web.context", name = "enabled", havingValue = "true", matchIfMissing = true)
-    FilterRegistrationBean<ContextFilter> contextFilterRegistration(final ContextWriter contextWriter,
-            final AuthContextResolver authContextResolver, final RequestIdResolver requestIdResolver,
+    FilterRegistrationBean<ContextFilter> contextFilterRegistration(
+            final ContextWriter contextWriter,
+            final AuthContextResolver authContextResolver,
+            final RequestIdResolver requestIdResolver,
             final ClientIpResolver clientIpResolver,
             @Qualifier("handlerExceptionResolver") final HandlerExceptionResolver handlerExceptionResolver,
             final WebContextProperties contextProperties) {
-        final ContextFilter contextFilter = new ContextFilter(contextWriter, authContextResolver, requestIdResolver,
-                clientIpResolver, handlerExceptionResolver, contextProperties);
+        final ContextFilter contextFilter = new ContextFilter(
+                contextWriter,
+                authContextResolver,
+                requestIdResolver,
+                clientIpResolver,
+                handlerExceptionResolver,
+                contextProperties);
         final FilterRegistrationBean<ContextFilter> registration = new FilterRegistrationBean<>(contextFilter);
         registration.setOrder(contextProperties.getFilterOrder());
         return registration;
@@ -83,31 +89,41 @@ public class WebAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ApiResponseFactory apiResponseFactory(final InvocationContextAccessor invocationContextAccessor,
-            final ErrorCodeResolver errorCodeResolver, final WebResponseProperties responseProperties) {
+    ApiResponseFactory apiResponseFactory(
+            final InvocationContextAccessor invocationContextAccessor,
+            final ErrorCodeResolver errorCodeResolver,
+            final WebResponseProperties responseProperties) {
         return new ApiResponseFactory(invocationContextAccessor, errorCodeResolver, responseProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "wuli3.web.response", name = "wrapper-enabled", havingValue = "true",
+    @ConditionalOnProperty(
+            prefix = "wuli3.web.response",
+            name = "wrapper-enabled",
+            havingValue = "true",
             matchIfMissing = true)
-    ApiResponseBodyAdvice apiResponseBodyAdvice(final ApiResponseFactory apiResponseFactory,
-            final WebResponseProperties responseProperties) {
+    ApiResponseBodyAdvice apiResponseBodyAdvice(
+            final ApiResponseFactory apiResponseFactory, final WebResponseProperties responseProperties) {
         return new ApiResponseBodyAdvice(apiResponseFactory, responseProperties);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "wuli3.web.response", name = "exception-handler-enabled", havingValue = "true",
+    @ConditionalOnProperty(
+            prefix = "wuli3.web.response",
+            name = "exception-handler-enabled",
+            havingValue = "true",
             matchIfMissing = true)
-    WebExceptionHandler webExceptionHandler(final ApiResponseFactory apiResponseFactory,
-            final InvocationContextAccessor invocationContextAccessor, final WebResponseProperties responseProperties,
+    WebExceptionHandler webExceptionHandler(
+            final ApiResponseFactory apiResponseFactory,
+            final InvocationContextAccessor invocationContextAccessor,
+            final WebResponseProperties responseProperties,
             final ObjectProvider<ErrorAlertNotifier> errorAlertNotifiers,
             final WebErrorStatusResolver webErrorStatusResolver) {
-        final List<ErrorAlertNotifier> notifiers = errorAlertNotifiers.orderedStream()
-                .toList();
-        return new WebExceptionHandler(apiResponseFactory, invocationContextAccessor, responseProperties,
-                notifiers, webErrorStatusResolver);
+        final List<ErrorAlertNotifier> notifiers =
+                errorAlertNotifiers.orderedStream().toList();
+        return new WebExceptionHandler(
+                apiResponseFactory, invocationContextAccessor, responseProperties, notifiers, webErrorStatusResolver);
     }
 }

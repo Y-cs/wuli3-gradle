@@ -16,8 +16,7 @@ public final class TimeFormatters {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern(TIME, Locale.ROOT);
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME, Locale.ROOT);
 
-    private TimeFormatters() {
-    }
+    private TimeFormatters() {}
 
     /**
      * Uses {@link Locale#ROOT} for all custom patterns so formatting stays stable across JVM locales.

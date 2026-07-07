@@ -2,9 +2,8 @@ package com.kjs.wuli3.web.internal.error;
 
 import com.kjs.wuli3.web.error.ErrorAlertContext;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Internal fan-out for business alert notifiers.

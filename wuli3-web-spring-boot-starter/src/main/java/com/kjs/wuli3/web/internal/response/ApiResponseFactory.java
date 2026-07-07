@@ -18,11 +18,14 @@ public class ApiResponseFactory {
 
     private final WebResponseProperties responseProperties;
 
-    public ApiResponseFactory(final InvocationContextAccessor invocationContextAccessor, final ErrorCodeResolver errorCodeResolver) {
+    public ApiResponseFactory(
+            final InvocationContextAccessor invocationContextAccessor, final ErrorCodeResolver errorCodeResolver) {
         this(invocationContextAccessor, errorCodeResolver, new WebResponseProperties());
     }
 
-    public ApiResponseFactory(final InvocationContextAccessor invocationContextAccessor, final ErrorCodeResolver errorCodeResolver,
+    public ApiResponseFactory(
+            final InvocationContextAccessor invocationContextAccessor,
+            final ErrorCodeResolver errorCodeResolver,
             final WebResponseProperties responseProperties) {
         this.invocationContextAccessor = invocationContextAccessor;
         this.errorCodeResolver = errorCodeResolver;
@@ -46,7 +49,6 @@ public class ApiResponseFactory {
     }
 
     private @Nullable String requestId() {
-        return this.invocationContextAccessor.requestId()
-                .orElse(null);
+        return this.invocationContextAccessor.requestId().orElse(null);
     }
 }

@@ -9,9 +9,8 @@ import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextStore;
-import org.junit.jupiter.api.Test;
-
 import java.util.Map;
+import org.junit.jupiter.api.Test;
 
 class ContextTransmitterTest {
 
@@ -23,12 +22,13 @@ class ContextTransmitterTest {
         this.holder.put(new AuthContext(42L, "alice"));
 
         final MapContextCarrier carrier = new MapContextCarrier();
-        final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
-                DefaultPropagationContextCodecs.invocationOnly());
+        final ContextTransmitter transmitter =
+                new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.invocationOnly());
 
         transmitter.writeTo(carrier);
 
-        assertThat(carrier.asMap()).containsEntry(InvocationContextCodec.REQUEST_ID, "rid-1")
+        assertThat(carrier.asMap())
+                .containsEntry(InvocationContextCodec.REQUEST_ID, "rid-1")
                 .containsEntry(InvocationContextCodec.ORIGIN_IP, "10.0.0.1")
                 .doesNotContainKey(AuthContextCodec.USER_ID);
     }
@@ -39,12 +39,13 @@ class ContextTransmitterTest {
         this.holder.put(new AuthContext(42L, "alice"));
 
         final MapContextCarrier carrier = new MapContextCarrier();
-        final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
-                DefaultPropagationContextCodecs.trustedInternal());
+        final ContextTransmitter transmitter =
+                new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.trustedInternal());
 
         transmitter.writeTo(carrier);
 
-        assertThat(carrier.asMap()).containsEntry(AuthContextCodec.USER_ID, "42")
+        assertThat(carrier.asMap())
+                .containsEntry(AuthContextCodec.USER_ID, "42")
                 .containsEntry(AuthContextCodec.USERNAME, "alice");
     }
 
@@ -52,10 +53,9 @@ class ContextTransmitterTest {
     void readsInvocationContextFromCarrier() {
         final MapContextCarrier carrier = new MapContextCarrier(Map.of(
                 InvocationContextCodec.REQUEST_ID, "rid-2",
-                InvocationContextCodec.ORIGIN_IP, "10.0.0.2"
-        ));
-        final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
-                DefaultPropagationContextCodecs.invocationOnly());
+                InvocationContextCodec.ORIGIN_IP, "10.0.0.2"));
+        final ContextTransmitter transmitter =
+                new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.invocationOnly());
 
         transmitter.readFrom(carrier);
 
@@ -70,10 +70,9 @@ class ContextTransmitterTest {
         final MapContextCarrier carrier = new MapContextCarrier(Map.of(
                 InvocationContextCodec.REQUEST_ID, "rid-3",
                 AuthContextCodec.USER_ID, "42",
-                AuthContextCodec.USERNAME, "alice"
-        ));
-        final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
-                DefaultPropagationContextCodecs.trustedInternal());
+                AuthContextCodec.USERNAME, "alice"));
+        final ContextTransmitter transmitter =
+                new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.trustedInternal());
 
         transmitter.readFrom(carrier);
 
@@ -87,10 +86,9 @@ class ContextTransmitterTest {
     void invalidAuthContextIsIgnored() {
         final MapContextCarrier carrier = new MapContextCarrier(Map.of(
                 AuthContextCodec.USER_ID, "invalid",
-                AuthContextCodec.USERNAME, "alice"
-        ));
-        final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
-                DefaultPropagationContextCodecs.trustedInternal());
+                AuthContextCodec.USERNAME, "alice"));
+        final ContextTransmitter transmitter =
+                new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.trustedInternal());
 
         transmitter.readFrom(carrier);
 

@@ -8,8 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public final class JacksonProvider {
     private static final ObjectMapper DEFAULT_OBJECT_MAPPER = createObjectMapper();
 
-    private JacksonProvider() {
-    }
+    private JacksonProvider() {}
 
     public static JavaTimeModule create() {
         return new JavaTimeModule();

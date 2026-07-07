@@ -3,7 +3,6 @@ package com.kjs.wuli3.propagation.codec;
 import com.kjs.wuli3.propagation.carrier.ContextCarrierReader;
 import com.kjs.wuli3.propagation.carrier.ContextCarrierWriter;
 import com.kjs.wuli3.propagation.context.InvocationContext;
-
 import java.util.Optional;
 
 /**
@@ -23,8 +22,7 @@ public final class InvocationContextCodec implements PropagationContextCodec<Inv
     public Optional<InvocationContext> read(final ContextCarrierReader reader) {
         return reader.get(REQUEST_ID)
                 .filter(requestId -> !requestId.isBlank())
-                .map(requestId -> new InvocationContext(reader.get(ORIGIN_IP)
-                        .orElse(""), requestId));
+                .map(requestId -> new InvocationContext(reader.get(ORIGIN_IP).orElse(""), requestId));
     }
 
     @Override

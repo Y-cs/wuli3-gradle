@@ -1,7 +1,6 @@
 package com.kjs.wuli3.core.error;
 
 import com.google.common.collect.Maps;
-
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Optional;
@@ -16,8 +15,7 @@ public final class ErrorMetadataParser {
     private final Map<Class<?>, ErrorModule> errorCodeCache = Maps.newConcurrentMap();
     private final Map<ErrorCode, ResolvedErrorPolicy> policyCache = Maps.newConcurrentMap();
 
-    private ErrorMetadataParser() {
-    }
+    private ErrorMetadataParser() {}
 
     public static ErrorMetadataParser instance() {
         return INSTANCE;
@@ -49,8 +47,7 @@ public final class ErrorMetadataParser {
 
     private static Optional<ErrorPolicy> fieldPolicy(final Enum<?> errorEnum) {
         try {
-            final Field field = errorEnum.getDeclaringClass()
-                    .getField(errorEnum.name());
+            final Field field = errorEnum.getDeclaringClass().getField(errorEnum.name());
             return Optional.ofNullable(field.getAnnotation(ErrorPolicy.class));
         } catch (NoSuchFieldException ex) {
             throw new ErrorCodeException(ErrorFrameworkErrors.ERROR_CODE_RESOLVE_FAILED, ex);

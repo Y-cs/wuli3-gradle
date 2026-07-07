@@ -2,9 +2,8 @@ package com.kjs.wuli3.web.internal.context;
 
 import com.kjs.wuli3.web.config.properties.WebContextProperties;
 import com.kjs.wuli3.web.context.ClientIpResolver;
-import org.jspecify.annotations.Nullable;
-
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default client IP resolver that only trusts forwarding headers when explicitly enabled.
@@ -41,8 +40,7 @@ public final class DefaultClientIpResolver implements ClientIpResolver {
             return DefaultClientIpResolver.forwardedFor(value);
         }
         final int comma = value.indexOf(',');
-        return comma < 0 ? value.trim() : value.substring(0, comma)
-                .trim();
+        return comma < 0 ? value.trim() : value.substring(0, comma).trim();
     }
 
     private static @Nullable String forwardedFor(final String value) {
@@ -52,10 +50,10 @@ public final class DefaultClientIpResolver implements ClientIpResolver {
             final String part = semicolon < 0 ? value.substring(start) : value.substring(start, semicolon);
             final String trimmed = part.trim();
             final int equals = trimmed.indexOf('=');
-            if (equals > 0 && "for".equalsIgnoreCase(trimmed.substring(0, equals)
-                    .trim())) {
-                return DefaultClientIpResolver.unquote(trimmed.substring(equals + 1)
-                        .trim());
+            if (equals > 0
+                    && "for".equalsIgnoreCase(trimmed.substring(0, equals).trim())) {
+                return DefaultClientIpResolver.unquote(
+                        trimmed.substring(equals + 1).trim());
             }
             if (semicolon < 0) {
                 return null;

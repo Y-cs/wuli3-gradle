@@ -1,19 +1,17 @@
 package com.kjs.wuli3.core.stream;
 
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public final class BigDecimalCollectors {
 
-    private BigDecimalCollectors() {
-    }
+    private BigDecimalCollectors() {}
 
     public static Collector<BigDecimal, ?, BigDecimal> summing() {
         return Collectors.collectingAndThen(BigDecimalCollectors.summarizing(), BigDecimalSummary::sum);

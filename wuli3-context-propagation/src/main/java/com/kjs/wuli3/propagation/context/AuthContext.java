@@ -21,5 +21,4 @@ public class AuthContext extends AbstractContext implements PropagationContext {
     public Class<? extends Context> type() {
         return AuthContext.class;
     }
-
 }

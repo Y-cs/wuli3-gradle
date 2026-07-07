@@ -35,15 +35,13 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
         }
         switch (error) {
             case ErrorCodeException errorCodeException -> {
-                return DefaultWebErrorStatusResolver.status(errorCodeException.getResolvedErrorPolicy()
-                        .severity());
+                return DefaultWebErrorStatusResolver.status(
+                        errorCodeException.getResolvedErrorPolicy().severity());
             }
             case ErrorResponseException errorResponseException -> {
-                return HttpStatus.valueOf(errorResponseException.getStatusCode()
-                        .value());
+                return HttpStatus.valueOf(errorResponseException.getStatusCode().value());
             }
-            default -> {
-            }
+            default -> {}
         }
         if (error instanceof NoHandlerFoundException || error instanceof NoResourceFoundException) {
             return HttpStatus.NOT_FOUND;
@@ -58,8 +56,7 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
             case HttpMessageNotWritableException httpMessageNotWritableException -> {
                 return HttpStatus.INTERNAL_SERVER_ERROR;
             }
-            default -> {
-            }
+            default -> {}
         }
         if (DefaultWebErrorStatusResolver.badRequest(error)) {
             return HttpStatus.BAD_REQUEST;
@@ -68,12 +65,12 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
     }
 
     private static boolean badRequest(final Throwable error) {
-        return error instanceof MethodArgumentNotValidException ||
-                error instanceof MethodArgumentTypeMismatchException ||
-                error instanceof ServletRequestBindingException ||
-                error instanceof HttpMessageNotReadableException ||
-                error instanceof ConstraintViolationException ||
-                error instanceof IllegalArgumentException;
+        return error instanceof MethodArgumentNotValidException
+                || error instanceof MethodArgumentTypeMismatchException
+                || error instanceof ServletRequestBindingException
+                || error instanceof HttpMessageNotReadableException
+                || error instanceof ConstraintViolationException
+                || error instanceof IllegalArgumentException;
     }
 
     private static HttpStatus status(final ErrorSeverity severity) {
@@ -84,10 +81,12 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
     }
 
     private static @Nullable HttpStatus securityStatus(final Throwable error) {
-        if (DefaultWebErrorStatusResolver.hasCause(error, "org.springframework.security.core.AuthenticationException")) {
+        if (DefaultWebErrorStatusResolver.hasCause(
+                error, "org.springframework.security.core.AuthenticationException")) {
             return HttpStatus.UNAUTHORIZED;
         }
-        if (DefaultWebErrorStatusResolver.hasCause(error, "org.springframework.security.access.AccessDeniedException")) {
+        if (DefaultWebErrorStatusResolver.hasCause(
+                error, "org.springframework.security.access.AccessDeniedException")) {
             return HttpStatus.FORBIDDEN;
         }
         return null;

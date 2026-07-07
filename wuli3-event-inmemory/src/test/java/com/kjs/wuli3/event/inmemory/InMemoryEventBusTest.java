@@ -18,7 +18,9 @@ class InMemoryEventBusTest {
         AtomicInteger count = new AtomicInteger();
         bus.register(DomainEvent.class, event -> count.incrementAndGet());
 
-        bus.publish(BasicDomainEvent.create("created", "1", "Order")).toCompletableFuture().join();
+        bus.publish(BasicDomainEvent.create("created", "1", "Order"))
+                .toCompletableFuture()
+                .join();
         executor.shutdown();
 
         assertThat(count).hasValue(1);
@@ -32,7 +34,9 @@ class InMemoryEventBusTest {
             throw new IllegalStateException("failed");
         });
 
-        assertThatThrownBy(() -> bus.publish(BasicDomainEvent.create("created", "1", "Order")).toCompletableFuture().join())
+        assertThatThrownBy(() -> bus.publish(BasicDomainEvent.create("created", "1", "Order"))
+                        .toCompletableFuture()
+                        .join())
                 .hasRootCauseMessage("failed");
         executor.shutdown();
     }

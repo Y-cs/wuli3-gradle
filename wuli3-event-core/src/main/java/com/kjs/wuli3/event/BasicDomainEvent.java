@@ -10,8 +10,8 @@ public record BasicDomainEvent(
         int version,
         EventMetadata metadata,
         String aggregateId,
-        String aggregateType
-) implements DomainEvent {
+        String aggregateType)
+        implements DomainEvent {
     public BasicDomainEvent {
         if (version < 1) {
             throw new IllegalArgumentException("version must be greater than 0");
@@ -20,13 +20,6 @@ public record BasicDomainEvent(
 
     public static BasicDomainEvent create(String eventType, String aggregateId, String aggregateType) {
         return new BasicDomainEvent(
-                UUID.randomUUID(),
-                Instant.now(),
-                eventType,
-                1,
-                EventMetadata.empty(),
-                aggregateId,
-                aggregateType
-        );
+                UUID.randomUUID(), Instant.now(), eventType, 1, EventMetadata.empty(), aggregateId, aggregateType);
     }
 }

@@ -12,5 +12,4 @@ public non-sealed interface ExtendableContext extends Context {
     <T> void put(ContextKey<T> key, T value);
 
     <T> Optional<T> get(ContextKey<T> key);
-
 }

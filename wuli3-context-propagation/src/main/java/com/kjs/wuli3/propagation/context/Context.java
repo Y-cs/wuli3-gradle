@@ -8,5 +8,4 @@ package com.kjs.wuli3.propagation.context;
 public sealed interface Context permits ExtendableContext, LocalContext, PropagationContext {
 
     Class<? extends Context> type();
-
 }

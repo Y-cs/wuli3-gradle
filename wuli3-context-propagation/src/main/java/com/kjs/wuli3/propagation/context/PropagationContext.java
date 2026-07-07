@@ -5,6 +5,4 @@ package com.kjs.wuli3.propagation.context;
  *
  * @author GuoYang create on 2026/6/25 11:57
  */
-public non-sealed interface PropagationContext extends Context {
-
-}
+public non-sealed interface PropagationContext extends Context {}

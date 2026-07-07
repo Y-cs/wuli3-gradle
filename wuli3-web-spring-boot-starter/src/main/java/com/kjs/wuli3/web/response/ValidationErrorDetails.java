@@ -1,8 +1,7 @@
 package com.kjs.wuli3.web.response;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Structured validation details returned in unified error responses.
@@ -16,6 +15,8 @@ public record ValidationErrorDetails(List<Item> errors) {
     /**
      * 单个错误项。
      */
-    public record Item(@Nullable String field, String message, @Nullable Object rejectedValue) {
-    }
+    public record Item(
+            @Nullable String field,
+            String message,
+            @Nullable Object rejectedValue) {}
 }

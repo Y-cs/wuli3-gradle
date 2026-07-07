@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @ErrorModule(value = "ERROR_FRAMEWORK", policy = @ErrorPolicy(visibility = ErrorVisibility.INTERNAL))
 public enum ErrorFrameworkErrors implements ErrorCode {
-
     ERROR_CODE_RESOLVE_FAILED("错误代码解释失败"),
 
     INVALID_ERROR_CODE("无效错误代码"),
@@ -20,5 +19,4 @@ public enum ErrorFrameworkErrors implements ErrorCode {
     MODULE_NOT_FOUND("未找到错误模型");
 
     private final String message;
-
 }

@@ -13,5 +13,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ApplicationServiceProperties {
 
     private String serviceCode = "";
-
 }

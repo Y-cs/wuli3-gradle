@@ -5,11 +5,16 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
+import org.gradle.testing.jacoco.tasks.JacocoCoverageVerification
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
+import org.gradle.testing.jacoco.tasks.JacocoReport
+import java.math.BigDecimal
 
 class JavaConventionsPlugin : Plugin<Project> {
     override fun apply(project: Project) {
@@ -23,6 +28,14 @@ class JavaConventionsPlugin : Plugin<Project> {
                 ConventionProperties.DEFAULT_JAVA_VERSION,
             )
             val lombokEnabled = booleanProperty(ConventionProperties.LOMBOK_ENABLED, true)
+            val jacocoVerificationEnabled = booleanProperty(
+                ConventionProperties.JACOCO_VERIFICATION_ENABLED,
+                true,
+            )
+            val jacocoLineMinimum = stringProperty(
+                ConventionProperties.JACOCO_LINE_MINIMUM,
+                ConventionProperties.DEFAULT_JACOCO_LINE_MINIMUM,
+            )
 
             extensions.configure<JavaPluginExtension> {
                 toolchain {
@@ -46,8 +59,35 @@ class JavaConventionsPlugin : Plugin<Project> {
                 )
             }
 
-            tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+            tasks.withType<Test>().configureEach {
                 useJUnitPlatform()
+            }
+
+            tasks.withType<JacocoReport>().configureEach {
+                dependsOn(tasks.withType<Test>())
+                reports {
+                    xml.required.set(true)
+                    html.required.set(true)
+                    csv.required.set(false)
+                }
+            }
+
+            tasks.withType<JacocoCoverageVerification>().configureEach {
+                enabled = jacocoVerificationEnabled
+                dependsOn(tasks.withType<Test>())
+                violationRules {
+                    rule {
+                        limit {
+                            counter = "LINE"
+                            value = "COVEREDRATIO"
+                            minimum = BigDecimal(jacocoLineMinimum)
+                        }
+                    }
+                }
+            }
+
+            tasks.named("check").configure {
+                dependsOn(tasks.withType<JacocoCoverageVerification>())
             }
 
             dependencies {

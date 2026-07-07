@@ -10,6 +10,7 @@ version = providers.gradleProperty("wuli3.build-logic.version").get()
 
 dependencies {
     implementation("com.github.spotbugs.snom:spotbugs-gradle-plugin:6.5.8")
+    implementation("com.diffplug.spotless:com.diffplug.spotless.gradle.plugin:8.8.0")
     implementation("de.thetaphi:forbiddenapis:3.10")
     implementation("net.ltgt.gradle:gradle-errorprone-plugin:5.1.0")
 }

@@ -13,5 +13,4 @@ public record ContextKey<T>(String name, Class<T> type) {
         Objects.requireNonNull(name, "name");
         Objects.requireNonNull(type, "type");
     }
-
 }

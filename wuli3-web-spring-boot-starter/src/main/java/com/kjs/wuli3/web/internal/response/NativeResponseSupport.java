@@ -11,8 +11,7 @@ import org.springframework.web.servlet.HandlerMapping;
 
 final class NativeResponseSupport {
 
-    private NativeResponseSupport() {
-    }
+    private NativeResponseSupport() {}
 
     static boolean hasNativeResponse(final MethodParameter returnType) {
         return NativeResponseSupport.resolveMode(returnType) != null;
@@ -39,8 +38,8 @@ final class NativeResponseSupport {
 
     private static @Nullable NativeResponse findNativeResponse(final MethodParameter returnType) {
         if (returnType.getMethod() != null) {
-            final NativeResponse nativeResponse = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(),
-                    NativeResponse.class);
+            final NativeResponse nativeResponse =
+                    AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), NativeResponse.class);
             if (nativeResponse != null) {
                 return nativeResponse;
             }
@@ -49,8 +48,8 @@ final class NativeResponseSupport {
     }
 
     private static @Nullable NativeResponse findNativeResponse(final HandlerMethod handlerMethod) {
-        final NativeResponse nativeResponse = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getMethod(),
-                NativeResponse.class);
+        final NativeResponse nativeResponse =
+                AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getMethod(), NativeResponse.class);
         if (nativeResponse != null) {
             return nativeResponse;
         }

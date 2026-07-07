@@ -9,8 +9,7 @@ import com.kjs.wuli3.core.error.SystemErrors;
 public final class JsonSupport {
     private static final ObjectMapper OBJECT_MAPPER = JacksonProvider.defaultObjectMapper();
 
-    private JsonSupport() {
-    }
+    private JsonSupport() {}
 
     public static String toJson(Object value) {
         try {

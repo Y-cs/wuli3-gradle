@@ -19,5 +19,4 @@ public interface ErrorCode extends Serializable {
         }
         throw new ErrorCodeException(ErrorFrameworkErrors.INVALID_ERROR_CODE).severity(ErrorSeverity.WARNING);
     }
-
 }

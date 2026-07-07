@@ -2,9 +2,8 @@ package com.kjs.wuli3.propagation.accessor;
 
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextReader;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Accessor for request context values.

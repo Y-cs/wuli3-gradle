@@ -2,7 +2,6 @@ package com.kjs.wuli3.propagation.store;
 
 import com.google.common.collect.Maps;
 import com.kjs.wuli3.propagation.context.Context;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -38,8 +37,7 @@ public class ContextContainer {
     }
 
     public Collection<Context> values() {
-        return Map.copyOf(this.contexts)
-                .values();
+        return Map.copyOf(this.contexts).values();
     }
 
     public ContextContainer copy() {

@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @ErrorModule("WEB")
 public enum WebErrors implements ErrorCode {
-
     SUCCESS("成功"),
     BAD_REQUEST("请求参数错误"),
     UNAUTHORIZED("未认证"),

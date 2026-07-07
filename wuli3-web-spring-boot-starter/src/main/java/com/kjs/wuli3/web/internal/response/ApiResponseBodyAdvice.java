@@ -29,39 +29,47 @@ public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     private final ApiResponseFactory responseFactory;
     private final WebResponseProperties responseProperties;
 
-    public ApiResponseBodyAdvice(final ApiResponseFactory responseFactory, final WebResponseProperties responseProperties) {
+    public ApiResponseBodyAdvice(
+            final ApiResponseFactory responseFactory, final WebResponseProperties responseProperties) {
         this.responseFactory = responseFactory;
         this.responseProperties = responseProperties;
     }
 
     @Override
-    public boolean supports(final MethodParameter returnType, final Class<? extends HttpMessageConverter<?>> converterType) {
+    public boolean supports(
+            final MethodParameter returnType, final Class<? extends HttpMessageConverter<?>> converterType) {
         // NativeResponse 的默认语义是跳过成功响应包装，异常仍交给 WebExceptionHandler。
         return !NativeResponseSupport.hasNativeResponse(returnType);
     }
 
     @Override
-    public @Nullable Object beforeBodyWrite(final @Nullable Object body, final MethodParameter returnType,
-            final MediaType selectedContentType, final Class<? extends HttpMessageConverter<?>> selectedConverterType,
-            final ServerHttpRequest request, final ServerHttpResponse response) {
+    public @Nullable Object beforeBodyWrite(
+            final @Nullable Object body,
+            final MethodParameter returnType,
+            final MediaType selectedContentType,
+            final Class<? extends HttpMessageConverter<?>> selectedConverterType,
+            final ServerHttpRequest request,
+            final ServerHttpResponse response) {
         if (ApiResponseBodyAdvice.shouldSkip(response)) {
             return body;
         }
-        if (!this.responseProperties.isWrapResponseEntityBody() && returnType.getParameterType() == ResponseEntity.class) {
+        if (!this.responseProperties.isWrapResponseEntityBody()
+                && returnType.getParameterType() == ResponseEntity.class) {
             return body;
         }
         if (body instanceof ApiResponse<?> || body instanceof ProblemDetail) {
             return body;
         }
         // 二进制、资源和流式返回值必须保持原始 body，避免破坏下载和长连接响应。
-        if (body instanceof byte[] || body instanceof Resource || body instanceof ResponseBodyEmitter ||
-                body instanceof StreamingResponseBody) {
+        if (body instanceof byte[]
+                || body instanceof Resource
+                || body instanceof ResponseBodyEmitter
+                || body instanceof StreamingResponseBody) {
             return body;
         }
         // String 返回值默认由 StringHttpMessageConverter 处理，需要提前序列化为 JSON 字符串。
         if (body instanceof String || StringHttpMessageConverter.class.isAssignableFrom(selectedConverterType)) {
-            response.getHeaders()
-                    .setContentType(MediaType.APPLICATION_JSON);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             return JsonSupport.toJson(this.responseFactory.success(body));
         }
         return this.responseFactory.success(body);

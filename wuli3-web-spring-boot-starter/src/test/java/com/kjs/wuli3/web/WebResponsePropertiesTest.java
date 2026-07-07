@@ -1,8 +1,8 @@
 package com.kjs.wuli3.web;
 
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.MOCK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.MOCK;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -19,8 +19,11 @@ import com.kjs.wuli3.web.autoconfigure.WebAutoConfiguration;
 import com.kjs.wuli3.web.context.RequestIds;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,25 +35,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 class WebResponsePropertiesTest {
 
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.response.wrapper-enabled=false"
-    )
+            properties = "wuli3.web.response.wrapper-enabled=false")
     @AutoConfigureMockMvc
     @Nested
     class WrapperDisabledTest {
@@ -68,12 +66,11 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.response.wrap-response-entity-body=false"
-    )
+            properties = "wuli3.web.response.wrap-response-entity-body=false")
     @AutoConfigureMockMvc
     @Nested
     class ResponseEntityBodyDisabledTest {
@@ -92,12 +89,11 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.response.success-message=success"
-    )
+            properties = "wuli3.web.response.success-message=success")
     @AutoConfigureMockMvc
     @Nested
     class SuccessMessageTest {
@@ -115,12 +111,11 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.response.exception-handler-enabled=false"
-    )
+            properties = "wuli3.web.response.exception-handler-enabled=false")
     @AutoConfigureMockMvc
     @Nested
     class ExceptionHandlerDisabledTest {
@@ -129,20 +124,18 @@ class WebResponsePropertiesTest {
 
         @Test
         void exceptionHandlerCanBeDisabled() throws Exception {
-            assertThatThrownBy(() -> mockMvc.perform(get("/boom")))
-                    .hasCauseInstanceOf(ErrorCodeException.class);
+            assertThatThrownBy(() -> mockMvc.perform(get("/boom"))).hasCauseInstanceOf(ErrorCodeException.class);
         }
     }
 
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.request-id-max-length=5"
-    )
+            properties = "wuli3.web.context.request-id-max-length=5")
     @AutoConfigureMockMvc
     @Nested
     class RequestIdValidationTest {
@@ -153,20 +146,19 @@ class WebResponsePropertiesTest {
         void invalidRequestIdIsRegeneratedByDefault() throws Exception {
             mockMvc.perform(get("/context").header(RequestIds.HEADER_NAME, "too-long-request-id"))
                     .andExpect(status().isOk())
-                    .andExpect(result -> assertThat(result.getResponse()
-                            .getHeader(RequestIds.HEADER_NAME)).isNotEqualTo("too-long-request-id"));
+                    .andExpect(result -> assertThat(result.getResponse().getHeader(RequestIds.HEADER_NAME))
+                            .isNotEqualTo("too-long-request-id"));
         }
     }
 
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.accept-external-request-id=false"
-    )
+            properties = "wuli3.web.context.accept-external-request-id=false")
     @AutoConfigureMockMvc
     @Nested
     class ExternalRequestIdDisabledTest {
@@ -177,20 +169,19 @@ class WebResponsePropertiesTest {
         void externalRequestIdCanBeIgnored() throws Exception {
             mockMvc.perform(get("/context").header(RequestIds.HEADER_NAME, "rid-external"))
                     .andExpect(status().isOk())
-                    .andExpect(result -> assertThat(result.getResponse()
-                            .getHeader(RequestIds.HEADER_NAME)).isNotEqualTo("rid-external"));
+                    .andExpect(result -> assertThat(result.getResponse().getHeader(RequestIds.HEADER_NAME))
+                            .isNotEqualTo("rid-external"));
         }
     }
 
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.trusted-proxy-enabled=true"
-    )
+            properties = "wuli3.web.context.trusted-proxy-enabled=true")
     @AutoConfigureMockMvc
     @Nested
     class TrustedProxyEnabledTest {
@@ -213,11 +204,10 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
-            }
-    )
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
+            })
     @AutoConfigureMockMvc
     @Nested
     class TrustedProxyDisabledTest {
@@ -240,12 +230,11 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.request-body-cache-enabled=false"
-    )
+            properties = "wuli3.web.context.request-body-cache-enabled=false")
     @AutoConfigureMockMvc
     @Nested
     class BodyCacheDisabledTest {
@@ -254,9 +243,7 @@ class WebResponsePropertiesTest {
 
         @Test
         void bodyCacheCanBeDisabled() throws Exception {
-            mockMvc.perform(post("/body")
-                            .contentType(MediaType.TEXT_PLAIN)
-                            .content("payload"))
+            mockMvc.perform(post("/body").contentType(MediaType.TEXT_PLAIN).content("payload"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.first").value("payload"))
                     .andExpect(jsonPath("$.data.second").value(""));
@@ -266,12 +253,11 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.max-cache-body-size=4B"
-    )
+            properties = "wuli3.web.context.max-cache-body-size=4B")
     @AutoConfigureMockMvc
     @Nested
     class BodyCacheLimitTest {
@@ -280,9 +266,7 @@ class WebResponsePropertiesTest {
 
         @Test
         void bodyCacheLimitReturnsPayloadTooLarge() throws Exception {
-            mockMvc.perform(post("/body")
-                            .contentType(MediaType.TEXT_PLAIN)
-                            .content("payload"))
+            mockMvc.perform(post("/body").contentType(MediaType.TEXT_PLAIN).content("payload"))
                     .andExpect(status().isPayloadTooLarge())
                     .andExpect(jsonPath("$.code").value("WEB.PAYLOAD_TOO_LARGE"));
         }
@@ -291,12 +275,11 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.enabled=false"
-    )
+            properties = "wuli3.web.context.enabled=false")
     @AutoConfigureMockMvc
     @Nested
     class ContextDisabledTest {
@@ -316,12 +299,11 @@ class WebResponsePropertiesTest {
     @SpringBootTest(
             webEnvironment = MOCK,
             classes = {
-                    TestApplication.class,
-                    WebAutoConfiguration.class,
-                    ControllerConfiguration.class,
-                    CustomStatusResolverConfiguration.class,
-            }
-    )
+                TestApplication.class,
+                WebAutoConfiguration.class,
+                ControllerConfiguration.class,
+                CustomStatusResolverConfiguration.class,
+            })
     @AutoConfigureMockMvc
     @Nested
     class CustomStatusResolverTest {
@@ -347,8 +329,7 @@ class WebResponsePropertiesTest {
 
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    static class TestApplication {
-    }
+    static class TestApplication {}
 
     @TestConfiguration
     static class ControllerConfiguration {
@@ -379,21 +360,17 @@ class WebResponsePropertiesTest {
 
         @GetMapping("/context")
         ContextView context() {
-            return new ContextView(invocationContextAccessor.requestId()
-                    .orElse(""));
+            return new ContextView(invocationContextAccessor.requestId().orElse(""));
         }
 
         @GetMapping("/origin-ip")
         String originIp() {
-            return invocationContextAccessor.originIp()
-                    .orElse("");
+            return invocationContextAccessor.originIp().orElse("");
         }
 
         @GetMapping("/entity")
         ResponseEntity<ContextView> entity() {
-            return ResponseEntity.status(201)
-                    .header("X-Custom", "yes")
-                    .body(new ContextView("entity"));
+            return ResponseEntity.status(201).header("X-Custom", "yes").body(new ContextView("entity"));
         }
 
         @GetMapping("/boom")
@@ -403,18 +380,16 @@ class WebResponsePropertiesTest {
 
         @PostMapping("/body")
         BodyView body(HttpServletRequest request) throws IOException {
-            return new BodyView(WebResponsePropertiesTest.readBody(request), WebResponsePropertiesTest.readBody(request));
+            return new BodyView(
+                    WebResponsePropertiesTest.readBody(request), WebResponsePropertiesTest.readBody(request));
         }
     }
 
-    record ContextView(String requestId) {
-    }
+    record ContextView(String requestId) {}
 
-    record BodyView(String first, String second) {
-    }
+    record BodyView(String first, String second) {}
 
     private static String readBody(final HttpServletRequest request) throws IOException {
-        return new String(request.getInputStream()
-                .readAllBytes(), StandardCharsets.UTF_8);
+        return new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
     }
 }

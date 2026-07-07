@@ -24,5 +24,4 @@ public class InvocationContext extends AbstractContext implements PropagationCon
     public Class<? extends Context> type() {
         return InvocationContext.class;
     }
-
 }

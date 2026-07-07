@@ -1,9 +1,8 @@
 package com.kjs.wuli3.core.error;
 
+import java.io.Serial;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
-
-import java.io.Serial;
 
 /**
  * Runtime exception carrying a domain {@link ErrorCode} plus the resolved response policy.
@@ -23,8 +22,7 @@ public class ErrorCodeException extends RuntimeException {
     public ErrorCodeException(final ErrorCode errorCode, final String message, final @Nullable Throwable cause) {
         super(message != null ? message : errorCode.getMessage(), cause);
         this.errorCode = errorCode;
-        this.resolvedErrorPolicy = ErrorMetadataParser.instance()
-                .getErrorPolicy(errorCode);
+        this.resolvedErrorPolicy = ErrorMetadataParser.instance().getErrorPolicy(errorCode);
     }
 
     public ErrorCodeException(final ErrorCode errorCode) {
@@ -71,6 +69,7 @@ public class ErrorCodeException extends RuntimeException {
 
     @FunctionalInterface
     public interface ErrorPolicyUpdater {
-        @Nullable ResolvedErrorPolicy apply(final ResolvedErrorPolicy policy);
+        @Nullable
+        ResolvedErrorPolicy apply(final ResolvedErrorPolicy policy);
     }
 }

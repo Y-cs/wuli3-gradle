@@ -2,7 +2,6 @@ package com.kjs.wuli3.propagation.snapshot;
 
 import com.kjs.wuli3.propagation.store.ContextContainer;
 import com.kjs.wuli3.propagation.store.ContextWriter;
-
 import java.util.Objects;
 
 public final class DefaultContextPropagator implements ContextPropagator {
@@ -32,5 +31,4 @@ public final class DefaultContextPropagator implements ContextPropagator {
             }
         };
     }
-
 }

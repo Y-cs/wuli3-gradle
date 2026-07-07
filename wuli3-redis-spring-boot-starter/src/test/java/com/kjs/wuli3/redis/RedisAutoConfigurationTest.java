@@ -6,12 +6,11 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 class RedisAutoConfigurationTest {
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(RedisAutoConfiguration.class));
+    private final ApplicationContextRunner contextRunner =
+            new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RedisAutoConfiguration.class));
 
     @Test
     void contextLoads() {
-        contextRunner.run(context -> {
-        });
+        contextRunner.run(context -> {});
     }
 }

@@ -1,7 +1,6 @@
 package com.kjs.wuli3.propagation.snapshot;
 
 import com.kjs.wuli3.propagation.store.ContextContainer;
-
 import java.util.Objects;
 
 /**
@@ -12,8 +11,8 @@ public final class ContextSnapshot {
     private final ContextContainer contextContainer;
 
     public ContextSnapshot(final ContextContainer contextContainer) {
-        this.contextContainer = Objects.requireNonNull(contextContainer, "contextContainer")
-                .copy();
+        this.contextContainer =
+                Objects.requireNonNull(contextContainer, "contextContainer").copy();
     }
 
     public ContextContainer getContextContainer() {

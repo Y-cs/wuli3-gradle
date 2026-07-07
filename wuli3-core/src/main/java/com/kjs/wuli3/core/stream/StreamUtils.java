@@ -1,22 +1,20 @@
 package com.kjs.wuli3.core.stream;
 
-import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public final class StreamUtils {
 
     private static final Object NULL_KEY = new Object();
 
-    private StreamUtils() {
-    }
+    private StreamUtils() {}
 
     public static <T> Stream<T> filterNotNull(final Stream<? extends @Nullable T> stream) {
         Objects.requireNonNull(stream, "stream");

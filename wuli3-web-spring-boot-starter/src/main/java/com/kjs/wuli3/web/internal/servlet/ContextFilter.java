@@ -14,16 +14,15 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.MDC;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.MDC;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
 
 public final class ContextFilter extends OncePerRequestFilter {
 
@@ -34,8 +33,11 @@ public final class ContextFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final WebContextProperties contextProperties;
 
-    public ContextFilter(final ContextWriter contextWriter, final AuthContextResolver authContextResolver,
-            final RequestIdResolver requestIdResolver, final ClientIpResolver clientIpResolver,
+    public ContextFilter(
+            final ContextWriter contextWriter,
+            final AuthContextResolver authContextResolver,
+            final RequestIdResolver requestIdResolver,
+            final ClientIpResolver clientIpResolver,
             final HandlerExceptionResolver handlerExceptionResolver,
             final WebContextProperties contextProperties) {
         this.contextWriter = Objects.requireNonNull(contextWriter, "contextWriter");
@@ -47,10 +49,12 @@ public final class ContextFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response,
-            final FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
+            throws ServletException, IOException {
         final String requestId = this.requestIdResolver.resolve(request);
-        final InvocationContext invocationContext = new InvocationContext(this.clientIpResolver.resolve(request), requestId);
+        final InvocationContext invocationContext =
+                new InvocationContext(this.clientIpResolver.resolve(request), requestId);
         this.contextWriter.put(invocationContext);
         response.setHeader(this.contextProperties.getRequestIdHeaderName(), requestId);
         MDC.put(RequestIds.MDC_KEY, requestId);
@@ -75,8 +79,8 @@ public final class ContextFilter extends OncePerRequestFilter {
         }
     }
 
-    private void handleErrorCodeException(final HttpServletRequest request, final HttpServletResponse response,
-            final ErrorCodeException ex) {
+    private void handleErrorCodeException(
+            final HttpServletRequest request, final HttpServletResponse response, final ErrorCodeException ex) {
         final ModelAndView modelAndView = this.handlerExceptionResolver.resolveException(request, response, null, ex);
         if (modelAndView == null) {
             throw ex;
@@ -87,8 +91,8 @@ public final class ContextFilter extends OncePerRequestFilter {
         if (!this.shouldCacheBody(request)) {
             return request;
         }
-        return new HttpServletCacheRequestWrapper(request, this.contextProperties.getMaxCacheBodySize()
-                .toBytes());
+        return new HttpServletCacheRequestWrapper(
+                request, this.contextProperties.getMaxCacheBodySize().toBytes());
     }
 
     private boolean shouldCacheBody(final HttpServletRequest request) {
@@ -137,7 +141,6 @@ public final class ContextFilter extends OncePerRequestFilter {
         }
         final int semicolon = contentType.indexOf(';');
         final String value = semicolon < 0 ? contentType : contentType.substring(0, semicolon);
-        return value.trim()
-                .toLowerCase(Locale.ROOT);
+        return value.trim().toLowerCase(Locale.ROOT);
     }
 }

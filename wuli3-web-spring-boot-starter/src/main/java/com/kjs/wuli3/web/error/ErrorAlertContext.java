@@ -15,6 +15,4 @@ public record ErrorAlertContext(
         String method,
         String requestUri,
         @Nullable String queryString,
-        String remoteAddr
-) {
-}
+        String remoteAddr) {}

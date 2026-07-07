@@ -30,8 +30,9 @@ class CoreSmokeTest {
     @Test
     void checkedExceptionIsWrapped() {
         assertThatThrownBy(() -> Functions.uncheckedSupplier(() -> {
-                throw new IOException("io");
-        }).get())
+                            throw new IOException("io");
+                        })
+                        .get())
                 .isInstanceOf(ErrorCodeException.class)
                 .hasMessage("io");
     }
@@ -54,8 +55,7 @@ class CoreSmokeTest {
     @Test
     void errorCodeExceptionPolicyOperatorReplacesPolicy() {
         ErrorCodeException exception = new ErrorCodeException(SystemErrors.INTERNAL_ERROR)
-                .policy(policy -> policy.withSeverity(ErrorSeverity.WARNING)
-                        .withVisibility(ErrorVisibility.CODE_ONLY));
+                .policy(policy -> policy.withSeverity(ErrorSeverity.WARNING).withVisibility(ErrorVisibility.CODE_ONLY));
 
         assertThat(exception.getResolvedErrorPolicy().severity()).isEqualTo(ErrorSeverity.WARNING);
         assertThat(exception.getResolvedErrorPolicy().visibility()).isEqualTo(ErrorVisibility.CODE_ONLY);

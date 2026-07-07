@@ -6,10 +6,9 @@ import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.store.ContextContainer;
 import com.kjs.wuli3.propagation.store.ContextStore;
-import org.junit.jupiter.api.Test;
-
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
+import org.junit.jupiter.api.Test;
 
 class DefaultContextPropagatorTest {
 
@@ -41,9 +40,7 @@ class DefaultContextPropagatorTest {
                     .contains(2L);
         });
 
-        assertThat(holder.get(AuthContext.class))
-                .map(AuthContext::getUserId)
-                .contains(1L);
+        assertThat(holder.get(AuthContext.class)).map(AuthContext::getUserId).contains(1L);
     }
 
     @Test
@@ -68,9 +65,7 @@ class DefaultContextPropagatorTest {
                     .contains(2L);
         });
 
-        assertThat(holder.get(AuthContext.class))
-                .map(AuthContext::getUserId)
-                .contains(1L);
+        assertThat(holder.get(AuthContext.class)).map(AuthContext::getUserId).contains(1L);
     }
 
     @Test
@@ -108,8 +103,7 @@ class DefaultContextPropagatorTest {
         final ContextSnapshot snapshot = new ContextSnapshot(container);
 
         container.put(authContext(2L));
-        snapshot.getContextContainer()
-                .put(authContext(3L));
+        snapshot.getContextContainer().put(authContext(3L));
 
         this.withRestored(snapshot, () -> {
             assertThat(holder.get(AuthContext.class))
@@ -131,48 +125,38 @@ class DefaultContextPropagatorTest {
 
         wrapped.run();
 
-        assertThat(holder.get(AuthContext.class))
-                .map(AuthContext::getUserId)
-                .contains(2L);
+        assertThat(holder.get(AuthContext.class)).map(AuthContext::getUserId).contains(2L);
     }
 
     @Test
     void wrappedCallableRestoresCapturedContext() throws Exception {
         holder.put(authContext(1L));
-        final Callable<Long> wrapped = propagator.wrap(() -> holder.get(AuthContext.class)
-                .map(AuthContext::getUserId)
-                .orElse(-1L));
+        final Callable<Long> wrapped = propagator.wrap(
+                () -> holder.get(AuthContext.class).map(AuthContext::getUserId).orElse(-1L));
 
         holder.put(authContext(2L));
 
         assertThat(wrapped.call()).isEqualTo(1L);
-        assertThat(holder.get(AuthContext.class))
-                .map(AuthContext::getUserId)
-                .contains(2L);
+        assertThat(holder.get(AuthContext.class)).map(AuthContext::getUserId).contains(2L);
     }
 
     @Test
     void wrappedSupplierRestoresCapturedContext() {
         holder.put(authContext(1L));
-        final Supplier<Long> wrapped = propagator.wrapSupplier(() -> holder.get(AuthContext.class)
-                .map(AuthContext::getUserId)
-                .orElse(-1L));
+        final Supplier<Long> wrapped = propagator.wrapSupplier(
+                () -> holder.get(AuthContext.class).map(AuthContext::getUserId).orElse(-1L));
 
         holder.put(authContext(2L));
 
         assertThat(wrapped.get()).isEqualTo(1L);
-        assertThat(holder.get(AuthContext.class))
-                .map(AuthContext::getUserId)
-                .contains(2L);
+        assertThat(holder.get(AuthContext.class)).map(AuthContext::getUserId).contains(2L);
     }
 
     @Test
     void containerUsesContextTypeAsStorageKey() {
         holder.put(new CustomAuthContext(1L, "user-1"));
 
-        assertThat(holder.get(AuthContext.class))
-                .map(AuthContext::getUserId)
-                .contains(1L);
+        assertThat(holder.get(AuthContext.class)).map(AuthContext::getUserId).contains(1L);
     }
 
     private static ContextSnapshot snapshotWith(AuthContext authContext) {

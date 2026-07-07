@@ -93,8 +93,8 @@ transmitter.writeTo(carrier);
 
 ```java
 final MapContextCarrier carrier = new MapContextCarrier(Map.of(
-        PropagationFieldNames.REQUEST_ID, "rid-1",
-        PropagationFieldNames.ORIGIN_IP, "10.0.0.1"
+        InvocationContextCodec.REQUEST_ID, "rid-1",
+        InvocationContextCodec.ORIGIN_IP, "10.0.0.1"
 ));
 
 transmitter.readFrom(carrier);

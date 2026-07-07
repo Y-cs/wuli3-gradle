@@ -11,6 +11,9 @@ import java.util.Optional;
  */
 public final class InvocationContextCodec implements PropagationContextCodec<InvocationContext> {
 
+    public static final String REQUEST_ID = "X-Request-Id";
+    public static final String ORIGIN_IP = "X-Origin-Ip";
+
     @Override
     public Class<InvocationContext> contextType() {
         return InvocationContext.class;
@@ -18,15 +21,15 @@ public final class InvocationContextCodec implements PropagationContextCodec<Inv
 
     @Override
     public Optional<InvocationContext> read(final ContextCarrierReader reader) {
-        return reader.get(PropagationFieldNames.REQUEST_ID)
+        return reader.get(REQUEST_ID)
                 .filter(requestId -> !requestId.isBlank())
-                .map(requestId -> new InvocationContext(reader.get(PropagationFieldNames.ORIGIN_IP)
+                .map(requestId -> new InvocationContext(reader.get(ORIGIN_IP)
                         .orElse(""), requestId));
     }
 
     @Override
     public void write(final InvocationContext context, final ContextCarrierWriter writer) {
-        writer.set(PropagationFieldNames.REQUEST_ID, context.getRequestId());
-        writer.set(PropagationFieldNames.ORIGIN_IP, context.getOriginIp());
+        writer.set(REQUEST_ID, context.getRequestId());
+        writer.set(ORIGIN_IP, context.getOriginIp());
     }
 }

@@ -11,6 +11,9 @@ import java.util.Optional;
  */
 public final class AuthContextCodec implements PropagationContextCodec<AuthContext> {
 
+    public static final String USER_ID = "X-User-Id";
+    public static final String USERNAME = "X-Username";
+
     @Override
     public Class<AuthContext> contextType() {
         return AuthContext.class;
@@ -18,16 +21,16 @@ public final class AuthContextCodec implements PropagationContextCodec<AuthConte
 
     @Override
     public Optional<AuthContext> read(final ContextCarrierReader reader) {
-        return reader.get(PropagationFieldNames.USER_ID)
+        return reader.get(USER_ID)
                 .flatMap(AuthContextCodec::parseUserId)
-                .map(userId -> new AuthContext(userId, reader.get(PropagationFieldNames.USERNAME)
+                .map(userId -> new AuthContext(userId, reader.get(USERNAME)
                         .orElse("")));
     }
 
     @Override
     public void write(final AuthContext context, final ContextCarrierWriter writer) {
-        writer.set(PropagationFieldNames.USER_ID, String.valueOf(context.getUserId()));
-        writer.set(PropagationFieldNames.USERNAME, context.getUsername());
+        writer.set(USER_ID, String.valueOf(context.getUserId()));
+        writer.set(USERNAME, context.getUsername());
     }
 
     private static Optional<Long> parseUserId(final String value) {

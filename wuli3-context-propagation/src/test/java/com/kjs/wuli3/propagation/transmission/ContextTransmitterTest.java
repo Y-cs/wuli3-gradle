@@ -3,8 +3,9 @@ package com.kjs.wuli3.propagation.transmission;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.propagation.carrier.MapContextCarrier;
+import com.kjs.wuli3.propagation.codec.AuthContextCodec;
 import com.kjs.wuli3.propagation.codec.DefaultPropagationContextCodecs;
-import com.kjs.wuli3.propagation.codec.PropagationFieldNames;
+import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextStore;
@@ -27,9 +28,9 @@ class ContextTransmitterTest {
 
         transmitter.writeTo(carrier);
 
-        assertThat(carrier.asMap()).containsEntry(PropagationFieldNames.REQUEST_ID, "rid-1")
-                .containsEntry(PropagationFieldNames.ORIGIN_IP, "10.0.0.1")
-                .doesNotContainKey(PropagationFieldNames.USER_ID);
+        assertThat(carrier.asMap()).containsEntry(InvocationContextCodec.REQUEST_ID, "rid-1")
+                .containsEntry(InvocationContextCodec.ORIGIN_IP, "10.0.0.1")
+                .doesNotContainKey(AuthContextCodec.USER_ID);
     }
 
     @Test
@@ -43,15 +44,15 @@ class ContextTransmitterTest {
 
         transmitter.writeTo(carrier);
 
-        assertThat(carrier.asMap()).containsEntry(PropagationFieldNames.USER_ID, "42")
-                .containsEntry(PropagationFieldNames.USERNAME, "alice");
+        assertThat(carrier.asMap()).containsEntry(AuthContextCodec.USER_ID, "42")
+                .containsEntry(AuthContextCodec.USERNAME, "alice");
     }
 
     @Test
     void readsInvocationContextFromCarrier() {
         final MapContextCarrier carrier = new MapContextCarrier(Map.of(
-                PropagationFieldNames.REQUEST_ID, "rid-2",
-                PropagationFieldNames.ORIGIN_IP, "10.0.0.2"
+                InvocationContextCodec.REQUEST_ID, "rid-2",
+                InvocationContextCodec.ORIGIN_IP, "10.0.0.2"
         ));
         final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
                 DefaultPropagationContextCodecs.invocationOnly());
@@ -67,9 +68,9 @@ class ContextTransmitterTest {
     @Test
     void readsAuthContextOnlyWhenTrustedInternalCodecsAreUsed() {
         final MapContextCarrier carrier = new MapContextCarrier(Map.of(
-                PropagationFieldNames.REQUEST_ID, "rid-3",
-                PropagationFieldNames.USER_ID, "42",
-                PropagationFieldNames.USERNAME, "alice"
+                InvocationContextCodec.REQUEST_ID, "rid-3",
+                AuthContextCodec.USER_ID, "42",
+                AuthContextCodec.USERNAME, "alice"
         ));
         final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
                 DefaultPropagationContextCodecs.trustedInternal());
@@ -85,8 +86,8 @@ class ContextTransmitterTest {
     @Test
     void invalidAuthContextIsIgnored() {
         final MapContextCarrier carrier = new MapContextCarrier(Map.of(
-                PropagationFieldNames.USER_ID, "invalid",
-                PropagationFieldNames.USERNAME, "alice"
+                AuthContextCodec.USER_ID, "invalid",
+                AuthContextCodec.USERNAME, "alice"
         ));
         final ContextTransmitter transmitter = new ContextTransmitter(this.holder, this.holder,
                 DefaultPropagationContextCodecs.trustedInternal());

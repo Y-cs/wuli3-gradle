@@ -11,10 +11,9 @@ import com.kjs.wuli3.core.error.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.ErrorVisibility;
 import com.kjs.wuli3.core.error.SystemErrors;
-import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
-import com.kjs.wuli3.propagation.codec.PropagationFieldNames;
-import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
+import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
+import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.snapshot.ContextPropagator;
 import com.kjs.wuli3.propagation.transmission.ContextTransmitter;
@@ -99,7 +98,7 @@ class WebAutoConfigurationTest {
         assertThat(applicationContext.getBean(ContextPropagator.class)).isNotNull();
         assertThat(applicationContext.getBean(InvocationContextCodec.class)).isNotNull();
         assertThat(applicationContext.getBean(ContextTransmitter.class)).isNotNull();
-        assertThat(RequestIds.HEADER_NAME).isEqualTo(PropagationFieldNames.REQUEST_ID);
+        assertThat(RequestIds.HEADER_NAME).isEqualTo(InvocationContextCodec.REQUEST_ID);
     }
 
     @Test

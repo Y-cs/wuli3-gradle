@@ -1,6 +1,6 @@
 package com.kjs.wuli3.web.internal.response;
 
-import com.kjs.wuli3.json.JsonSupport;
+import com.kjs.wuli3.json.Jsons;
 import com.kjs.wuli3.web.config.properties.WebResponseProperties;
 import com.kjs.wuli3.web.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -70,7 +70,7 @@ public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         // String 返回值默认由 StringHttpMessageConverter 处理，需要提前序列化为 JSON 字符串。
         if (body instanceof String || StringHttpMessageConverter.class.isAssignableFrom(selectedConverterType)) {
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            return JsonSupport.toJson(this.responseFactory.success(body));
+            return Jsons.toJson(this.responseFactory.success(body));
         }
         return this.responseFactory.success(body);
     }

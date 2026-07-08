@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@ErrorModule("SYSTEM")
+@ErrorModule(value = "SYSTEM", policy = @ErrorPolicy(visibility = ErrorVisibility.MESSAGE_ONLY))
 public enum SystemErrors implements ErrorCode {
     INTERNAL_ERROR("内部错误"),
     UNSUPPORTED_OPERATION("不支持的操作"),

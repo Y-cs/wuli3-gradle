@@ -1,6 +1,7 @@
 package com.kjs.wuli3.core.error;
 
 import java.io.Serial;
+import java.util.Objects;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
@@ -20,9 +21,9 @@ public class ErrorCodeException extends RuntimeException {
     private transient @Nullable Object detail;
 
     public ErrorCodeException(final ErrorCode errorCode, final String message, final @Nullable Throwable cause) {
-        super(message != null ? message : errorCode.getMessage(), cause);
-        this.errorCode = errorCode;
-        this.resolvedErrorPolicy = ErrorMetadataParser.instance().getErrorPolicy(errorCode);
+        super(Objects.requireNonNull(message, "message"), cause);
+        this.errorCode = Objects.requireNonNull(errorCode, "errorCode");
+        this.resolvedErrorPolicy = ErrorMetadataParser.instance().getErrorPolicy(this.errorCode);
     }
 
     public ErrorCodeException(final ErrorCode errorCode) {
@@ -37,39 +38,32 @@ public class ErrorCodeException extends RuntimeException {
         this(errorCode, message, null);
     }
 
-    public ErrorCodeException policy(final @Nullable ErrorPolicyUpdater errorPolicyUpdater) {
-        if (errorPolicyUpdater == null) {
-            return this;
-        }
-        final ResolvedErrorPolicy policy = errorPolicyUpdater.apply(this.resolvedErrorPolicy);
-        if (policy != null) {
-            this.resolvedErrorPolicy = policy;
-        }
+    public ErrorCodeException policy(final ErrorPolicyUpdater errorPolicyUpdater) {
+        Objects.requireNonNull(errorPolicyUpdater, "errorPolicyUpdater");
+        this.resolvedErrorPolicy = Objects.requireNonNull(
+                errorPolicyUpdater.apply(this.resolvedErrorPolicy), "updated error policy");
         return this;
     }
 
     public ErrorCodeException visibility(final ErrorVisibility visibility) {
-        if (visibility != null) {
-            this.resolvedErrorPolicy = this.resolvedErrorPolicy.withVisibility(visibility);
-        }
+        Objects.requireNonNull(visibility, "visibility");
+        this.resolvedErrorPolicy = this.resolvedErrorPolicy.withVisibility(visibility);
         return this;
     }
 
     public ErrorCodeException severity(final ErrorSeverity severity) {
-        if (severity != null) {
-            this.resolvedErrorPolicy = this.resolvedErrorPolicy.withSeverity(severity);
-        }
+        Objects.requireNonNull(severity, "severity");
+        this.resolvedErrorPolicy = this.resolvedErrorPolicy.withSeverity(severity);
         return this;
     }
 
-    public ErrorCodeException detail(final Object detail) {
+    public ErrorCodeException detail(final @Nullable Object detail) {
         this.detail = detail;
         return this;
     }
 
     @FunctionalInterface
     public interface ErrorPolicyUpdater {
-        @Nullable
         ResolvedErrorPolicy apply(final ResolvedErrorPolicy policy);
     }
 }

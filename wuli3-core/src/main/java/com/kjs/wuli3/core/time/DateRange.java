@@ -20,6 +20,9 @@ public record DateRange(LocalDate startInclusive, LocalDate endExclusive) {
 
     public static DateRange closed(final LocalDate startInclusive, final LocalDate endInclusive) {
         Objects.requireNonNull(endInclusive, "endInclusive");
+        if (LocalDate.MAX.equals(endInclusive)) {
+            throw new IllegalArgumentException("endInclusive must be before LocalDate.MAX");
+        }
         return new DateRange(startInclusive, endInclusive.plusDays(1L));
     }
 
@@ -38,7 +41,10 @@ public record DateRange(LocalDate startInclusive, LocalDate endExclusive) {
 
     public boolean overlaps(final DateRange other) {
         Objects.requireNonNull(other, "other");
-        return this.startInclusive.isBefore(other.endExclusive) && other.startInclusive.isBefore(this.endExclusive);
+        return !this.isEmpty()
+                && !other.isEmpty()
+                && this.startInclusive.isBefore(other.endExclusive)
+                && other.startInclusive.isBefore(this.endExclusive);
     }
 
     public Optional<DateRange> intersection(final DateRange other) {

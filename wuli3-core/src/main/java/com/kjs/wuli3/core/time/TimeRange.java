@@ -33,7 +33,10 @@ public record TimeRange(Instant startInclusive, Instant endExclusive) {
 
     public boolean overlaps(final TimeRange other) {
         Objects.requireNonNull(other, "other");
-        return this.startInclusive.isBefore(other.endExclusive) && other.startInclusive.isBefore(this.endExclusive);
+        return !this.isEmpty()
+                && !other.isEmpty()
+                && this.startInclusive.isBefore(other.endExclusive)
+                && other.startInclusive.isBefore(this.endExclusive);
     }
 
     public Optional<TimeRange> intersection(final TimeRange other) {

@@ -21,6 +21,13 @@ public final class StreamUtils {
         return stream.flatMap((final T value) -> value == null ? Stream.empty() : Stream.of(value));
     }
 
+    /**
+     * Creates a stateful predicate that keeps one element for each mapped key.
+     *
+     * <p>Sequential streams retain the first encountered element. Parallel streams retain an arbitrary element for
+     * each key and must not rely on encounter-order selection. A predicate instance is scoped to one stream
+     * traversal and must not be reused across independent operations.
+     */
     public static <T, K> Predicate<T> distinctBy(final Function<? super T, ? extends @Nullable K> keyMapper) {
         Objects.requireNonNull(keyMapper, "keyMapper");
         final Set<Object> seen = ConcurrentHashMap.newKeySet();

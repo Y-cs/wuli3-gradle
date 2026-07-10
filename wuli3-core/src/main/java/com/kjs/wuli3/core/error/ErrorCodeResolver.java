@@ -5,5 +5,5 @@ package com.kjs.wuli3.core.error;
  */
 public interface ErrorCodeResolver {
 
-    String resolver(final ErrorCode errorCode);
+    String resolve(final ErrorCode errorCode);
 }

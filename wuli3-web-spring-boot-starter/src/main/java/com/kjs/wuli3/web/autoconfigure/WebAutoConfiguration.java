@@ -3,7 +3,11 @@ package com.kjs.wuli3.web.autoconfigure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.ConfigFeature;
 import com.kjs.wuli3.core.error.ErrorCodeResolver;
+import com.kjs.wuli3.json.datatype.desensitization.DesensitizationStrategy;
+import com.kjs.wuli3.json.datatype.desensitization.DesensitizationStrategyRegistry;
+import com.kjs.wuli3.json.datatype.desensitization.DesensitizationVisibilityPolicy;
 import com.kjs.wuli3.json.provider.JacksonProvider;
+import com.kjs.wuli3.json.provider.JsonMapperDesensitizationAssembly;
 import com.kjs.wuli3.json.provider.JsonMapperResourcePathAssembly;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.propagation.store.ContextWriter;
@@ -57,11 +61,23 @@ public class WebAutoConfiguration {
 
     @Bean
     Jackson2ObjectMapperBuilderCustomizer webJackson2ObjectMapperBuilderCustomizer(
-            final WebResourcePathResolver resourcePathResolvers) {
+            final WebResourcePathResolver resourcePathResolvers,
+            final ObjectProvider<DesensitizationStrategy> desensitizationStrategies,
+            final ObjectProvider<DesensitizationVisibilityPolicy> desensitizationVisibilityPolicy) {
+        // @ResourcePath解析器
         final JsonMapperResourcePathAssembly jsonMapperResourcePathAssembly = new JsonMapperResourcePathAssembly(
                 resourcePathResolvers);
+        // @Desensitization解析器
+        final JsonMapperDesensitizationAssembly jsonMapperDesensitizationAssembly =
+                new JsonMapperDesensitizationAssembly(
+                // @Desensitization配置如何脱敏
+                DesensitizationStrategyRegistry.standardWithOverrides(desensitizationStrategies.orderedStream()
+                        .toList()),
+                // @Desensitization配置是否应该脱敏
+                desensitizationVisibilityPolicy.getIfAvailable(DesensitizationVisibilityPolicy::alwaysMask));
         return builder -> {
-            builder.modules(JacksonProvider.javaTimeModule(), jsonMapperResourcePathAssembly.resourcePathModule());
+            builder.modules(JacksonProvider.javaTimeModule(), jsonMapperResourcePathAssembly.resourcePathModule(),
+                    jsonMapperDesensitizationAssembly.desensitizationModule());
             builder.locale(JacksonProvider.defaultLocale());
             builder.timeZone(JacksonProvider.defaultTimeZone());
             for (ConfigFeature configFeature : JacksonProvider.featuresToEnable()) {

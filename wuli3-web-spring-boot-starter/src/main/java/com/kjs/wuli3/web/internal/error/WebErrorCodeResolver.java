@@ -29,7 +29,7 @@ public class WebErrorCodeResolver implements ErrorCodeResolver {
     }
 
     @Override
-    public String resolver(final ErrorCode errorCode) {
+    public String resolve(final ErrorCode errorCode) {
         final ErrorModule errorModule = ErrorMetadataParser.instance().getErrorModule(errorCode);
         return Optional.of(errorModule)
                 .map(ErrorModule::value)

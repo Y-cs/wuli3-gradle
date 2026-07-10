@@ -16,6 +16,8 @@ public enum ErrorFrameworkErrors implements ErrorCode {
 
     INVALID_ERROR_CODE("无效错误代码"),
 
+    INVALID_ERROR_MODULE("无效错误模块"),
+
     MODULE_NOT_FOUND("未找到错误模型");
 
     private final String message;

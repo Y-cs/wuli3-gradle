@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerBuilder;
 import com.fasterxml.jackson.databind.deser.BeanDeserializerModifier;
 import com.fasterxml.jackson.databind.deser.SettableBeanProperty;
+import com.kjs.wuli3.json.internal.JacksonAnnotationLookup;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,7 @@ public class ResourcePathDeserializerModifier extends BeanDeserializerModifier {
         final List<SettableBeanProperty> properties = new ArrayList<>();
         iterator.forEachRemaining(properties::add);
         for (final SettableBeanProperty property : properties) {
-            final ResourcePath annotation = ResourcePathAnnotationLookup.find(property);
+            final ResourcePath annotation = JacksonAnnotationLookup.find(property, ResourcePath.class);
             if (annotation == null) {
                 continue;
             }

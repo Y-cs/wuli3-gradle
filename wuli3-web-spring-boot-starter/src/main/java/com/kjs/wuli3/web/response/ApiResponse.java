@@ -45,6 +45,6 @@ public record ApiResponse<T>(
             final ErrorCodeResolver errorCodeResolver,
             final @Nullable T data) {
         return new ApiResponse<>(
-                errorCodeResolver.resolver(errorCode), message, System.currentTimeMillis(), requestId, data);
+                errorCodeResolver.resolve(errorCode), message, System.currentTimeMillis(), requestId, data);
     }
 }

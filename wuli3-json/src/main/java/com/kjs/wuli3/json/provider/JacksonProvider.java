@@ -3,7 +3,6 @@ package com.kjs.wuli3.json.provider;
 import com.fasterxml.jackson.databind.cfg.ConfigFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -14,16 +13,15 @@ import java.util.stream.Stream;
  */
 public final class JacksonProvider {
 
-    private static final JsonMapper DEFAULT_OBJECT_MAPPER = JacksonProvider.createDefaultJsonMapper();
     private static final JsonMapperBaseAssembly JSON_MAPPER_BASE_ASSEMBLY = new JsonMapperBaseAssembly();
     private static final JsonMapperTimeAssembly JSON_MAPPER_TIME_ASSEMBLY = new JsonMapperTimeAssembly();
     private static final JsonMapperEnumAssembly JSON_MAPPER_ENUM_ASSEMBLY = new JsonMapperEnumAssembly();
+    private static final JsonMapper DEFAULT_OBJECT_MAPPER = JacksonProvider.createDefaultJsonMapper();
 
     private JacksonProvider() {}
 
     private static JsonMapper createDefaultJsonMapper() {
-        return JsonMapperFactory.standardJsonMapperFactory()
-                .create();
+        return JsonMapperFactory.standardJsonMapperFactory().create();
     }
 
     public static JsonMapper defaultJsonMapper() {
@@ -56,9 +54,7 @@ public final class JacksonProvider {
 
     public static ConfigFeature[] featuresToEnable() {
         return Stream.of(JSON_MAPPER_BASE_ASSEMBLY, JSON_MAPPER_TIME_ASSEMBLY, JSON_MAPPER_ENUM_ASSEMBLY)
-                .map(JsonMapperAssemblyChain::deserializationConfigs)
-                .flatMap(map -> map.entrySet()
-                        .stream())
+                .flatMap(JacksonProvider::configEntries)
                 .filter(e -> e.getValue() == FeatureState.ENABLED)
                 .map(Map.Entry::getKey)
                 .toArray(ConfigFeature[]::new);
@@ -66,12 +62,16 @@ public final class JacksonProvider {
 
     public static ConfigFeature[] featuresToDisabled() {
         return Stream.of(JSON_MAPPER_BASE_ASSEMBLY, JSON_MAPPER_TIME_ASSEMBLY, JSON_MAPPER_ENUM_ASSEMBLY)
-                .map(JsonMapperAssemblyChain::deserializationConfigs)
-                .flatMap(map -> map.entrySet()
-                        .stream())
+                .flatMap(JacksonProvider::configEntries)
                 .filter(e -> e.getValue() == FeatureState.DISABLED)
                 .map(Map.Entry::getKey)
                 .toArray(ConfigFeature[]::new);
     }
 
+    private static Stream<Map.Entry<? extends ConfigFeature, FeatureState>> configEntries(
+            final JsonMapperAssemblyChain assemblyChain) {
+        return Stream.concat(
+                assemblyChain.deserializationConfigs().entrySet().stream(),
+                assemblyChain.serializationConfigs().entrySet().stream());
+    }
 }

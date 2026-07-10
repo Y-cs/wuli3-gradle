@@ -1,7 +1,6 @@
 package com.kjs.wuli3.json.datatype.resource;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import java.io.Serial;
 import java.util.Objects;
 
@@ -20,5 +19,4 @@ public class ResourcePathModule extends SimpleModule {
         this.setSerializerModifier(new ResourcePathSerializerModifier(requiredResolver));
         this.setDeserializerModifier(new ResourcePathDeserializerModifier(requiredResolver));
     }
-
 }

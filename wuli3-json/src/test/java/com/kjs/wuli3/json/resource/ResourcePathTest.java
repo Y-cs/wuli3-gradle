@@ -5,16 +5,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kjs.wuli3.json.datatype.resource.DefaultResourcePathResolver;
 import com.kjs.wuli3.json.datatype.resource.ResourcePath;
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
-import com.kjs.wuli3.json.provider.JacksonProvider;
-import java.util.List;
+import com.kjs.wuli3.json.provider.JsonMapperFactory;
+import com.kjs.wuli3.json.provider.JsonMapperResourcePathAssembly;
 import org.junit.jupiter.api.Test;
 
 class ResourcePathTest {
     @Test
     void defaultResolverKeepsValueUnchanged() throws Exception {
-        final ObjectMapper objectMapper = JacksonProvider.webFactory(List.of()).create();
+        final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new DefaultResourcePathResolver());
         final DefaultSample sample = objectMapper.readValue("""
                         {"path":"https://static.example.com/files/demo.png"}
                         """, DefaultSample.class);
@@ -26,8 +27,7 @@ class ResourcePathTest {
 
     @Test
     void customResolverRestoresUrlAndResolvesPathOnRecordComponent() throws Exception {
-        final ObjectMapper objectMapper =
-                JacksonProvider.webFactory(List.of(new CdnResolver())).create();
+        final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new CdnResolver());
         final CdnSample sample = objectMapper.readValue("""
                         {"path":"https://static.example.com/files/demo.png"}
                         """, CdnSample.class);
@@ -39,8 +39,7 @@ class ResourcePathTest {
 
     @Test
     void customResolverKeepsBlankStringsAndExternalUrlsUnchanged() throws Exception {
-        final ObjectMapper objectMapper =
-                JacksonProvider.webFactory(List.of(new CdnResolver())).create();
+        final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new CdnResolver());
 
         assertThat(objectMapper.writeValueAsString(new CdnSample(" "))).contains("\"path\":\" \"");
         assertThat(objectMapper.readValue("""
@@ -52,17 +51,18 @@ class ResourcePathTest {
     }
 
     @Test
-    void unsupportedTypeFailsDuringMapping() {
-        final ObjectMapper objectMapper = JacksonProvider.webFactory(List.of()).create();
+    void unsupportedTypeDeserializesValueUnchanged() throws Exception {
+        final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new DefaultResourcePathResolver());
+        final UnsupportedSample sample = objectMapper.readValue("""
+                        {"path":"files/demo.png"}
+                        """, UnsupportedSample.class);
 
-        assertThatThrownBy(() -> objectMapper.writeValueAsString(new UnsupportedSample("files/demo.png")))
-                .isInstanceOf(JsonMappingException.class)
-                .hasMessageContaining("No ResourcePathResolver supports type: avatar");
+        assertThat(sample.path()).isEqualTo("files/demo.png");
     }
 
     @Test
     void nullResourcePathValueIsPreserved() throws Exception {
-        final ObjectMapper objectMapper = JacksonProvider.webFactory(List.of()).create();
+        final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new DefaultResourcePathResolver());
 
         assertThat(objectMapper.readValue("""
                         {"path":null}
@@ -70,9 +70,8 @@ class ResourcePathTest {
     }
 
     @Test
-    void noAnnotationWebFactoryStillAppliesResourcePathOnFields() throws Exception {
-        final ObjectMapper objectMapper = JacksonProvider.noAnnotationWebFactory(List.of(new CdnResolver()))
-                .create();
+    void resourcePathModuleAppliesResourcePathOnFields() throws Exception {
+        final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new CdnResolver());
         final MutableCdnSample sample = objectMapper.readValue("""
                         {"path":"https://static.example.com/files/demo.png"}
                         """, MutableCdnSample.class);
@@ -84,7 +83,7 @@ class ResourcePathTest {
 
     @Test
     void nonStringResourcePathFailsDuringMapping() {
-        final ObjectMapper objectMapper = JacksonProvider.webFactory(List.of()).create();
+        final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new DefaultResourcePathResolver());
 
         assertThatThrownBy(() -> objectMapper.writeValueAsString(new NonStringSample(1)))
                 .isInstanceOf(JsonMappingException.class)
@@ -102,6 +101,12 @@ class ResourcePathTest {
     static final class MutableCdnSample {
         @ResourcePath(type = CdnResolver.TYPE)
         public String path = "";
+    }
+
+    private static ObjectMapper resourcePathObjectMapper(final ResourcePathResolver resolver) {
+        return JsonMapperFactory.standardJsonMapperFactory()
+                .addAssemblyChain(new JsonMapperResourcePathAssembly(resolver))
+                .create();
     }
 
     public static final class CdnResolver implements ResourcePathResolver {

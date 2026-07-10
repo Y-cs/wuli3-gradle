@@ -3,7 +3,6 @@ package com.kjs.wuli3.json.provider;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-
 import java.util.Map;
 
 /**
@@ -11,10 +10,9 @@ import java.util.Map;
  */
 public interface JsonMapperAssemblyChain {
 
-
     void assemble(JsonMapper.Builder mapperBuilder);
 
-    default void featureConfigs(JsonMapper.Builder mapperBuilder){
+    default void featureConfigs(JsonMapper.Builder mapperBuilder) {
         deserializationConfigs().forEach((feature, state) -> {
             mapperBuilder.configure(feature, state == FeatureState.ENABLED);
         });
@@ -30,5 +28,4 @@ public interface JsonMapperAssemblyChain {
     default Map<SerializationFeature, FeatureState> serializationConfigs() {
         return Map.of();
     }
-
 }

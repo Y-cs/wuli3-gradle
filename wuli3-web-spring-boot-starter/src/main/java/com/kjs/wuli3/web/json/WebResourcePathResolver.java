@@ -37,9 +37,8 @@ public class WebResourcePathResolver implements ResourcePathResolver {
         if (domain == null || domain.isBlank() || path.isBlank() || WebResourcePathResolver.isAbsoluteUri(path)) {
             return path;
         }
-        return WebResourcePathResolver.trimTrailingSlashes(domain)
-                + "/"
-                + WebResourcePathResolver.trimLeadingSlashes(path);
+        return WebResourcePathResolver.trimTrailingSlashes(domain) + "/" +
+                WebResourcePathResolver.trimLeadingSlashes(path);
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.kjs.wuli3.json.provider;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-
 import java.util.Map;
 
 /**
@@ -11,12 +10,10 @@ import java.util.Map;
 public final class JsonMapperEnumAssembly implements JsonMapperAssemblyChain {
 
     @Override
-    public void assemble(final JsonMapper.Builder mapperBuilder) {
-    }
+    public void assemble(final JsonMapper.Builder mapperBuilder) {}
 
     @Override
     public Map<DeserializationFeature, FeatureState> deserializationConfigs() {
         return Map.of(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, FeatureState.ENABLED);
     }
-
 }

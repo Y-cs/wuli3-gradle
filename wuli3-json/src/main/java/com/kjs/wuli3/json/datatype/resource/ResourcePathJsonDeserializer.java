@@ -24,6 +24,9 @@ public final class ResourcePathJsonDeserializer extends JsonDeserializer<String>
         if (!p.hasToken(JsonToken.VALUE_STRING)) {
             return (String) ctxt.handleUnexpectedToken(String.class, p);
         }
-        return this.resolver.deserialize(this.resourcePath.type(), p.getValueAsString());
+        if (this.resolver.supports(this.resourcePath.type())) {
+            return this.resolver.deserialize(this.resourcePath.type(), p.getValueAsString());
+        }
+        return p.getValueAsString();
     }
 }

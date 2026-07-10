@@ -3,9 +3,12 @@ package com.kjs.wuli3.json.core;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.kjs.wuli3.json.provider.JacksonProvider;
+import com.kjs.wuli3.json.provider.JsonMapperFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -48,34 +51,23 @@ class JacksonProviderTest {
     }
 
     @Test
-    void noAnnotationObjectMapperIgnoresJacksonAnnotations() throws Exception {
-        final ObjectMapper objectMapper = JacksonProvider.createNoAnnotationObjectMapper();
-        final String json = objectMapper.writeValueAsString(new AnnotationSample("demo"));
-        final AnnotationSample sample = objectMapper.readValue("""
-                        {"alias":"demo"}
-                        """, AnnotationSample.class);
-
-        assertThat(json).contains("\"name\":\"demo\"");
-        assertThat(json).doesNotContain("alias");
-        assertThat(sample.name).isEmpty();
-    }
-
-    @Test
-    void createObjectMapperReturnsIndependentProjectMapper() throws Exception {
-        final JsonMapper first = JacksonProvider.createObjectMapper();
-        final JsonMapper second = JacksonProvider.createObjectMapper();
+    void standardJsonMapperFactoryReturnsIndependentProjectMappers() throws Exception {
+        final JsonMapper first = JsonMapperFactory.standardJsonMapperFactory().create();
+        final JsonMapper second = JsonMapperFactory.standardJsonMapperFactory().create();
 
         assertThat(first).isNotSameAs(second);
         assertThat(first.writeValueAsString(Sample.create())).contains("\"dateTime\":\"2026-06-22 10:30:05\"");
     }
 
     @Test
-    void baseFactoryReturnsIndependentProjectMappers() throws Exception {
-        final ObjectMapper first = JacksonProvider.baseFactory().create();
-        final ObjectMapper second = JacksonProvider.baseFactory().create();
-
-        assertThat(first).isNotSameAs(second);
-        assertThat(first.writeValueAsString(Sample.create())).contains("\"dateTime\":\"2026-06-22 10:30:05\"");
+    void featureExportsIncludeSerializationAndDeserializationConfigs() {
+        assertThat(JacksonProvider.featuresToEnable())
+                .contains(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+        assertThat(JacksonProvider.featuresToDisabled())
+                .contains(
+                        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                        SerializationFeature.FAIL_ON_EMPTY_BEANS,
+                        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Test

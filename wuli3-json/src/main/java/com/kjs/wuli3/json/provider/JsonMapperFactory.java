@@ -1,7 +1,6 @@
 package com.kjs.wuli3.json.provider;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,10 +27,9 @@ public final class JsonMapperFactory {
     }
 
     public static JsonMapperFactory standardJsonMapperFactory() {
-        return new JsonMapperFactory().addAssemblyChain(JacksonProvider.getJsonMapperBaseAssembly())
+        return new JsonMapperFactory()
+                .addAssemblyChain(JacksonProvider.getJsonMapperBaseAssembly())
                 .addAssemblyChain(JacksonProvider.getJsonMapperTimeAssembly())
                 .addAssemblyChain(JacksonProvider.getJsonMapperEnumAssembly());
     }
-
-
 }

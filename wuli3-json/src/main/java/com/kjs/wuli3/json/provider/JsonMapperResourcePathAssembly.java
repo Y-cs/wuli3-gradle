@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.kjs.wuli3.json.datatype.resource.ResourcePathModule;
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
-
 import java.util.Objects;
 
 /**

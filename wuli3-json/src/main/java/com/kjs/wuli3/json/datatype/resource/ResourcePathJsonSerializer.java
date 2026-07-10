@@ -29,7 +29,11 @@ public final class ResourcePathJsonSerializer extends JsonSerializer<Object> {
             return;
         }
         if (value instanceof String strValue) {
-            gen.writeString(this.resolver.serialize(this.resourcePath.type(), strValue));
+            if (this.resolver.supports(this.resourcePath.type())) {
+                gen.writeString(this.resolver.serialize(this.resourcePath.type(), strValue));
+            } else if (this.resourcePath.type().equals("default")) {
+                gen.writeString(strValue);
+            }
             return;
         }
         throw JsonMappingException.from(gen, "@ResourcePath can only be used on String values.");

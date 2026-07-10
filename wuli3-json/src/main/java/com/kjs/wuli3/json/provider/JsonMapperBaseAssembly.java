@@ -3,7 +3,6 @@ package com.kjs.wuli3.json.provider;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-
 import java.util.Map;
 
 /**
@@ -12,8 +11,7 @@ import java.util.Map;
 public final class JsonMapperBaseAssembly implements JsonMapperAssemblyChain {
 
     @Override
-    public void assemble(final JsonMapper.Builder mapperBuilder) {
-    }
+    public void assemble(final JsonMapper.Builder mapperBuilder) {}
 
     @Override
     public Map<DeserializationFeature, FeatureState> deserializationConfigs() {
@@ -22,8 +20,10 @@ public final class JsonMapperBaseAssembly implements JsonMapperAssemblyChain {
 
     @Override
     public Map<SerializationFeature, FeatureState> serializationConfigs() {
-        return Map.of(SerializationFeature.FAIL_ON_EMPTY_BEANS, FeatureState.DISABLED,
-                SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, FeatureState.DISABLED);
+        return Map.of(
+                SerializationFeature.FAIL_ON_EMPTY_BEANS,
+                FeatureState.DISABLED,
+                SerializationFeature.WRITE_DATES_AS_TIMESTAMPS,
+                FeatureState.DISABLED);
     }
-
 }

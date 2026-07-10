@@ -1,4 +1,4 @@
-package com.kjs.wuli3.json;
+package com.kjs.wuli3.json.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

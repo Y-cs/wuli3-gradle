@@ -1,10 +1,11 @@
-package com.kjs.wuli3.json;
+package com.kjs.wuli3.json.core;
 
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.kjs.wuli3.json.provider.JacksonProvider;
 
 /**
  * JSON tree utilities for code that needs Jackson tree-model access instead of direct value binding.
@@ -21,11 +22,11 @@ public final class JsonTrees {
     }
 
     public static ObjectNode createObjectNode() {
-        return JacksonProvider.defaultObjectMapper().createObjectNode();
+        return JacksonProvider.defaultJsonMapper().createObjectNode();
     }
 
     public static ArrayNode createArrayNode() {
-        return JacksonProvider.defaultObjectMapper().createArrayNode();
+        return JacksonProvider.defaultJsonMapper().createArrayNode();
     }
 
     public static JsonNode valueToTree(final Object value) {

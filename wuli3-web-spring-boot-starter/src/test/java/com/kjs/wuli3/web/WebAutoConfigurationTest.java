@@ -11,6 +11,8 @@ import com.kjs.wuli3.core.error.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.ErrorVisibility;
 import com.kjs.wuli3.core.error.SystemErrors;
+import com.kjs.wuli3.json.datatype.resource.ResourcePath;
+import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
@@ -32,9 +34,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +124,20 @@ class WebAutoConfigurationTest {
         mockMvc.perform(get("/context").header(RequestIds.HEADER_NAME, "rid-context"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.requestId").value("rid-context"));
+    }
+
+    @Test
+    void webObjectMapperUsesResourcePathResolverBean() throws Exception {
+        mockMvc.perform(get("/resource"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.path").value("https://static.example.com/files/demo.png"));
+    }
+
+    @Test
+    void webObjectMapperUsesBaseJsonConfiguration() throws Exception {
+        mockMvc.perform(get("/json-time"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.dateTime").value("2026-06-22 10:30:05"));
     }
 
     @Test
@@ -323,6 +342,11 @@ class WebAutoConfigurationTest {
         FailingErrorAlertNotifier failingErrorAlertNotifier() {
             return new FailingErrorAlertNotifier();
         }
+
+        @Bean
+        TestResourcePathResolver testResourcePathResolver() {
+            return new TestResourcePathResolver();
+        }
     }
 
     static final class TestErrorAlertNotifier implements ErrorAlertNotifier {
@@ -437,6 +461,16 @@ class WebAutoConfigurationTest {
             return ApiResponse.success("wrapped", null);
         }
 
+        @GetMapping("/resource")
+        ResourceView resource() {
+            return new ResourceView("/files/demo.png");
+        }
+
+        @GetMapping("/json-time")
+        TimeView jsonTime() {
+            return new TimeView(LocalDateTime.of(2026, 6, 22, 10, 30, 5));
+        }
+
         @GetMapping("/entity")
         ResponseEntity<ContextView> entity() {
             return ResponseEntity.status(201).header("X-Custom", "yes").body(new ContextView("entity"));
@@ -513,5 +547,31 @@ class WebAutoConfigurationTest {
 
     record BodyView(String first, String second) {}
 
+    record ResourceView(
+            @ResourcePath(type = TestResourcePathResolver.TYPE)
+            String path) {}
+
+    record TimeView(LocalDateTime dateTime) {}
+
     record ValidatedRequest(@NotBlank(message = "不能为空") String name) {}
+
+    static final class TestResourcePathResolver implements ResourcePathResolver {
+        static final String TYPE = "web-test";
+        private static final String DOMAIN = "https://static.example.com";
+
+        @Override
+        public boolean supports(final @NonNull String type) {
+            return TestResourcePathResolver.TYPE.equals(type);
+        }
+
+        @Override
+        public String serialize(final String type, final String path) {
+            return TestResourcePathResolver.DOMAIN + path;
+        }
+
+        @Override
+        public String deserialize(final String type, final String url) {
+            return url.substring(TestResourcePathResolver.DOMAIN.length());
+        }
+    }
 }

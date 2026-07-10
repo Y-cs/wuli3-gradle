@@ -1,4 +1,4 @@
-package com.kjs.wuli3.json;
+package com.kjs.wuli3.json.core;
 
 import com.kjs.wuli3.core.error.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorModule;

@@ -1,0 +1,29 @@
+package com.kjs.wuli3.json.datatype.resource;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import java.io.IOException;
+import java.util.Objects;
+
+/**
+ * Jackson deserializer backing {@link ResourcePath}.
+ */
+public final class ResourcePathJsonDeserializer extends JsonDeserializer<String> {
+    private final ResourcePathResolver resolver;
+    private final ResourcePath resourcePath;
+
+    public ResourcePathJsonDeserializer(final ResourcePathResolver resolver, final ResourcePath resourcePath) {
+        this.resolver = Objects.requireNonNull(resolver, "resolver");
+        this.resourcePath = Objects.requireNonNull(resourcePath, "resourcePath");
+    }
+
+    @Override
+    public String deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+        if (!p.hasToken(JsonToken.VALUE_STRING)) {
+            return (String) ctxt.handleUnexpectedToken(String.class, p);
+        }
+        return this.resolver.deserialize(this.resourcePath.type(), p.getValueAsString());
+    }
+}

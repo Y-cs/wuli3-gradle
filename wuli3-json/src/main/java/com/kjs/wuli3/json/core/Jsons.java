@@ -1,14 +1,15 @@
-package com.kjs.wuli3.json;
+package com.kjs.wuli3.json.core;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.json.provider.JacksonProvider;
 
 /**
  * Project-level JSON utility facade backed by the standard Jackson {@link ObjectMapper}.
  */
 public final class Jsons {
-    private static final ObjectMapper OBJECT_MAPPER = JacksonProvider.defaultObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JacksonProvider.defaultJsonMapper();
 
     private Jsons() {}
 

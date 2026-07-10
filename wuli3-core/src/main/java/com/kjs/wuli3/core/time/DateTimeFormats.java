@@ -1,5 +1,6 @@
 package com.kjs.wuli3.core.time;
 
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -8,6 +9,7 @@ import java.util.Locale;
  */
 public final class DateTimeFormats {
 
+    public static final ZoneId DEFAULT_ZONE_ID = ZoneId.of("Asia/Shanghai");
     public static final String DATE_PATTERN = "yyyy-MM-dd";
     public static final String TIME_PATTERN = "HH:mm:ss";
     public static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";

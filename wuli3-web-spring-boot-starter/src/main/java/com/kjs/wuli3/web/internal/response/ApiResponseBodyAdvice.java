@@ -1,6 +1,9 @@
 package com.kjs.wuli3.web.internal.response;
 
-import com.kjs.wuli3.json.Jsons;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.json.core.JsonErrors;
 import com.kjs.wuli3.web.config.properties.WebResponseProperties;
 import com.kjs.wuli3.web.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,11 +31,15 @@ public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
 
     private final ApiResponseFactory responseFactory;
     private final WebResponseProperties responseProperties;
+    private final ObjectMapper objectMapper;
 
     public ApiResponseBodyAdvice(
-            final ApiResponseFactory responseFactory, final WebResponseProperties responseProperties) {
+            final ApiResponseFactory responseFactory,
+            final WebResponseProperties responseProperties,
+            final ObjectMapper objectMapper) {
         this.responseFactory = responseFactory;
         this.responseProperties = responseProperties;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -70,9 +77,17 @@ public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         // String 返回值默认由 StringHttpMessageConverter 处理，需要提前序列化为 JSON 字符串。
         if (body instanceof String || StringHttpMessageConverter.class.isAssignableFrom(selectedConverterType)) {
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            return Jsons.toJson(this.responseFactory.success(body));
+            return this.toJson(this.responseFactory.success(body));
         }
         return this.responseFactory.success(body);
+    }
+
+    private String toJson(final Object body) {
+        try {
+            return this.objectMapper.writeValueAsString(body);
+        } catch (JsonProcessingException ex) {
+            throw new ErrorCodeException(JsonErrors.SERIALIZATION_FAILED, ex);
+        }
     }
 
     private static boolean shouldSkip(final ServerHttpResponse response) {

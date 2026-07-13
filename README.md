@@ -15,6 +15,8 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | `wuli3-web-spring-boot-starter` | Spring MVC 增强：统一响应、异常处理、MDC、请求 ID。 |
 | `wuli3-*-spring-boot-starter` | MySQL、Redis、RocketMQ、Elasticsearch、MongoDB starter 壳。 |
 
+`integration-tests/` 不是 Gradle 业务模块，而是用于验证发布产物能否被外部 Gradle/Maven 项目正确消费的独立测试工程。
+
 ## 质量门禁
 
 执行 `check` 会统一运行编译、测试和静态检测：
@@ -36,16 +38,46 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 ./gradlew test
 ./gradlew check
 ./gradlew clean check
-./gradlew :wuli3-dependencies:publishToMavenLocal
+./gradlew verifyBomConsumers
+./gradlew apiCompatibilityCheck
 ```
+
+## 发布与消费验证
+
+模块内部测试直接使用项目依赖，不能发现 POM、BOM、Gradle Module Metadata 或发布依赖声明错误。根任务
+`verifyBomConsumers` 通过两套隔离消费者验证真实发布结果：
+
+1. 将 BOM 和所有公共组件发布到 `build/temporary-maven-repository/`。
+2. 使用独立 Gradle user home 运行 `integration-tests/gradle-consumer`。
+3. 使用项目内 Maven settings 和独立本地仓库运行 `integration-tests/maven-consumer`。
+4. 验证消费者可以通过 BOM 无版本引入组件，并完成编译和最小运行测试。
+
+本地执行：
+
+```bash
+./gradlew verifyBomConsumers --warning-mode fail
+```
+
+CI 推荐执行顺序：
+
+```bash
+./gradlew --no-daemon clean check --continue
+./gradlew --no-daemon verifyBomConsumers apiCompatibilityCheck --warning-mode fail
+```
+
+CI 环境需要 JDK 21、Maven 和 Maven Central 网络访问。消费验证只使用构建目录中的临时 Maven 仓库，不需要正式仓库凭据。
+正式发布必须在消费验证成功后执行，发布凭据只从 CI secret 或环境变量注入。目录结构与扩展规则见
+[`integration-tests/README.md`](integration-tests/README.md)。
 
 ## Maven 项目使用 BOM
 
-先发布到本地 Maven 仓库：
+仅需在本机调试 BOM 时，可以发布到 Maven Local：
 
 ```bash
 ./gradlew :wuli3-dependencies:publishToMavenLocal
 ```
+
+该命令只发布 BOM，不代表所有组件均可被外部项目消费；完整发布链路应使用 `verifyBomConsumers` 验证。
 
 Maven 项目引入：
 

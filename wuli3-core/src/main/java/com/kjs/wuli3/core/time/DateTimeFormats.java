@@ -22,12 +22,12 @@ public final class DateTimeFormats {
             .withResolverStyle(ResolverStyle.STRICT);
     public static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern(DateTimeFormats.TIME_PATTERN, Locale.ROOT)
             .withResolverStyle(ResolverStyle.STRICT);
-    public static final DateTimeFormatter DATE_TIME =
-            DateTimeFormatter.ofPattern(DateTimeFormats.DATE_TIME_PATTERN, Locale.ROOT)
-                    .withResolverStyle(ResolverStyle.STRICT);
-    public static final DateTimeFormatter COMPACT_DATE =
-            DateTimeFormatter.ofPattern(DateTimeFormats.COMPACT_DATE_PATTERN, Locale.ROOT)
-                    .withResolverStyle(ResolverStyle.STRICT);
+    public static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern(
+                    DateTimeFormats.DATE_TIME_PATTERN, Locale.ROOT)
+            .withResolverStyle(ResolverStyle.STRICT);
+    public static final DateTimeFormatter COMPACT_DATE = DateTimeFormatter.ofPattern(
+                    DateTimeFormats.COMPACT_DATE_PATTERN, Locale.ROOT)
+            .withResolverStyle(ResolverStyle.STRICT);
 
     private DateTimeFormats() {}
 }

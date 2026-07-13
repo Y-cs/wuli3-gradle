@@ -30,9 +30,6 @@ public final class DefaultRequestIdResolver implements RequestIdResolver {
         if (this.valid(requestId)) {
             return requestId;
         }
-        if (this.properties.getInvalidRequestIdPolicy() == WebContextProperties.InvalidRequestIdPolicy.USE_AS_IS) {
-            return requestId;
-        }
         return DefaultRequestIdResolver.generate();
     }
 

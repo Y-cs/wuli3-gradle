@@ -51,13 +51,16 @@ class ResourcePathTest {
     }
 
     @Test
-    void unsupportedTypeDeserializesValueUnchanged() throws Exception {
+    void unsupportedTypeRoundTripsValueUnchanged() throws Exception {
         final ObjectMapper objectMapper = ResourcePathTest.resourcePathObjectMapper(new DefaultResourcePathResolver());
         final UnsupportedSample sample = objectMapper.readValue("""
                         {"path":"files/demo.png"}
                         """, UnsupportedSample.class);
 
         assertThat(sample.path()).isEqualTo("files/demo.png");
+        final String json = objectMapper.writeValueAsString(sample);
+        assertThat(json).isEqualTo("{\"path\":\"files/demo.png\"}");
+        assertThat(objectMapper.readTree(json).get("path").textValue()).isEqualTo("files/demo.png");
     }
 
     @Test

@@ -22,6 +22,7 @@ class JavaConventionsPlugin : Plugin<Project> {
             pluginManager.apply("java-library")
             pluginManager.apply("jacoco")
             pluginManager.apply("com.kjs.wuli3.quality-conventions")
+            pluginManager.apply("com.kjs.wuli3.publishing-conventions")
 
             val javaVersion = intProperty(
                 ConventionProperties.JAVA_VERSION,
@@ -87,6 +88,7 @@ class JavaConventionsPlugin : Plugin<Project> {
             }
 
             tasks.named("check").configure {
+                dependsOn(tasks.withType<JacocoReport>())
                 dependsOn(tasks.withType<JacocoCoverageVerification>())
             }
 
@@ -113,7 +115,7 @@ class JavaConventionsPlugin : Plugin<Project> {
                 ConventionProperties.PROJECT_BOM_PATH,
                 ConventionProperties.DEFAULT_PROJECT_BOM_PATH,
             )
-            return project(projectBomPath)
+            return dependencies.project(mapOf("path" to projectBomPath))
         }
 
         return stringProperty(

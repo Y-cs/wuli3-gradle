@@ -10,7 +10,6 @@ import com.kjs.wuli3.core.error.ErrorSeverity;
 import com.kjs.wuli3.web.config.properties.ApplicationServiceProperties;
 import java.util.Locale;
 import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Formats external web error codes as SERVICE.MODULE.ERROR_NAME.
@@ -23,7 +22,7 @@ public class WebErrorCodeResolver implements ErrorCodeResolver {
         this.serviceCode = Optional.of(applicationServiceProperties)
                 .map(ApplicationServiceProperties::getServiceCode)
                 .map(String::trim)
-                .filter(StringUtils::isNotBlank)
+                .filter(value -> !value.isBlank())
                 .map(value -> value.toUpperCase(Locale.ROOT))
                 .orElse("");
     }
@@ -33,7 +32,7 @@ public class WebErrorCodeResolver implements ErrorCodeResolver {
         final ErrorModule errorModule = ErrorMetadataParser.instance().getErrorModule(errorCode);
         return Optional.of(errorModule)
                 .map(ErrorModule::value)
-                .filter(StringUtils::isNotBlank)
+                .filter(value -> !value.isBlank())
                 .map(String::trim)
                 .map(moduleName -> this.prefix() + moduleName + "." + errorCode.getName())
                 .map(v -> v.toUpperCase(Locale.ROOT))

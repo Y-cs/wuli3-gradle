@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.kjs.wuli3.json.provider.JacksonProvider;
@@ -16,8 +15,8 @@ import org.junit.jupiter.api.Test;
 
 class JacksonProviderTest {
     @Test
-    void defaultJsonMapperSerializesJavaTimeWithProjectFormats() throws Exception {
-        final String json = JacksonProvider.defaultJsonMapper().writeValueAsString(Sample.create());
+    void newJsonMapperSerializesJavaTimeWithProjectFormats() throws Exception {
+        final String json = JacksonProvider.newJsonMapper().writeValueAsString(Sample.create());
 
         assertThat(json)
                 .contains("\"date\":\"2026-06-22\"")
@@ -26,8 +25,8 @@ class JacksonProviderTest {
     }
 
     @Test
-    void defaultJsonMapperDeserializesJavaTimeWithProjectFormats() throws Exception {
-        final Sample sample = JacksonProvider.defaultJsonMapper().readValue("""
+    void newJsonMapperDeserializesJavaTimeWithProjectFormats() throws Exception {
+        final Sample sample = JacksonProvider.newJsonMapper().readValue("""
                         {"name":"demo","date":"2026-06-22","time":"10:30:05","dateTime":"2026-06-22 10:30:05"}
                         """, Sample.class);
 
@@ -35,8 +34,8 @@ class JacksonProviderTest {
     }
 
     @Test
-    void defaultJsonMapperMapsUnknownEnumValuesToNull() throws Exception {
-        final EnumSample sample = JacksonProvider.defaultJsonMapper().readValue("""
+    void newJsonMapperMapsUnknownEnumValuesToNull() throws Exception {
+        final EnumSample sample = JacksonProvider.newJsonMapper().readValue("""
                         {"status":"REMOVED"}
                         """, EnumSample.class);
 
@@ -44,8 +43,8 @@ class JacksonProviderTest {
     }
 
     @Test
-    void defaultJsonMapperHonorsJacksonAnnotations() throws Exception {
-        final String json = JacksonProvider.defaultJsonMapper().writeValueAsString(new AnnotationSample("demo"));
+    void newJsonMapperHonorsJacksonAnnotations() throws Exception {
+        final String json = JacksonProvider.newJsonMapper().writeValueAsString(new AnnotationSample("demo"));
 
         assertThat(json).contains("\"alias\":\"demo\"");
     }
@@ -71,11 +70,13 @@ class JacksonProviderTest {
     }
 
     @Test
-    void defaultJsonMapperIsShared() {
-        final ObjectMapper first = JacksonProvider.defaultJsonMapper();
-        final ObjectMapper second = JacksonProvider.defaultJsonMapper();
+    void newJsonMapperReturnsIndependentInstances() {
+        final JsonMapper first = JacksonProvider.newJsonMapper();
+        final JsonMapper second = JacksonProvider.newJsonMapper();
 
-        assertThat(first).isSameAs(second);
+        assertThat(first).isNotSameAs(second);
+        first.enable(SerializationFeature.INDENT_OUTPUT);
+        assertThat(second.isEnabled(SerializationFeature.INDENT_OUTPUT)).isFalse();
     }
 
     record Sample(String name, LocalDate date, LocalTime time, LocalDateTime dateTime) {

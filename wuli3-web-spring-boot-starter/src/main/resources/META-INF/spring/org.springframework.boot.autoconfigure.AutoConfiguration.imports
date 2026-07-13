@@ -1,1 +1,4 @@
-com.kjs.wuli3.web.autoconfigure.WebAutoConfiguration
+com.kjs.wuli3.web.autoconfigure.WebContextAutoConfiguration
+com.kjs.wuli3.web.autoconfigure.WebJsonAutoConfiguration
+com.kjs.wuli3.web.autoconfigure.WebErrorAutoConfiguration
+com.kjs.wuli3.web.autoconfigure.WebResponseAutoConfiguration

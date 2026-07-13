@@ -1,9 +1,12 @@
 package com.kjs.wuli3.web.config.properties;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import java.util.Map;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * WebJsonResourcePathProperties
@@ -13,8 +16,9 @@ import java.util.Map;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "wuli3.web.json.resource")
+@Validated
 public class WebJsonResourcePathProperties {
 
-    private Map<String, String> path = Map.of();
-
+    @NotNull
+    private Map<@NotBlank String, @NotBlank String> path = Map.of();
 }

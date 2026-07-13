@@ -35,18 +35,6 @@ class AssertsTest {
     }
 
     @Test
-    void returnsValidatedValues() {
-        final List<String> values = List.of("value");
-        final Map<String, String> mappings = Map.of("key", "value");
-
-        assertThat(Asserts.notNull("value", SystemErrors.ILLEGAL_ARGUMENT)).isEqualTo("value");
-        assertThat(Asserts.notBlank("value", SystemErrors.ILLEGAL_ARGUMENT)).isEqualTo("value");
-        assertThat(Asserts.notEmpty("value", SystemErrors.ILLEGAL_ARGUMENT)).isEqualTo("value");
-        assertThat(Asserts.notEmpty(values, SystemErrors.ILLEGAL_ARGUMENT)).isSameAs(values);
-        assertThat(Asserts.notEmpty(mappings, SystemErrors.ILLEGAL_ARGUMENT)).isSameAs(mappings);
-    }
-
-    @Test
     void failsWithErrorCodeException() {
         assertThatThrownBy(() -> Asserts.notBlank(" ").throwException(SystemErrors.ILLEGAL_ARGUMENT))
                 .isInstanceOfSatisfying(

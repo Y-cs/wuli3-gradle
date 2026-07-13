@@ -3,6 +3,7 @@ package com.kjs.wuli3.web.config.properties;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Web 统一响应处理配置。
@@ -10,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "wuli3.web.response")
+@Validated
 public class WebResponseProperties {
 
     /**

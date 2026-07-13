@@ -34,6 +34,10 @@ gradlePlugin {
             id = "com.kjs.wuli3.spring-conventions"
             implementationClass = "com.kjs.wuli3.SpringConventionsPlugin"
         }
+        register("publishingConventions") {
+            id = "com.kjs.wuli3.publishing-conventions"
+            implementationClass = "com.kjs.wuli3.PublishingConventionsPlugin"
+        }
     }
 }
 

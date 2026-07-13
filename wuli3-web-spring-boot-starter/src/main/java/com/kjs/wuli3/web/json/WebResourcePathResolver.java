@@ -2,12 +2,11 @@ package com.kjs.wuli3.web.json;
 
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import com.kjs.wuli3.web.config.properties.WebJsonResourcePathProperties;
-import org.jspecify.annotations.NullMarked;
-
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * WebResourcePathResolver
@@ -20,8 +19,8 @@ public class WebResourcePathResolver implements ResourcePathResolver {
     private final Map<String, String> pathTypeMap;
 
     public WebResourcePathResolver(final WebJsonResourcePathProperties properties) {
-        this.pathTypeMap = Optional.ofNullable(Objects.requireNonNull(properties, "properties")
-                        .getPath())
+        this.pathTypeMap = Optional.ofNullable(
+                        Objects.requireNonNull(properties, "properties").getPath())
                 .map(Map::copyOf)
                 .orElse(Map.of());
     }
@@ -37,8 +36,8 @@ public class WebResourcePathResolver implements ResourcePathResolver {
         if (domain == null || domain.isBlank() || path.isBlank() || WebResourcePathResolver.isAbsoluteUri(path)) {
             return path;
         }
-        return WebResourcePathResolver.trimTrailingSlashes(domain) + "/" +
-                WebResourcePathResolver.trimLeadingSlashes(path);
+        return WebResourcePathResolver.trimTrailingSlashes(domain) + "/"
+                + WebResourcePathResolver.trimLeadingSlashes(path);
     }
 
     @Override
@@ -76,8 +75,7 @@ public class WebResourcePathResolver implements ResourcePathResolver {
             return true;
         }
         try {
-            return URI.create(value)
-                    .isAbsolute();
+            return URI.create(value).isAbsolute();
         } catch (final IllegalArgumentException ignored) {
             return false;
         }

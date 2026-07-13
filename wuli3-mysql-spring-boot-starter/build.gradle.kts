@@ -3,6 +3,5 @@ plugins {
 }
 
 dependencies {
-    api(project(":wuli3-core"))
     api("com.baomidou:mybatis-plus-spring-boot3-starter")
 }

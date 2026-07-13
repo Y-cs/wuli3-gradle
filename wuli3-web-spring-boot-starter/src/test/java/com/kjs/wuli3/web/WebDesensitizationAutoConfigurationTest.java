@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.kjs.wuli3.json.datatype.desensitization.DesensitizationStrategy;
 import com.kjs.wuli3.json.datatype.desensitization.DesensitizationTypes;
 import com.kjs.wuli3.json.datatype.desensitization.Desensitized;
-import com.kjs.wuli3.web.autoconfigure.WebAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootTest(
         classes = {
             WebDesensitizationAutoConfigurationTest.TestApplication.class,
-            WebAutoConfiguration.class,
             WebDesensitizationAutoConfigurationTest.ControllerConfiguration.class,
         })
 @AutoConfigureMockMvc

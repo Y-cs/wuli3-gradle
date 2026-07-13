@@ -15,7 +15,6 @@ import com.kjs.wuli3.core.error.SystemErrors;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
-import com.kjs.wuli3.web.autoconfigure.WebAutoConfiguration;
 import com.kjs.wuli3.web.context.RequestIds;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +44,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.response.wrapper-enabled=false")
@@ -67,7 +65,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.response.wrap-response-entity-body=false")
@@ -90,7 +87,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.response.success-message=success")
@@ -112,7 +108,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.response.exception-handler-enabled=false")
@@ -132,7 +127,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.context.request-id-max-length=5")
@@ -155,7 +149,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.context.accept-external-request-id=false")
@@ -178,7 +171,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.context.trusted-proxy-enabled=true")
@@ -205,7 +197,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             })
     @AutoConfigureMockMvc
@@ -231,7 +222,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.context.request-body-cache-enabled=false")
@@ -242,7 +232,7 @@ class WebResponsePropertiesTest {
         private MockMvc mockMvc;
 
         @Test
-        void bodyCacheCanBeDisabled() throws Exception {
+        void bodyCacheIsDisabledByDefault() throws Exception {
             mockMvc.perform(post("/body").contentType(MediaType.TEXT_PLAIN).content("payload"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.data.first").value("payload"))
@@ -254,10 +244,12 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.max-cache-body-size=4B")
+            properties = {
+                "wuli3.web.context.request-body-cache-enabled=true",
+                "wuli3.web.context.max-cache-body-size=4B"
+            })
     @AutoConfigureMockMvc
     @Nested
     class BodyCacheLimitTest {
@@ -276,7 +268,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
             },
             properties = "wuli3.web.context.enabled=false")
@@ -300,7 +291,6 @@ class WebResponsePropertiesTest {
             webEnvironment = MOCK,
             classes = {
                 TestApplication.class,
-                WebAutoConfiguration.class,
                 ControllerConfiguration.class,
                 CustomStatusResolverConfiguration.class,
             })
@@ -314,7 +304,7 @@ class WebResponsePropertiesTest {
         void customStatusResolverCanOverrideDefaultStatus() throws Exception {
             mockMvc.perform(get("/boom"))
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.code").value("SYSTEM.ILLEGAL_ARGUMENT"));
+                    .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"));
         }
     }
 

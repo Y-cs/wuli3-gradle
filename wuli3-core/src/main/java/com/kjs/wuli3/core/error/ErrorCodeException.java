@@ -40,8 +40,8 @@ public class ErrorCodeException extends RuntimeException {
 
     public ErrorCodeException policy(final ErrorPolicyUpdater errorPolicyUpdater) {
         Objects.requireNonNull(errorPolicyUpdater, "errorPolicyUpdater");
-        this.resolvedErrorPolicy = Objects.requireNonNull(
-                errorPolicyUpdater.apply(this.resolvedErrorPolicy), "updated error policy");
+        this.resolvedErrorPolicy =
+                Objects.requireNonNull(errorPolicyUpdater.apply(this.resolvedErrorPolicy), "updated error policy");
         return this;
     }
 

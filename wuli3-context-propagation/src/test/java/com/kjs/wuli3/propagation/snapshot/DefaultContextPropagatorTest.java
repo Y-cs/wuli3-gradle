@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.Context;
+import com.kjs.wuli3.propagation.context.ContextKey;
 import com.kjs.wuli3.propagation.store.ContextContainer;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.util.concurrent.Callable;
@@ -11,6 +12,8 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 class DefaultContextPropagatorTest {
+
+    private static final ContextKey<String> TENANT_ID = new ContextKey<>("tenantId", String.class);
 
     private final ContextStore holder = new ContextStore();
     private final DefaultContextPropagator propagator = new DefaultContextPropagator(holder);
@@ -27,6 +30,23 @@ class DefaultContextPropagatorTest {
                     .map(AuthContext::getUserId)
                     .contains(1L);
         });
+    }
+
+    @Test
+    void captureCopiesMutableExtensionStructure() {
+        final AuthContext current = authContext(1L);
+        current.put(DefaultContextPropagatorTest.TENANT_ID, "tenant-1");
+        this.holder.put(current);
+        final ContextSnapshot snapshot = this.propagator.capture();
+
+        current.put(DefaultContextPropagatorTest.TENANT_ID, "tenant-2");
+
+        this.withRestored(
+                snapshot,
+                () -> assertThat(this.holder
+                                .get(AuthContext.class)
+                                .flatMap(context -> context.get(DefaultContextPropagatorTest.TENANT_ID)))
+                        .contains("tenant-1"));
     }
 
     @Test

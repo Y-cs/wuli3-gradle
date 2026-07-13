@@ -8,8 +8,8 @@
 
 1. 每个 PR 只处理一个可独立验证的目标，禁止顺手重构无关代码。
 2. 先写失败或契约测试，再修改实现；文档和迁移说明与行为变更同 PR 提交。
-3. 0.1.x 阶段保持源码和二进制兼容；安全默认值允许行为调整，但必须保留配置迁移路径并在发布说明中突出标记。
-4. 修改默认行为时保留显式配置恢复旧行为，并在发布说明中列出迁移方式。
+3. 本轮不保持源码、二进制或旧配置兼容，直接收敛到目标公共契约。
+4. 安全边界不提供恢复不安全旧行为的开关；破坏性变化集中记录在实施结果中。
 5. 每个 PR 至少执行影响模块的 `check`；阶段关口执行 `./gradlew clean check`。
 
 ## 2. 决策摘要
@@ -18,12 +18,12 @@
 | --- | --- | --- |
 | `Asserts` | 保留现有延迟抛错链式 API，删除漂移的返回值测试 | 不为修复构建临时增加五组重载 |
 | `ErrorCode` | 保留 enum-only 模型，补契约测试 | 没有动态错误码需求时不引入 registry |
-| JSON | 新增每次返回独立实例的 `JacksonProvider.newJsonMapper()`；共享入口先文档化、再弃用 | 不突然让 `defaultJsonMapper()` 返回 copy |
-| 上下文快照 | `Context` 增加默认 `snapshotCopy()`；容器复制逐项调用；可变内置上下文深度复制扩展 Map | 不强制所有第三方 Context 立即实现新抽象 |
+| JSON | 每次返回独立实例的 `JacksonProvider.newJsonMapper()`；删除共享可变入口 | 不保留可被外部修改的 Mapper |
+| 上下文快照 | `Context` 强制实现 `snapshotCopy()`；容器复制逐项调用；可变内置上下文复制扩展 Map 结构 | 不提供复用原实例的默认实现 |
 | 内存事件总线 | 固化“同一 publish 内并行提交、无顺序保证、失败由返回 stage 聚合、Executor 归调用方” | 当前不增加反注册、背压或 MQ 语义 |
 | 外部 requestId | 继续默认接受，但只接受现有受控字符集和长度；移除/禁用 `USE_AS_IS` 绕过路径 | 不因安全担忧直接破坏现有链路追踪 |
 | 请求体缓存 | 默认改为关闭；需要重复读取的应用显式开启，保留 1 MiB 上限 | 不让通用 starter 默认承担全量请求内存复制 |
-| Web 自动配置 | 先修 Bean 退让和配置校验，再按 JSON/Context/Response/Error 拆内部配置 | 不在行为未固化前同时重构结构和语义 |
+| Web 自动配置 | 修 Bean 退让和配置校验，按 JSON/Context/Response/Error 拆分 | 不保留旧总配置兼容门面 |
 | 聚合 starter | 0.1.x 保留 artifact，明确依赖聚合定位，删除无用 Core 依赖 | 不创建空泛 Repository/Client 抽象 |
 | 发布 | 公共 Java 组件统一发布；`build-logic` 保持独立发布；先临时仓库消费验证 | 不直接以本地 Maven 成功代替正式发布验证 |
 
@@ -201,11 +201,11 @@ flowchart TD
 
 **公共 API 与实现**：
 
-- 在 `Context` 增加默认 `Context snapshotCopy() { return this; }`；默认语义是“上下文不可变，可安全复用”。这是向接口增加 default 方法，不破坏已有实现类的加载；但它仍属于公共 API 增量，必须由 PR-15 的兼容报告建立基线。
+- 在 `Context` 增加强制 `Context snapshotCopy()` 契约，不提供默认实现；所有上下文必须明确声明快照复制语义，避免框架静默复用可变实例。
 - `ContextContainer.copy()` 不再仅复制 Map，而是对每个 value 调用 `snapshotCopy()`，仍以 `context.type()` 为 key 构造新容器。
 - `AbstractContext` 增加受保护的扩展快照/复制辅助方法，返回不可变 Map，并允许子类导入扩展副本；用 JDK `ConcurrentHashMap` 替换 Guava。
-- `InvocationContext`、`AuthContext` 和 `WebContext` 覆写 `snapshotCopy()`，创建字段等价的新对象并复制扩展 Map 结构；这里不是对任意扩展值做递归深拷贝。
-- Javadoc 明确：扩展值本身必须是不可变值；框架只复制扩展 Map，不递归克隆任意对象。自定义可变 `Context` 必须覆写 `snapshotCopy()`。
+- `InvocationContext`、`AuthContext` 和 `WebContext` 实现 `snapshotCopy()`，创建字段等价的新对象并复制扩展 Map 结构；这里不是对任意扩展值做递归深拷贝。
+- Javadoc 明确：扩展值本身必须是不可变值；框架只复制扩展 Map，不递归克隆任意对象。自定义 `Context` 必须实现 `snapshotCopy()`，可变实现必须返回独立副本。
 
 **测试矩阵**：
 

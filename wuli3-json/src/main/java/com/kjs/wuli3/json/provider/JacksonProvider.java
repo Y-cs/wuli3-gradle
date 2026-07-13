@@ -16,16 +16,12 @@ public final class JacksonProvider {
     private static final JsonMapperBaseAssembly JSON_MAPPER_BASE_ASSEMBLY = new JsonMapperBaseAssembly();
     private static final JsonMapperTimeAssembly JSON_MAPPER_TIME_ASSEMBLY = new JsonMapperTimeAssembly();
     private static final JsonMapperEnumAssembly JSON_MAPPER_ENUM_ASSEMBLY = new JsonMapperEnumAssembly();
-    private static final JsonMapper DEFAULT_OBJECT_MAPPER = JacksonProvider.createDefaultJsonMapper();
 
     private JacksonProvider() {}
 
-    private static JsonMapper createDefaultJsonMapper() {
+    /** Creates an independently owned mapper with the project-standard configuration. */
+    public static JsonMapper newJsonMapper() {
         return JsonMapperFactory.standardJsonMapperFactory().create();
-    }
-
-    public static JsonMapper defaultJsonMapper() {
-        return DEFAULT_OBJECT_MAPPER;
     }
 
     public static JavaTimeModule javaTimeModule() {

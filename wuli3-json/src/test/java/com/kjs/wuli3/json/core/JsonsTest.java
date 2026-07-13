@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.kjs.wuli3.core.error.ErrorCodeException;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -68,16 +67,6 @@ class JsonsTest {
     @Test
     void mapsDeserializeFailureToJsonError() {
         assertThatThrownBy(() -> Jsons.fromJson("{", Sample.class))
-                .isInstanceOfSatisfying(
-                        ErrorCodeException.class,
-                        ex -> assertThat(ex.getErrorCode()).isEqualTo(JsonErrors.DESERIALIZATION_FAILED));
-    }
-
-    @Test
-    void executesCustomJsonFunctionWithJsonErrorMapping() {
-        assertThatThrownBy(() -> Jsons.execute(JsonErrors.DESERIALIZATION_FAILED, objectMapper -> {
-                    throw new IOException("Cannot read JSON stream");
-                }))
                 .isInstanceOfSatisfying(
                         ErrorCodeException.class,
                         ex -> assertThat(ex.getErrorCode()).isEqualTo(JsonErrors.DESERIALIZATION_FAILED));

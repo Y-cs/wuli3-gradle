@@ -45,7 +45,7 @@ com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
 - `com.puppycrawl.tools:checkstyle:13.6.0`
 - `org.redisson:redisson-spring-boot-starter:4.6.1`
 - `com.google.guava:guava:33.6.0-jre`
-- `cn.hutool:hutool-all:5.8.46`
+- `cn.hutool:hutool-core:5.8.46`
 - `org.apache.commons:commons-lang3:3.20.0`
 - `org.apache.commons:commons-collections4:4.5.0`
 - `commons-io:commons-io:2.22.0`
@@ -97,7 +97,7 @@ dependencies {
 dependencies {
     implementation(platform(project(":wuli3-dependencies")))
 
-    implementation("cn.hutool:hutool-all")
+    implementation("cn.hutool:hutool-core")
     implementation("org.redisson:redisson-spring-boot-starter")
 }
 ```

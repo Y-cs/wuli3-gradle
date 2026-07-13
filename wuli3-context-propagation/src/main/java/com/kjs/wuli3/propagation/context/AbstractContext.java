@@ -1,9 +1,9 @@
 package com.kjs.wuli3.propagation.context;
 
-import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * AbstractContext
@@ -12,18 +12,31 @@ import java.util.Optional;
  */
 public abstract class AbstractContext implements ExtendableContext {
 
-    private final Map<ContextKey<?>, Object> extensions = Maps.newConcurrentMap();
+    private final Map<ContextKey<?>, Object> extensions;
 
-    @Override
-    public <T> void put(ContextKey<T> key, T value) {
-        Objects.requireNonNull(key, "key");
-        extensions.put(key, value);
+    protected AbstractContext() {
+        this.extensions = new ConcurrentHashMap<>();
+    }
+
+    protected AbstractContext(final Map<ContextKey<?>, Object> extensions) {
+        this.extensions = new ConcurrentHashMap<>(Objects.requireNonNull(extensions, "extensions"));
     }
 
     @Override
-    public <T> Optional<T> get(ContextKey<T> key) {
+    public <T> void put(final ContextKey<T> key, final T value) {
         Objects.requireNonNull(key, "key");
-        Class<T> type = key.type();
-        return Optional.ofNullable(type.cast(extensions.get(key)));
+        this.extensions.put(key, Objects.requireNonNull(value, "value"));
+    }
+
+    @Override
+    public <T> Optional<T> get(final ContextKey<T> key) {
+        Objects.requireNonNull(key, "key");
+        final Class<T> type = key.type();
+        return Optional.ofNullable(type.cast(this.extensions.get(key)));
+    }
+
+    /** Returns a structural copy of extension entries; extension values themselves must be immutable. */
+    protected final Map<ContextKey<?>, Object> extensionSnapshot() {
+        return Map.copyOf(this.extensions);
     }
 }

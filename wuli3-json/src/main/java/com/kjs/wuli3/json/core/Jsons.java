@@ -9,7 +9,7 @@ import com.kjs.wuli3.json.provider.JacksonProvider;
  * Project-level JSON utility facade backed by the standard Jackson {@link ObjectMapper}.
  */
 public final class Jsons {
-    private static final ObjectMapper OBJECT_MAPPER = JacksonProvider.defaultJsonMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JacksonProvider.newJsonMapper();
 
     private Jsons() {}
 
@@ -42,7 +42,7 @@ public final class Jsons {
     /**
      * Executes a custom Jackson operation and maps checked failures to the project JSON error model.
      */
-    public static <T> T execute(final JsonErrors error, final JsonFunction<T> function) {
+    static <T> T execute(final JsonErrors error, final JsonFunction<T> function) {
         try {
             return function.apply(Jsons.OBJECT_MAPPER);
         } catch (ErrorCodeException ex) {

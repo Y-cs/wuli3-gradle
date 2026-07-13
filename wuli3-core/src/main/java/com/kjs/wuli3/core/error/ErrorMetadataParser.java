@@ -38,7 +38,8 @@ public final class ErrorMetadataParser {
     public ResolvedErrorPolicy getErrorPolicy(final ErrorCode errorCode) {
         ErrorMetadataParser.enumValue(errorCode);
         return this.policyCache.computeIfAbsent(errorCode, code -> {
-            final Optional<ErrorPolicy> fieldPolicy = ErrorMetadataParser.fieldPolicy(ErrorMetadataParser.enumValue(code));
+            final Optional<ErrorPolicy> fieldPolicy =
+                    ErrorMetadataParser.fieldPolicy(ErrorMetadataParser.enumValue(code));
             if (fieldPolicy.isPresent()) {
                 return ResolvedErrorPolicy.from(fieldPolicy.get());
             }

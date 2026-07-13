@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.kjs.wuli3.json.datatype.resource.ResourcePath;
 import com.kjs.wuli3.json.internal.JacksonAnnotationLookup;
-
 import java.io.Serial;
 import java.util.List;
 import java.util.Objects;

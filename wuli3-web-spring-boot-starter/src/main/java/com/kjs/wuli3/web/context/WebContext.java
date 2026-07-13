@@ -2,6 +2,7 @@ package com.kjs.wuli3.web.context;
 
 import com.kjs.wuli3.propagation.context.AbstractContext;
 import com.kjs.wuli3.propagation.context.Context;
+import com.kjs.wuli3.propagation.context.ContextKey;
 import com.kjs.wuli3.propagation.context.LocalContext;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public final class WebContext extends AbstractContext implements LocalContext {
     private final @Nullable String queryString;
 
     private WebContext(
+            final Map<ContextKey<?>, Object> extensions,
             final String requestId,
             final Map<String, List<String>> headers,
             final Map<String, List<String>> parameters,
@@ -42,6 +44,7 @@ public final class WebContext extends AbstractContext implements LocalContext {
             final String requestUrl,
             final String method,
             final @Nullable String queryString) {
+        super(extensions);
         this.requestId = requestId;
         this.headers = WebContext.immutableValues(headers);
         this.parameters = WebContext.immutableValues(parameters);
@@ -55,6 +58,7 @@ public final class WebContext extends AbstractContext implements LocalContext {
 
     public static WebContext from(final HttpServletRequest request, final String requestId) {
         return new WebContext(
+                Map.of(),
                 requestId,
                 WebContext.headers(request),
                 WebContext.parameters(request),
@@ -64,6 +68,21 @@ public final class WebContext extends AbstractContext implements LocalContext {
                 request.getRequestURL().toString(),
                 request.getMethod(),
                 request.getQueryString());
+    }
+
+    @Override
+    public Context snapshotCopy() {
+        return new WebContext(
+                this.extensionSnapshot(),
+                this.requestId,
+                this.headers,
+                this.parameters,
+                this.locale,
+                this.remoteAddr,
+                this.requestUri,
+                this.requestUrl,
+                this.method,
+                this.queryString);
     }
 
     public Optional<String> header(final String name) {

@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 class InMemoryEventBusTest {
     @Test
     void publishesToRegisteredHandler() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        InMemoryEventBus bus = new InMemoryEventBus(executor);
-        AtomicInteger count = new AtomicInteger();
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final InMemoryEventBus bus = new InMemoryEventBus(executor);
+        final AtomicInteger count = new AtomicInteger();
         bus.register(DomainEvent.class, event -> count.incrementAndGet());
 
         bus.publish(BasicDomainEvent.create("created", "1", "Order"))
@@ -28,8 +28,8 @@ class InMemoryEventBusTest {
 
     @Test
     void propagatesHandlerFailure() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        InMemoryEventBus bus = new InMemoryEventBus(executor);
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final InMemoryEventBus bus = new InMemoryEventBus(executor);
         bus.register(DomainEvent.class, event -> {
             throw new IllegalStateException("failed");
         });
@@ -38,6 +38,33 @@ class InMemoryEventBusTest {
                         .toCompletableFuture()
                         .join())
                 .hasRootCauseMessage("failed");
+        executor.shutdown();
+    }
+
+    @Test
+    void repeatedAndAssignableRegistrationsEachReceiveEvent() {
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        final InMemoryEventBus bus = new InMemoryEventBus(executor);
+        final AtomicInteger count = new AtomicInteger();
+        bus.register(DomainEvent.class, event -> count.incrementAndGet());
+        bus.register(DomainEvent.class, event -> count.incrementAndGet());
+
+        bus.publish(BasicDomainEvent.create("created", "1", "Order"))
+                .toCompletableFuture()
+                .join();
+        executor.shutdown();
+
+        assertThat(count).hasValue(2);
+    }
+
+    @Test
+    void noHandlerCompletesSuccessfully() {
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final InMemoryEventBus bus = new InMemoryEventBus(executor);
+
+        bus.publish(BasicDomainEvent.create("created", "1", "Order"))
+                .toCompletableFuture()
+                .join();
         executor.shutdown();
     }
 }

@@ -2,9 +2,9 @@
 
 ## 文档目的
 
-本组文档基于 2026-07-10 的当前工作区，系统说明项目的实现方式、设计边界、已确认风险和后续方向。主要读者是项目维护者、架构负责人、starter 开发者及业务接入团队。
+本组文档以 2026-07-10 的分析基线为起点，系统说明项目的实现方式、设计边界、已确认风险、修复过程和后续方向。主要读者是项目维护者、架构负责人、starter 开发者及业务接入团队。
 
-文档只描述和评估当前代码，不表示其中建议已经实施。公共 API、配置和模块行为仍以源码与发布版本为准。
+01-05 记录修复前的事实与判断，06 是实施计划，07 记录当前完成状态。公共 API、配置和模块行为仍以源码与发布版本为准。
 
 ## 推荐阅读顺序
 
@@ -14,17 +14,17 @@
 4. [分阶段演进路线](04-evolution-roadmap.md)：从恢复基线到生产能力扩展的阶段顺序。
 5. [可执行行动清单](05-action-checklist.md)：可以直接拆成 Issue/提交的实施步骤和验收方式。
 6. [问题修复实施计划](06-remediation-plan.md)：锁定方案、PR 依赖顺序、兼容策略、测试矩阵与阶段关口。
+7. [修复实施结果](07-remediation-result.md)：本轮实际完成项、破坏性变化、验收接口和剩余发布前置。
 
 ## 核心结论
 
 - 项目已形成“纯 Java 公共语义 -> JSON/上下文/事件机制 -> Spring Web 适配”的合理依赖主干。
 - Core 的错误策略、半开时间区间、最小 ID/Clock 端口，以及上下文的协议无关 carrier/codec 值得保留。
-- 当前最高优先级是恢复失败的全量 `check`，而不是继续增加基础工具或 starter 功能。
-- 当前还存在一个确定性 JSON 缺陷：未知 `@ResourcePath` type 会漏写值并生成非法 JSON，已在修复计划中列为 F-18/P0。
-- `ErrorCode` 的接口承诺、共享可变 `JsonMapper`、上下文浅复制和事件总线未声明语义是近期公共契约治理重点。
-- Web starter 已有真实且较完整能力，但请求体缓存、外部 requestId 等默认策略需要更严格的资源与信任边界。
+- 全量 `clean check` 已恢复，未知 `@ResourcePath` type 序列化缺陷已修复，JaCoCo 报告和覆盖率门禁已并入 `check`。
+- 共享可变 `JsonMapper` 入口已删除，上下文快照和内存事件总线语义已形成显式公共契约。
+- Web starter 已收紧请求体缓存和外部 requestId 默认策略，并按 JSON、Context、Error、Response 拆分自动配置边界。
 - MySQL、Redis、RocketMQ、Elasticsearch、MongoDB 模块当前是依赖聚合/占位 starter，不应被描述为已有项目级增强。
-- 当前只有 BOM 具备 Maven publication；组件发布、独立消费验证和 API 兼容检查尚未形成闭环。
+- BOM 与 11 个 Java 组件已具备统一 publication，并通过隔离 Gradle/Maven consumer 验证；真实 API/ABI 对比仍需首次正式发布版本作为 baseline。
 
 ## 优先级
 

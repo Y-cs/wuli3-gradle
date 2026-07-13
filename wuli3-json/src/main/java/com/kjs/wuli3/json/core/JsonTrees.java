@@ -4,13 +4,15 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.kjs.wuli3.json.provider.JacksonProvider;
 
 /**
  * JSON tree utilities for code that needs Jackson tree-model access instead of direct value binding.
  */
 public final class JsonTrees {
+    private static final JsonNodeFactory NODE_FACTORY = JsonNodeFactory.instance;
+
     private JsonTrees() {}
 
     public static JsonNode readTree(final String json) {
@@ -22,11 +24,11 @@ public final class JsonTrees {
     }
 
     public static ObjectNode createObjectNode() {
-        return JacksonProvider.defaultJsonMapper().createObjectNode();
+        return JsonTrees.NODE_FACTORY.objectNode();
     }
 
     public static ArrayNode createArrayNode() {
-        return JacksonProvider.defaultJsonMapper().createArrayNode();
+        return JsonTrees.NODE_FACTORY.arrayNode();
     }
 
     public static JsonNode valueToTree(final Object value) {

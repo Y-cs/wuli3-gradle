@@ -22,7 +22,10 @@ import com.kjs.wuli3.propagation.transmission.ContextTransmitter;
 import com.kjs.wuli3.web.annotation.NativeResponse;
 import com.kjs.wuli3.web.annotation.NativeResponseMode;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
-import com.kjs.wuli3.web.autoconfigure.WebAutoConfiguration;
+import com.kjs.wuli3.web.autoconfigure.WebContextAutoConfiguration;
+import com.kjs.wuli3.web.autoconfigure.WebErrorAutoConfiguration;
+import com.kjs.wuli3.web.autoconfigure.WebJsonAutoConfiguration;
+import com.kjs.wuli3.web.autoconfigure.WebResponseAutoConfiguration;
 import com.kjs.wuli3.web.context.RequestIds;
 import com.kjs.wuli3.web.context.WebContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertContext;
@@ -38,7 +41,6 @@ import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -63,9 +65,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootTest(
+        properties = "wuli3.web.context.request-body-cache-enabled=true",
         classes = {
             WebAutoConfigurationTest.TestApplication.class,
-            WebAutoConfiguration.class,
             WebAutoConfigurationTest.ControllerConfiguration.class,
         })
 @AutoConfigureMockMvc
@@ -94,7 +96,11 @@ class WebAutoConfigurationTest {
     void autoConfigurationIsListedInBootImports() {
         assertThat(ImportCandidates.load(
                         AutoConfiguration.class, this.getClass().getClassLoader()))
-                .contains(WebAutoConfiguration.class.getName());
+                .contains(
+                        WebContextAutoConfiguration.class.getName(),
+                        WebJsonAutoConfiguration.class.getName(),
+                        WebErrorAutoConfiguration.class.getName(),
+                        WebResponseAutoConfiguration.class.getName());
     }
 
     @Test
@@ -128,6 +134,8 @@ class WebAutoConfigurationTest {
 
     @Test
     void webObjectMapperUsesResourcePathResolverBean() throws Exception {
+        assertThat(this.applicationContext.getBean(ResourcePathResolver.class))
+                .isInstanceOf(TestResourcePathResolver.class);
         mockMvc.perform(get("/resource"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.path").value("https://static.example.com/files/demo.png"));
@@ -205,7 +213,7 @@ class WebAutoConfigurationTest {
     void nativeResponseStillWrapsErrorByDefault() throws Exception {
         mockMvc.perform(get("/native-default-error").header(RequestIds.HEADER_NAME, "rid-native-default"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("SYSTEM.ILLEGAL_ARGUMENT"))
+                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.requestId").value("rid-native-default"));
     }
 
@@ -219,7 +227,7 @@ class WebAutoConfigurationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value(SystemErrors.ILLEGAL_ARGUMENT.getMessage()))
-                .andExpect(jsonPath("$.code").value("SYSTEM.ILLEGAL_ARGUMENT"))
+                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.requestId").value("rid-native-all"));
     }
 
@@ -265,7 +273,7 @@ class WebAutoConfigurationTest {
     void exceptionIsMapped() throws Exception {
         mockMvc.perform(get("/boom").header(RequestIds.HEADER_NAME, "rid-2"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("SYSTEM.ILLEGAL_ARGUMENT"))
+                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value(SystemErrors.ILLEGAL_ARGUMENT.getMessage()))
                 .andExpect(jsonPath("$.requestId").value("rid-2"));
     }
@@ -283,7 +291,7 @@ class WebAutoConfigurationTest {
         assertThat(errorAlertNotifier.error()).isInstanceOf(ErrorCodeException.class);
         assertThat(errorAlertNotifier.requestUri()).isEqualTo("/boom");
         assertThat(errorAlertNotifier.status()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(errorAlertNotifier.responseCode()).isEqualTo(SystemErrors.ILLEGAL_ARGUMENT);
+        assertThat(errorAlertNotifier.responseCode()).isEqualTo(WebErrors.INTERNAL_ERROR);
     }
 
     @Test

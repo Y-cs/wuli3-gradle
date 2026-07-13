@@ -31,7 +31,7 @@ public final class ResourcePathJsonSerializer extends JsonSerializer<Object> {
         if (value instanceof String strValue) {
             if (this.resolver.supports(this.resourcePath.type())) {
                 gen.writeString(this.resolver.serialize(this.resourcePath.type(), strValue));
-            } else if (this.resourcePath.type().equals("default")) {
+            } else {
                 gen.writeString(strValue);
             }
             return;

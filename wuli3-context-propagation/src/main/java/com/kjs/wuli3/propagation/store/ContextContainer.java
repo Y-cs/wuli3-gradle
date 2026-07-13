@@ -1,10 +1,11 @@
 package com.kjs.wuli3.propagation.store;
 
-import com.google.common.collect.Maps;
 import com.kjs.wuli3.propagation.context.Context;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ContextContainer
@@ -12,7 +13,7 @@ import java.util.Optional;
  * @author GuoYang create on 2026/6/25 15:33
  */
 public class ContextContainer {
-    private final Map<Class<? extends Context>, Context> contexts = Maps.newConcurrentMap();
+    private final Map<Class<? extends Context>, Context> contexts = new ConcurrentHashMap<>();
 
     public ContextContainer() {}
 
@@ -21,6 +22,7 @@ public class ContextContainer {
     }
 
     public <T extends Context> void put(final T context) {
+        Objects.requireNonNull(context, "context");
         this.contexts.put(context.type(), context);
     }
 
@@ -41,6 +43,11 @@ public class ContextContainer {
     }
 
     public ContextContainer copy() {
-        return new ContextContainer(Map.copyOf(this.contexts));
+        final Map<Class<? extends Context>, Context> copies = new ConcurrentHashMap<>();
+        this.contexts.values().forEach(context -> {
+            final Context copy = context.snapshotCopy();
+            copies.put(copy.type(), copy);
+        });
+        return new ContextContainer(copies);
     }
 }

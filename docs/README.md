@@ -4,7 +4,8 @@
 
 本组文档以 2026-07-10 的分析基线为起点，系统说明项目的实现方式、设计边界、已确认风险、修复过程和后续方向。主要读者是项目维护者、架构负责人、starter 开发者及业务接入团队。
 
-01-05 记录修复前的事实与判断，06 是实施计划，07 记录当前完成状态。公共 API、配置和模块行为仍以源码与发布版本为准。
+01-05 记录修复前的事实与判断，06 是当时的实施计划，07 记录后续完成状态。历史文档中的内存事件总线分析已被当前
+[`wuli3-event-core` 说明](../wuli3-event-core/README.md)取代。公共 API、配置和模块行为仍以源码与发布版本为准。
 
 ## 推荐阅读顺序
 
@@ -18,13 +19,13 @@
 
 ## 核心结论
 
-- 项目已形成“纯 Java 公共语义 -> JSON/上下文/事件机制 -> Spring Web 适配”的合理依赖主干。
+- 项目已形成“纯 Java 公共语义与事件模型 -> JSON/上下文机制 -> Spring 运行时适配”的合理依赖主干。
 - Core 的错误策略、半开时间区间、最小 ID/Clock 端口，以及上下文的协议无关 carrier/codec 值得保留。
 - 全量 `clean check` 已恢复，未知 `@ResourcePath` type 序列化缺陷已修复，JaCoCo 报告和覆盖率门禁已并入 `check`。
-- 共享可变 `JsonMapper` 入口已删除，上下文快照和内存事件总线语义已形成显式公共契约。
+- 共享可变 `JsonMapper` 入口已删除，上下文快照语义已形成显式公共契约；本地事件统一使用 Spring 原生机制。
 - Web starter 已收紧请求体缓存和外部 requestId 默认策略，并按 JSON、Context、Error、Response 拆分自动配置边界。
 - MySQL、Redis、RocketMQ、Elasticsearch、MongoDB 模块当前是依赖聚合/占位 starter，不应被描述为已有项目级增强。
-- BOM 与 11 个 Java 组件已具备统一 publication，并通过隔离 Gradle/Maven consumer 验证；真实 API/ABI 对比仍需首次正式发布版本作为 baseline。
+- BOM 与 10 个 Java 组件已具备统一 publication，并通过隔离 Gradle/Maven consumer 验证；真实 API/ABI 对比仍需首次正式发布版本作为 baseline。
 
 ## 优先级
 

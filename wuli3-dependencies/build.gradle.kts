@@ -15,7 +15,6 @@ dependencies {
         api("com.kjs.wuli3:wuli3-core:${project.version}")
         api("com.kjs.wuli3:wuli3-json:${project.version}")
         api("com.kjs.wuli3:wuli3-event-core:${project.version}")
-        api("com.kjs.wuli3:wuli3-event-inmemory:${project.version}")
         api("com.kjs.wuli3:wuli3-context-propagation:${project.version}")
         api("com.kjs.wuli3:wuli3-web-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-mysql-spring-boot-starter:${project.version}")

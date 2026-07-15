@@ -1,7 +1,4 @@
 package com.kjs.wuli3.event;
 
-public interface DomainEvent extends EventEnvelope {
-    String aggregateId();
-
-    String aggregateType();
-}
+/** Marker for a fact produced by the domain model and dispatched through the application's local event mechanism. */
+public interface DomainEvent extends Event {}

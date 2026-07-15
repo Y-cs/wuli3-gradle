@@ -19,8 +19,8 @@
 
 1. 删除 `JacksonProvider.defaultJsonMapper()` 和公共 `Jsons.execute(...)`；`JacksonProvider.newJsonMapper()` 每次返回独立实例，工具类内部 Mapper 不再向调用方暴露。
 2. `Context` 强制实现 `snapshotCopy()`；内置上下文复制扩展 Map 结构，捕获后的扩展修改不会污染快照。扩展值本身要求不可变，不做任意对象递归克隆。
-3. 内存事件总线明确为异步、无顺序保证、每个匹配注册提交一次、失败通过返回 stage 报告；Executor 生命周期归调用方。
-4. Context 移除 Guava，Event Core 和五个聚合 starter 移除无效 Core 依赖，Web 移除未使用的聚合工具依赖，JSON 从 `hutool-all` 收窄到 `hutool-core`。
+3. 事件机制按 Spring 运行时边界重新收敛：删除 `event-inmemory` 及发布/注册抽象，Event Core 只保留纯 Java 领域事件与集成事件模型。
+4. Context 移除 Guava，事件机制不重新引入 Guava EventBus；五个聚合 starter 移除无效 Core 依赖，Web 移除未使用的聚合工具依赖，JSON 从 `hutool-all` 收窄到 `hutool-core`。
 
 ### 2.3 Web Starter
 
@@ -32,8 +32,8 @@
 
 ### 2.4 发布与消费
 
-1. 11 个 Java 组件统一发布主包、sources、Javadoc、POM 和 Gradle module metadata；BOM 单独发布。
-2. BOM 纳入全部 11 个内部组件同版本约束。
+1. 10 个 Java 组件统一发布主包、sources、Javadoc、POM 和 Gradle module metadata；BOM 单独发布。
+2. BOM 纳入全部 10 个内部组件同版本约束。
 3. 根任务 `publishAllPublicationsToTemporaryRepository` 将组件和 BOM 发布到临时 Maven 仓库。
 4. 根任务 `verifyBomConsumers` 使用隔离 Gradle/Maven 缓存，从 BOM 无版本消费并真实编译代表组件；Maven 验证使用项目内 settings，避免用户镜像污染。
 5. `apiCompatibilityCheck` 当前只生成首次发布基线状态报告。仓库尚无已发布旧版本，因此没有可比较的 API/ABI baseline；首次正式发布后应接入 japicmp 并替换该基线任务。
@@ -48,6 +48,8 @@
 - `WebContextProperties.InvalidRequestIdPolicy` 已删除，不再允许未校验 requestId。
 - `WebAutoConfiguration` 已删除；应用应依赖 Boot 自动配置，不应显式导入 starter 内部装配类。
 - 请求体缓存默认值由开启改为关闭。
+- `wuli3-event-inmemory`、`EventBus`、`EventPublisher`、`EventHandler`、`EventEnvelope` 和通用 `Basic*Event` 已删除。
+- 本地事件直接使用 Spring `ApplicationEventPublisher`、`@EventListener` 和 `@TransactionalEventListener`；Event Core 不提供 Spring 包装层。
 
 ## 4. 固定验收接口
 
@@ -63,7 +65,7 @@ git diff --check
 
 ## 5. 后续方向
 
-1. 首次正式发布后保存组件版本为 API baseline，引入 japicmp 对 11 个公共组件执行真实 API/ABI 对比。
+1. 首次正式发布后保存组件版本为 API baseline，引入 japicmp 对 10 个公共组件执行真实 API/ABI 对比。
 2. 将临时发布、双消费者验证和正式发布串入 CI，正式版本禁止覆盖，凭据只从 CI secret 注入。
 3. 继续补齐 Core collectors、错误元数据和 Web 非法属性启动失败的边界测试；新增公共能力时保持按风险扩展测试矩阵。
 4. 五个中间件 starter 继续保持依赖聚合定位，只有出现至少两个真实复用场景后才增加项目级 Bean 或抽象。

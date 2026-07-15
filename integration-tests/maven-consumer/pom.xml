@@ -28,6 +28,7 @@
     <dependencies>
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-core</artifactId></dependency>
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-json</artifactId></dependency>
+        <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-event-core</artifactId></dependency>
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-web-spring-boot-starter</artifactId></dependency>
     </dependencies>
 </project>

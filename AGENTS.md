@@ -8,7 +8,7 @@
 
 - `wuli3-dependencies`：统一依赖版本平台，发布为 Maven BOM。
 - `wuli3-core`、`wuli3-json`：基础能力与 JSON 支持。
-- `wuli3-event-*`：事件抽象与内存实现。
+- `wuli3-event-core`：纯 Java 领域事件与集成事件模型；Spring 应用使用 Spring 原生本地事件机制。
 - `wuli3-*-spring-boot-starter`：Web、MySQL、Redis、RocketMQ、Elasticsearch、MongoDB starter。
 
 ## 构建、测试与开发命令

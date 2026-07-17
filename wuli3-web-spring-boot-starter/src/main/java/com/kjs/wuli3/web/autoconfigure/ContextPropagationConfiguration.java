@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web.internal.autoconfigure;
+package com.kjs.wuli3.web.autoconfigure;
 
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
@@ -21,29 +21,29 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ContextConfiguration {
+class ContextPropagationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ContextStore contextStore() {
+    ContextStore contextStore() {
         return new ContextStore();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ContextPropagator contextPropagator(final ContextWriter contextWriter) {
+    ContextPropagator contextPropagator(final ContextWriter contextWriter) {
         return new DefaultContextPropagator(contextWriter);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public InvocationContextCodec invocationContextCodec() {
+    InvocationContextCodec invocationContextCodec() {
         return new InvocationContextCodec();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ContextTransmitter contextTransmitter(
+    ContextTransmitter contextTransmitter(
             final ContextReader contextReader,
             final ContextWriter contextWriter,
             final ObjectProvider<PropagationContextCodec<? extends PropagationContext>> codecs) {
@@ -54,25 +54,25 @@ public class ContextConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public InvocationContextAccessor invocationContextAccessor(final ContextReader contextReader) {
+    InvocationContextAccessor invocationContextAccessor(final ContextReader contextReader) {
         return new InvocationContextAccessor(contextReader);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public AuthContextAccessor authContextAccessor(final ContextReader contextReader) {
+    AuthContextAccessor authContextAccessor(final ContextReader contextReader) {
         return new AuthContextAccessor(contextReader);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public WebContextAccessor webContextAccessor(final ContextReader contextReader) {
+    WebContextAccessor webContextAccessor(final ContextReader contextReader) {
         return new WebContextAccessor(contextReader);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public AuthContextResolver securityContextResolver() {
+    AuthContextResolver securityContextResolver() {
         return new DefaultAuthContextResolver();
     }
 }

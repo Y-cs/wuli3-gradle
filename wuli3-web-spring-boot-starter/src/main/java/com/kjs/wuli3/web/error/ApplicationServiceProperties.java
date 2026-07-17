@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web.config.properties;
+package com.kjs.wuli3.web.error;
 
 import jakarta.validation.constraints.AssertTrue;
 import lombok.Getter;

@@ -1,8 +1,8 @@
 package com.kjs.wuli3.web.internal.response;
 
-import com.kjs.wuli3.web.config.properties.WebResponseProperties;
 import com.kjs.wuli3.web.error.WebErrors;
 import com.kjs.wuli3.web.response.ValidationErrorDetails;
+import com.kjs.wuli3.web.response.WebResponseProperties;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import java.util.ArrayList;

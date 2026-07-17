@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web;
+package com.kjs.wuli3.web.autoconfigure;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

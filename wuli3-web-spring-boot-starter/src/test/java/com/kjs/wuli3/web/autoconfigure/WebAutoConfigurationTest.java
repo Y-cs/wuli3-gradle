@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web;
+package com.kjs.wuli3.web.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,19 +19,15 @@ import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.snapshot.ContextPropagator;
 import com.kjs.wuli3.propagation.transmission.ContextTransmitter;
-import com.kjs.wuli3.web.annotation.NativeResponse;
-import com.kjs.wuli3.web.annotation.NativeResponseMode;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
-import com.kjs.wuli3.web.autoconfigure.WebContextAutoConfiguration;
-import com.kjs.wuli3.web.autoconfigure.WebErrorAutoConfiguration;
-import com.kjs.wuli3.web.autoconfigure.WebJsonAutoConfiguration;
-import com.kjs.wuli3.web.autoconfigure.WebResponseAutoConfiguration;
 import com.kjs.wuli3.web.context.RequestIds;
 import com.kjs.wuli3.web.context.WebContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertContext;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
 import com.kjs.wuli3.web.error.WebErrors;
 import com.kjs.wuli3.web.response.ApiResponse;
+import com.kjs.wuli3.web.response.NativeResponse;
+import com.kjs.wuli3.web.response.NativeResponseMode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

@@ -2,10 +2,9 @@ package com.kjs.wuli3.web.autoconfigure;
 
 import com.kjs.wuli3.propagation.store.ContextWriter;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
-import com.kjs.wuli3.web.config.properties.WebContextProperties;
 import com.kjs.wuli3.web.context.ClientIpResolver;
 import com.kjs.wuli3.web.context.RequestIdResolver;
-import com.kjs.wuli3.web.internal.autoconfigure.ContextConfiguration;
+import com.kjs.wuli3.web.context.WebContextProperties;
 import com.kjs.wuli3.web.internal.context.DefaultClientIpResolver;
 import com.kjs.wuli3.web.internal.context.DefaultRequestIdResolver;
 import com.kjs.wuli3.web.internal.servlet.ContextFilter;
@@ -22,7 +21,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /** Configures request context capture and propagation. */
 @AutoConfiguration
-@Import(ContextConfiguration.class)
+@Import(ContextPropagationConfiguration.class)
 @EnableConfigurationProperties(WebContextProperties.class)
 public class WebContextAutoConfiguration {
 

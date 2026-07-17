@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web;
+package com.kjs.wuli3.web.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-class WebResponsePropertiesTest {
+class WebConfigurationPropertiesTest {
 
     @SpringBootTest(
             webEnvironment = MOCK,
@@ -371,7 +371,7 @@ class WebResponsePropertiesTest {
         @PostMapping("/body")
         BodyView body(HttpServletRequest request) throws IOException {
             return new BodyView(
-                    WebResponsePropertiesTest.readBody(request), WebResponsePropertiesTest.readBody(request));
+                    WebConfigurationPropertiesTest.readBody(request), WebConfigurationPropertiesTest.readBody(request));
         }
     }
 

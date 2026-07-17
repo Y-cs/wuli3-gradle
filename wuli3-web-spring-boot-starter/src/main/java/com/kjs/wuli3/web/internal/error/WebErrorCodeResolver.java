@@ -7,7 +7,7 @@ import com.kjs.wuli3.core.error.ErrorFrameworkErrors;
 import com.kjs.wuli3.core.error.ErrorMetadataParser;
 import com.kjs.wuli3.core.error.ErrorModule;
 import com.kjs.wuli3.core.error.ErrorSeverity;
-import com.kjs.wuli3.web.config.properties.ApplicationServiceProperties;
+import com.kjs.wuli3.web.error.ApplicationServiceProperties;
 import java.util.Locale;
 import java.util.Optional;
 

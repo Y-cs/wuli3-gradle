@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web.annotation;
+package com.kjs.wuli3.web.response;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

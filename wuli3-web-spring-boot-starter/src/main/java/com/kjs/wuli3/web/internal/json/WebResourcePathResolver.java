@@ -1,7 +1,7 @@
-package com.kjs.wuli3.web.json;
+package com.kjs.wuli3.web.internal.json;
 
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
-import com.kjs.wuli3.web.config.properties.WebJsonResourcePathProperties;
+import com.kjs.wuli3.web.json.WebJsonResourcePathProperties;
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web.config.properties;
+package com.kjs.wuli3.web.response;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,5 @@
-package com.kjs.wuli3.web.config.properties;
+package com.kjs.wuli3.web.context;
 
-import com.kjs.wuli3.web.context.RequestIds;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

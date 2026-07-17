@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.autoconfigure;
 
 import com.kjs.wuli3.core.error.ErrorCodeResolver;
-import com.kjs.wuli3.web.config.properties.ApplicationServiceProperties;
+import com.kjs.wuli3.web.error.ApplicationServiceProperties;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
 import com.kjs.wuli3.web.internal.error.DefaultWebErrorStatusResolver;
 import com.kjs.wuli3.web.internal.error.WebErrorCodeResolver;

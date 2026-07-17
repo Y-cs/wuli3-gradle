@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.internal.response;
 
-import com.kjs.wuli3.web.annotation.NativeResponse;
-import com.kjs.wuli3.web.annotation.NativeResponseMode;
+import com.kjs.wuli3.web.response.NativeResponse;
+import com.kjs.wuli3.web.response.NativeResponseMode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 import org.springframework.core.MethodParameter;

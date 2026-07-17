@@ -128,6 +128,8 @@ UserDetail getUser(@PathVariable final Long id) {
 使用 `@NativeResponse` 可以跳过成功响应包装：
 
 ```java
+import com.kjs.wuli3.web.response.NativeResponse;
+
 @NativeResponse
 @GetMapping("/download")
 Resource download() {

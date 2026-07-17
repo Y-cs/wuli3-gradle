@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.internal.context;
 
-import com.kjs.wuli3.web.config.properties.WebContextProperties;
 import com.kjs.wuli3.web.context.ClientIpResolver;
+import com.kjs.wuli3.web.context.WebContextProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jspecify.annotations.Nullable;
 

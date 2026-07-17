@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web.config.properties;
+package com.kjs.wuli3.web.json;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

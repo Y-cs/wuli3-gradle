@@ -1,4 +1,4 @@
-package com.kjs.wuli3.web.annotation;
+package com.kjs.wuli3.web.response;
 
 /**
  * 原生响应模式。

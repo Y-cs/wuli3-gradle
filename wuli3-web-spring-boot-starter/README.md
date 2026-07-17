@@ -16,6 +16,12 @@ Spring MVC Web 能力增强 starter。
 
 统一响应和异常处理的完整使用说明见 [Web 统一响应处理使用文档](docs/response-handling.md)。
 
+## 包边界
+
+- `auth`、`context`、`error`、`json`、`response` 按 Web 能力组织公开契约与配置。
+- `autoconfigure` 只负责 Spring Boot 自动配置和内部组件装配。
+- `internal` 存放默认实现与框架适配代码，不作为应用扩展 API；应用应通过公开 SPI 替换默认行为。
+
 默认响应结构：
 
 ```json

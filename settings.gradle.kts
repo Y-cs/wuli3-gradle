@@ -22,6 +22,7 @@ include(
     "wuli3-core",
     "wuli3-json",
     "wuli3-event-core",
+    "wuli3-event-spring-boot-starter",
     "wuli3-context-propagation",
     "wuli3-web-spring-boot-starter",
     "wuli3-mysql-spring-boot-starter",

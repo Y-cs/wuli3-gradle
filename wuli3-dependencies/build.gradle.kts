@@ -15,6 +15,7 @@ dependencies {
         api("com.kjs.wuli3:wuli3-core:${project.version}")
         api("com.kjs.wuli3:wuli3-json:${project.version}")
         api("com.kjs.wuli3:wuli3-event-core:${project.version}")
+        api("com.kjs.wuli3:wuli3-event-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-context-propagation:${project.version}")
         api("com.kjs.wuli3:wuli3-web-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-mysql-spring-boot-starter:${project.version}")
@@ -38,6 +39,8 @@ dependencies {
         api("org.junit.jupiter:junit-jupiter:5.12.2")
         api("org.assertj:assertj-core:3.27.3")
         api("org.apache.rocketmq:rocketmq-spring-boot-starter:2.3.4")
+        api("io.cloudevents:cloudevents-core:4.0.1")
+        api("io.cloudevents:cloudevents-json-jackson:4.0.1")
     }
 }
 

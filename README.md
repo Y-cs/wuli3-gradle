@@ -10,7 +10,8 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | `wuli3-dependencies` | 统一依赖版本平台。 |
 | `wuli3-core` | 无 Spring 依赖的基础能力：错误模型、分页、函数式增强、时间工具。 |
 | `wuli3-json` | Jackson 对象提供和 JSON 操作支持。 |
-| `wuli3-event-core` | 纯 Java 事件模型，区分领域事件和集成事件。 |
+| `wuli3-event-core` | 单一、不可变的纯 Java `Event<T>` 数据载体。 |
+| `wuli3-event-spring-boot-starter` | 本地、远程和自定义事件发布策略的链式编排。 |
 | `wuli3-web-spring-boot-starter` | Spring MVC 增强：统一响应、异常处理、MDC、请求 ID。 |
 | `wuli3-*-spring-boot-starter` | MySQL、Redis、RocketMQ、Elasticsearch、MongoDB starter 壳。 |
 

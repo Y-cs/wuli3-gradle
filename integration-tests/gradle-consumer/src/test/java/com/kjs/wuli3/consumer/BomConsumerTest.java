@@ -1,10 +1,9 @@
 package com.kjs.wuli3.consumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.kjs.wuli3.core.id.UuidStringIdGenerator;
-import com.kjs.wuli3.event.EventMetadata;
+import com.kjs.wuli3.event.Event;
 import com.kjs.wuli3.json.provider.JacksonProvider;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +12,6 @@ class BomConsumerTest {
     void resolvesAndUsesVersionlessComponents() {
         assertNotNull(UuidStringIdGenerator.INSTANCE.nextId());
         assertNotNull(JacksonProvider.newJsonMapper());
-        assertTrue(EventMetadata.empty().headers().isEmpty());
+        assertNotNull(Event.of("consumer.test", "payload").eventId());
     }
 }

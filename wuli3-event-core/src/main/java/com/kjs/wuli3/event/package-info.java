@@ -1,4 +1,4 @@
-/** Framework-independent domain and integration event data contracts. */
+/** Framework-independent single event envelope. */
 @NullMarked
 package com.kjs.wuli3.event;
 

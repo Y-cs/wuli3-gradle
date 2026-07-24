@@ -10,12 +10,15 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | `wuli3-dependencies` | 统一依赖版本平台。 |
 | `wuli3-core` | 无 Spring 依赖的基础能力：错误模型、分页、函数式增强、时间工具。 |
 | `wuli3-json` | Jackson 对象提供和 JSON 操作支持。 |
-| `wuli3-event-core` | 单一、不可变的纯 Java `Event<T>` 数据载体。 |
-| `wuli3-event-spring-boot-starter` | 本地、远程和自定义事件发布策略的链式编排。 |
+| `wuli3-event-core` | 纯 Java 事件信封、发布选项和消息传输契约。 |
+| `wuli3-event-spring-boot-starter` | Spring 本地事件发布与 REMOTE 提交后尽力投递编排。 |
 | `wuli3-web-spring-boot-starter` | Spring MVC 增强：统一响应、异常处理、MDC、请求 ID。 |
-| `wuli3-*-spring-boot-starter` | MySQL、Redis、RocketMQ、Elasticsearch、MongoDB starter 壳。 |
+| `wuli3-rocketmq-spring-boot-starter` | 默认 `RocketMQTemplate` 远程事件传输适配与条件自动配置。 |
+| 其他数据 starter | MySQL、Redis、Elasticsearch、MongoDB 依赖聚合。 |
 
 `integration-tests/` 不是 Gradle 业务模块，而是用于验证发布产物能否被外部 Gradle/Maven 项目正确消费的独立测试工程。
+
+事件发布的完整边界、事务语义和 RocketMQ 配置见 [`docs/event-publication.md`](docs/event-publication.md)。
 
 ## 质量门禁
 

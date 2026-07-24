@@ -437,7 +437,7 @@ git diff --check
 
 以下事项不进入本轮修复：
 
-- 事件反注册、优先级、背压、MQ/outbox 实现。
+- 事件反注册、优先级、背压和可靠消息实现。
 - 动态错误码 registry。
 - 五个聚合 starter 的 Repository、Client 或项目级默认 Bean。
 - Context 扩展值的任意对象递归深拷贝。

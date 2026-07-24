@@ -4,8 +4,9 @@ plugins {
 
 dependencies {
     api(project(":wuli3-event-spring-boot-starter"))
-    implementation(project(":wuli3-json"))
+    api(project(":wuli3-context-propagation"))
     api("org.apache.rocketmq:rocketmq-spring-boot-starter")
-    implementation("io.cloudevents:cloudevents-core")
-    implementation("io.cloudevents:cloudevents-json-jackson")
+    implementation(project(":wuli3-json"))
+    compileOnly("org.apache.rocketmq:rocketmq-client-java:5.2.0")
+    testImplementation("org.apache.rocketmq:rocketmq-client-java:5.2.0")
 }

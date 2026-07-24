@@ -93,16 +93,11 @@ sequenceDiagram
 
 ## 5. 事件：契约与单进程异步实现
 
-`wuli3-event-core` 用 `EventEnvelope` 统一事件身份、发生时间、类型、版本和 metadata，并用 `DomainEvent`、`IntegrationEvent` 区分服务内与服务间语义。模块明确不绑定 MQ，也不实现 outbox，这一职责边界是合理的。
+`wuli3-event-core` 提供无框架的 `DomainEvent`、`EventEnvelope`、`PublishOptions` 和 `MessageTransport` 契约。信封在一次发布时生成稳定 eventId，事件类型按当前约定使用 Java 类全名；模块不绑定 Spring 或具体 MQ。
 
-`InMemoryEventBus` 的行为如下：
+`wuli3-event-spring-boot-starter` 将两种语义集中到一个主 `EventPublisher`：LOCAL 直接交给 Spring `ApplicationEventPublisher`，REMOTE 通过 `@TransactionalEventListener(AFTER_COMMIT)` 尽力发送。远程 transport 缺失时调用显式失败，不静默丢弃。
 
-- 按注册类型的 `isAssignableFrom` 匹配处理器，允许注册父接口处理多种事件。
-- 每个处理器通过给定 `Executor` 异步执行，`publish` 返回 `CompletionStage<Void>`。
-- 任一处理器失败会使返回阶段失败；其他已提交处理器不会被取消。
-- 注册表使用并发 Map 与 `CopyOnWriteArrayList`，支持并发读取和低频注册。
-
-当前契约没有说明处理顺序、重复注册、反注册、关闭或背压语义；实现也不拥有外部传入的 Executor，因此不应擅自关闭它。近期应先补 Javadoc 和并发/多处理器测试，准确说明一次 `publish` 如何提交当前匹配的处理器，以及部分提交/执行失败如何反映到返回阶段，避免使用可靠消息意义上的投递保证术语。只有出现动态插件或长生命周期订阅场景时再增加可关闭 subscription；只有出现跨服务可靠投递需求时，才新增 MQ/outbox 实现，而不是扩张内存总线。
+RocketMQ starter 负责物理 topic、同步/异步/顺序和 5.x 毫秒延迟 API，业务层不感知 Broker 方法。
 
 ## 6. Web Starter：边界适配与默认策略
 
@@ -123,15 +118,11 @@ sequenceDiagram
 - `acceptExternalRequestId=true` 需要与网关信任模型配套。现有长度/非法值策略是良好起点，但还应测试字符集、日志注入和代理边界。
 - 配置属性主要依赖 Lombok 可变 Bean，缺少 Bean Validation 约束；空 header 名、负长度、非正 body 上限等非法配置应在启动阶段失败。
 
-## 7. 数据与中间件 Starter：当前是依赖聚合
+## 7. 数据与中间件 Starter
 
-MySQL、Redis、RocketMQ、Elasticsearch、MongoDB 五个 starter 均注册了空的 `@AutoConfiguration`，并通过 `api(...)` 暴露对应第三方 starter。它们当前提供的是：
+MySQL、Redis、Elasticsearch、MongoDB 四个 starter 仍通过 `api(...)` 暴露对应第三方 starter，当前只提供统一依赖坐标、版本和自动配置导入入口。它们尚未提供项目级配置属性、默认 Bean、可观测性、异常适配或领域抽象，因此应明确称为“依赖聚合/占位 starter”。
 
-- 统一依赖坐标和版本；
-- Spring Boot 自动配置导入入口；
-- 最小的上下文加载测试。
-
-它们尚未提供项目级配置属性、默认 Bean、可观测性、异常适配或领域抽象。因此文档和 artifact 描述必须称其为“依赖聚合/占位 starter”，不能暗示已形成 Wuli3 增强能力。
+RocketMQ starter 已实现 `MessageTransport`，按配置创建 transport 并适配同步、异步、顺序和 RocketMQ 5.x 毫秒延迟发送。它只处理 Broker 能力和物理 topic，不承担领域事件建模或业务事务。
 
 后续不要为了填充空配置而制造统一 Repository、Client 或模板封装。每个 starter 只有在出现至少一个跨业务稳定需求时再增强，例如可重复的序列化约定、事务边界、健康检查标签、上下文透传或项目级安全默认值，并为每项默认行为提供开关、退让条件和自动配置测试。
 
@@ -145,7 +136,7 @@ MySQL、Redis、RocketMQ、Elasticsearch、MongoDB 五个 starter 均注册了�
 - 主构建只有 BOM 定义 Maven publication，普通库和 starter 暂无发布闭环。
 - `build-logic` 是独立 included build，其发布仓库配置不会自动作用到主构建。
 - Gradle 9.6 已报告弃用功能，升级 Gradle 10 前需要用 `--warning-mode all` 建立清单。
-- Core 当前除 BOM 平台元数据外没有第三方运行时库；Context 的 Guava 仅用于并发 Map 工厂，Event Core 与五个聚合 starter 依赖 Core 却没有源码用法，Web 也声明了多项没有直接源码用法的工具依赖。这些模块应逐项压缩实际 classpath 和未来发布 POM。
+- Core 当前除 BOM 平台元数据外没有第三方运行时库；Context 的 Guava 仅用于并发 Map 工厂，Event Core 与四个聚合 starter 依赖 Core 却没有源码用法，Web 也声明了多项没有直接源码用法的工具依赖。这些模块应逐项压缩实际 classpath 和未来发布 POM。
 
 ## 9. 总体设计判断
 

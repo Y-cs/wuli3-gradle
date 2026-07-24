@@ -2,7 +2,7 @@
 
 ## 1. 项目定位
 
-Wuli3 是面向后续 Spring Boot / DDD 业务工程复用的 Java 基础组件仓库。当前代码已经超出“脚手架模板”阶段：Core、JSON、上下文传播、事件契约和 Web 适配具备真实实现；与此同时，五个数据/中间件 starter 仍处于依赖聚合或占位阶段。
+Wuli3 是面向后续 Spring Boot / DDD 业务工程复用的 Java 基础组件仓库。当前代码已经超出“脚手架模板”阶段：Core、JSON、上下文传播、事件契约、RocketMQ 传输和 Web 适配具备真实实现；与此同时，四个数据 starter 仍处于依赖聚合或占位阶段。
 
 整体设计可概括为：
 
@@ -40,7 +40,7 @@ flowchart TB
     Json[wuli3-json]
     Context[wuli3-context-propagation]
     EventCore[wuli3-event-core]
-    EventMemory[wuli3-event-inmemory]
+    EventStarter[wuli3-event-spring-boot-starter]
 
     Web[wuli3-web-spring-boot-starter]
     Mysql[wuli3-mysql-spring-boot-starter]
@@ -53,12 +53,13 @@ flowchart TB
     Json --> Core
     Context --> Core
     EventCore --> Core
-    EventMemory --> EventCore
+    EventStarter --> EventCore
     Web --> Core
     Web --> Json
     Web --> Context
     Mysql --> Core
     Redis --> Core
+    Rocket --> EventStarter
     Rocket --> Core
     Elastic --> Core
     Mongo --> Core
@@ -67,7 +68,7 @@ flowchart TB
     BuildLogic -.约定插件.-> Json
     BuildLogic -.约定插件.-> Context
     BuildLogic -.约定插件.-> EventCore
-    BuildLogic -.约定插件.-> EventMemory
+    BuildLogic -.约定插件.-> EventStarter
     BuildLogic -.约定插件.-> Web
 ```
 
@@ -84,12 +85,12 @@ flowchart TB
 | `wuli3-core` | 错误、断言、ID、时间、Stream/金额工具 | 已实现，当前检查失败 | 保持纯 JDK、无 Spring；公共契约需收敛 |
 | `wuli3-json` | 标准 Jackson 组装、JSON 门面、资源路径、脱敏 | 已实现 | 机制与具体 Web 路径解析分离 |
 | `wuli3-context-propagation` | 线程上下文、快照、carrier/codec/transmitter | 已实现 | 不认证外部身份，不绑定具体协议 |
-| `wuli3-event-core` | 领域/集成事件与发布处理契约 | 早期实现 | 不负责 MQ、outbox、可靠投递 |
-| `wuli3-event-inmemory` | Executor 驱动的进程内异步事件总线 | 早期实现 | 非持久化，关键并发/生命周期语义待固化 |
+| `wuli3-event-core` | DomainEvent、EventEnvelope、PublishOptions 和 MessageTransport 契约 | 已实现 | 不绑定 Spring 或具体 MQ |
+| `wuli3-event-spring-boot-starter` | 本地 Spring 发布和 REMOTE after-commit 分发 | 已实现 | 远程发布为尽力投递 |
 | `wuli3-web-spring-boot-starter` | Web 上下文、统一响应、异常、JSON 集成 | 已实现，覆盖面最完整 | 默认策略较多，需要持续控制侵入性 |
 | `wuli3-mysql-spring-boot-starter` | MyBatis-Plus starter 依赖聚合 | 占位/聚合 | 空自动配置，无 Wuli3 运行时增强 |
 | `wuli3-redis-spring-boot-starter` | Spring Data Redis + Redisson 聚合 | 占位/聚合 | 空自动配置，无统一序列化等项目行为 |
-| `wuli3-rocketmq-spring-boot-starter` | RocketMQ starter 聚合 | 占位/聚合 | 尚未连接 event contract 或上下文传播 |
+| `wuli3-rocketmq-spring-boot-starter` | RocketMQ MessageTransport 实现 | 已实现 | 物理 topic 和 Broker 能力只在适配层处理 |
 | `wuli3-elasticsearch-spring-boot-starter` | Spring Data Elasticsearch 聚合 | 占位/聚合 | 空自动配置 |
 | `wuli3-mongodb-spring-boot-starter` | Spring Data MongoDB 聚合 | 占位/聚合 | 空自动配置 |
 
@@ -121,10 +122,10 @@ flowchart TB
 | core | 29 | 5 | error、stream 缺少直接契约测试 |
 | json | 40 | 5 | 主路径有覆盖，注解组合与失败矩阵仍需加强 |
 | context-propagation | 31 | 2 | 两个测试类场景较丰富，浅复制扩展边界未覆盖 |
-| event-core | 10 | 1 | 主要为值对象基本测试 |
-| event-inmemory | 2 | 1 | 只覆盖单处理器成功/失败 |
+| event-core | 6 | 1 | 覆盖事件信封和发布选项校验 |
+| event-spring-boot-starter | 6 | 1 | 覆盖本地发布和提交后远程分发 |
 | web starter | 47 | 3 | 三个测试类包含大量场景，仍需过滤器安全边界与拆分条件测试 |
-| 五个聚合 starter | 各 2 | 各 1 | 只证明空自动配置可加载 |
+| RocketMQ starter | 5 | 2 | 覆盖发送能力组合和自动配置条件 |
 
 ### 6.1 全量检查结果
 

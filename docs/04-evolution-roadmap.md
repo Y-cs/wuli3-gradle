@@ -125,7 +125,7 @@
 
 ### 候选方向
 
-- 事件：当出现跨服务可靠投递需求时，引入 outbox 与具体 MQ adapter，并把投递保证、幂等和序列化版本作为首要契约。
+- 事件：当出现跨服务可靠投递需求时，单独设计可靠消息机制，并把投递保证、幂等和序列化版本作为首要契约。
 - 上下文：按协议增加 Servlet 出站、HTTP client、Dubbo、消息 header 和 Spring TaskDecorator 适配模块。
 - 数据 starter：只沉淀可验证的序列化、事务、审计、健康检查或观测约定。
 - 错误模型：当动态错误码或多协议适配成为真实需求时，再分离 identity、metadata source 和 renderer。

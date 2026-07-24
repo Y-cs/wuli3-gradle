@@ -1,10 +1,9 @@
 package com.kjs.wuli3.rocketmq.internal;
 
-import org.jspecify.annotations.Nullable;
-
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 由公共编码器生成、与 SDK 无关的 RocketMQ 事件消息。
@@ -28,8 +27,13 @@ public final class RocketMqWireMessage {
      * @param orderKey 可选顺序键
      * @param delay    可选的精确延迟
      */
-    public RocketMqWireMessage(final String topic, final byte[] body, final String key, final String tag,
-            final @Nullable String orderKey, final @Nullable Duration delay) {
+    public RocketMqWireMessage(
+            final String topic,
+            final byte[] body,
+            final String key,
+            final String tag,
+            final @Nullable String orderKey,
+            final @Nullable Duration delay) {
         this.topic = Objects.requireNonNull(topic, "topic");
         this.body = Arrays.copyOf(Objects.requireNonNull(body, "body"), body.length);
         this.key = Objects.requireNonNull(key, "key");

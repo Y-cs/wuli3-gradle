@@ -78,12 +78,12 @@ public class WebContextProperties {
             new ArrayList<>(List.of("multipart/*", "application/octet-stream", "text/event-stream"));
 
     /**
-     * 是否信任代理转发的客户端 IP 请求头。
+     * 允许作为直接 peer 信任转发头的代理网段；为空时忽略所有转发头。
      */
-    private boolean trustedProxyEnabled = false;
+    private List<@NotBlank String> trustedProxyCidr = new ArrayList<>();
 
     /**
-     * 可信代理开启后用于解析客户端 IP 的请求头优先级。
+     * 命中可信代理网段后用于解析客户端 IP 的请求头优先级。
      */
     @NotEmpty
     private List<@NotBlank String> clientIpHeaderPriority =

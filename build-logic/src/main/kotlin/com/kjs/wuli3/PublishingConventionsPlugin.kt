@@ -5,6 +5,8 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
@@ -18,6 +20,13 @@ class PublishingConventionsPlugin : Plugin<Project> {
 
             extensions.configure<JavaPluginExtension> {
                 withJavadocJar()
+            }
+
+            tasks.withType<Javadoc>().configureEach {
+                (options as StandardJavadocDocletOptions).apply {
+                    addBooleanOption("Xdoclint:all,-missing", true)
+                    addBooleanOption("Werror", true)
+                }
             }
 
             extensions.configure<PublishingExtension> {

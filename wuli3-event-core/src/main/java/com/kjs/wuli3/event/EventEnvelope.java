@@ -61,5 +61,4 @@ public record EventEnvelope<T>(
         merged.put(key, value);
         return new EventEnvelope<>(merged, topic, eventType, eventId, occurredOn, payload);
     }
-
 }

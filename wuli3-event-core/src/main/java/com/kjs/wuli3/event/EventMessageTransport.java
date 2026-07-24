@@ -3,7 +3,6 @@ package com.kjs.wuli3.event;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.ErrorModule;
 import com.kjs.wuli3.event.error.EventError;
-
 import java.io.Serial;
 import java.util.Collection;
 

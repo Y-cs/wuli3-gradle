@@ -38,5 +38,4 @@ public interface EventPublisher {
     default void publishes(final Collection<EventEnvelope<?>> envelopes) {
         this.publishes(envelopes, PublishOptions.defaults());
     }
-
 }

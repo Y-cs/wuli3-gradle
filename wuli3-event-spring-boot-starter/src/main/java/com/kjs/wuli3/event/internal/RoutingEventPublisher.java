@@ -5,7 +5,6 @@ import com.kjs.wuli3.event.EventMessageTransport;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.spring.TransactionalEventMessageTransport;
-
 import java.util.Collection;
 import java.util.Objects;
 
@@ -23,8 +22,8 @@ public final class RoutingEventPublisher implements EventPublisher {
      * @param localPublisher  立即执行的本地 Spring 传输实现
      * @param remotePublisher 将由事务同步包装的远程传输实现
      */
-    public RoutingEventPublisher(final EventMessageTransport localPublisher,
-            final EventMessageTransport remotePublisher) {
+    public RoutingEventPublisher(
+            final EventMessageTransport localPublisher, final EventMessageTransport remotePublisher) {
         this.localPublisher = new TransactionalEventMessageTransport(
                 Objects.requireNonNull(localPublisher, "localPublisher cannot be null"));
         this.remotePublisher = new TransactionalEventMessageTransport(
@@ -33,14 +32,12 @@ public final class RoutingEventPublisher implements EventPublisher {
 
     @Override
     public void publish(final EventEnvelope<?> envelope, final PublishOptions options) {
-        this.selectPublisher(options)
-                .send(envelope, options);
+        this.selectPublisher(options).send(envelope, options);
     }
 
     @Override
     public void publishes(final Collection<EventEnvelope<?>> envelopes, final PublishOptions options) {
-        this.selectPublisher(options)
-                .sends(envelopes, options);
+        this.selectPublisher(options).sends(envelopes, options);
     }
 
     private EventMessageTransport selectPublisher(final PublishOptions options) {

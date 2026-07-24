@@ -98,9 +98,9 @@ class JavaConventionsPlugin : Plugin<Project> {
                 "testImplementation"(platform(bomDependency))
                 "annotationProcessor"(platform(bomDependency))
                 "testAnnotationProcessor"(platform(bomDependency))
+                slf4jApi()
                 if (lombokEnabled) {
                     lombok()
-                    slf4j()
                 }
                 "testImplementation"("org.junit.jupiter:junit-jupiter")
                 "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
@@ -132,9 +132,8 @@ class JavaConventionsPlugin : Plugin<Project> {
         add("testAnnotationProcessor", "org.projectlombok:lombok")
     }
 
-    private fun DependencyHandler.slf4j() {
+    private fun DependencyHandler.slf4jApi() {
         add("implementation", "org.slf4j:slf4j-api")
         add("testImplementation", "org.slf4j:slf4j-api")
-        add("testImplementation", "org.slf4j:slf4j-simple")
     }
 }

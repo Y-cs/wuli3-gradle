@@ -3,64 +3,141 @@ package com.kjs.wuli3.web.internal.context;
 import com.kjs.wuli3.web.context.ClientIpResolver;
 import com.kjs.wuli3.web.context.WebContextProperties;
 import jakarta.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Locale;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Default client IP resolver that only trusts forwarding headers when explicitly enabled.
+ * Default client IP resolver that only trusts forwarding headers from configured proxy networks.
  */
 public final class DefaultClientIpResolver implements ClientIpResolver {
 
     private static final String FORWARDED = "Forwarded";
+    private static final String FORWARDED_FOR = "for";
 
     private final WebContextProperties properties;
+    private final List<IpNetwork> trustedProxyNetworks;
 
     public DefaultClientIpResolver(final WebContextProperties properties) {
         this.properties = properties;
+        this.trustedProxyNetworks =
+                properties.getTrustedProxyCidr().stream().map(IpNetwork::parse).toList();
     }
 
     @Override
     public String resolve(final HttpServletRequest request) {
-        if (this.properties.isTrustedProxyEnabled()) {
+        final String remoteAddr = request.getRemoteAddr();
+        if (this.isTrustedPeer(remoteAddr)) {
             for (final String headerName : this.properties.getClientIpHeaderPriority()) {
-                final String candidate = this.candidate(request, headerName);
+                final String candidate = this.candidate(request, headerName, remoteAddr);
                 if (candidate != null && !candidate.isBlank()) {
                     return candidate;
                 }
             }
         }
-        return request.getRemoteAddr();
+        return remoteAddr;
     }
 
-    private @Nullable String candidate(final HttpServletRequest request, final String headerName) {
+    private boolean isTrustedPeer(final String remoteAddr) {
+        if (this.trustedProxyNetworks.isEmpty()) {
+            return false;
+        }
+        final byte @Nullable [] address = DefaultClientIpResolver.parseAddress(remoteAddr);
+        if (address == null) {
+            return false;
+        }
+        return this.isTrustedAddress(address);
+    }
+
+    private boolean isTrustedAddress(final byte[] address) {
+        return this.trustedProxyNetworks.stream().anyMatch(network -> network.contains(address));
+    }
+
+    private @Nullable String candidate(
+            final HttpServletRequest request, final String headerName, final String remoteAddr) {
         final String value = request.getHeader(headerName);
         if (value == null || value.isBlank()) {
             return null;
         }
         if (FORWARDED.equalsIgnoreCase(headerName)) {
-            return DefaultClientIpResolver.forwardedFor(value);
+            return this.forwardedFor(value, remoteAddr);
         }
-        final int comma = value.indexOf(',');
-        return comma < 0 ? value.trim() : value.substring(0, comma).trim();
+        return this.forwardedForChain(value, remoteAddr);
     }
 
-    private static @Nullable String forwardedFor(final String value) {
+    private @Nullable String forwardedFor(final String value, final String remoteAddr) {
+        final StringBuilder chain = new StringBuilder();
         int start = 0;
         while (start <= value.length()) {
-            final int semicolon = value.indexOf(';', start);
-            final String part = semicolon < 0 ? value.substring(start) : value.substring(start, semicolon);
+            final int comma = value.indexOf(',', start);
+            final String entry = comma < 0 ? value.substring(start) : value.substring(start, comma);
+            final String forwardedFor = DefaultClientIpResolver.forwardedEntryFor(entry);
+            if (forwardedFor != null) {
+                if (!chain.isEmpty()) {
+                    chain.append(',');
+                }
+                chain.append(forwardedFor);
+            }
+            if (comma < 0) {
+                break;
+            }
+            start = comma + 1;
+        }
+        return chain.isEmpty() ? null : this.forwardedForChain(chain.toString(), remoteAddr);
+    }
+
+    private static @Nullable String forwardedEntryFor(final String entry) {
+        int start = 0;
+        while (start <= entry.length()) {
+            final int semicolon = entry.indexOf(';', start);
+            final String part = semicolon < 0 ? entry.substring(start) : entry.substring(start, semicolon);
             final String trimmed = part.trim();
             final int equals = trimmed.indexOf('=');
             if (equals > 0
-                    && "for".equalsIgnoreCase(trimmed.substring(0, equals).trim())) {
+                    && DefaultClientIpResolver.FORWARDED_FOR.equalsIgnoreCase(
+                            trimmed.substring(0, equals).trim())) {
                 return DefaultClientIpResolver.unquote(
                         trimmed.substring(equals + 1).trim());
             }
             if (semicolon < 0) {
-                return null;
+                break;
             }
             start = semicolon + 1;
         }
         return null;
+    }
+
+    private @Nullable String forwardedForChain(final String value, final String remoteAddr) {
+        final List<String> hops = DefaultClientIpResolver.forwardedHops(value);
+        if (hops.isEmpty()) {
+            return null;
+        }
+        final byte @Nullable [] remoteAddress = DefaultClientIpResolver.parseAddress(remoteAddr);
+        if (remoteAddress == null || !this.isTrustedAddress(remoteAddress)) {
+            return null;
+        }
+
+        int index = hops.size() - 1;
+        while (index >= 0) {
+            final byte @Nullable [] hopAddress = DefaultClientIpResolver.parseAddress(hops.get(index));
+            if (hopAddress == null) {
+                return null;
+            }
+            if (!this.isTrustedAddress(hopAddress)) {
+                return DefaultClientIpResolver.normalizeAddress(hops.get(index));
+            }
+            index--;
+        }
+        return DefaultClientIpResolver.normalizeAddress(hops.get(0));
+    }
+
+    private static List<String> forwardedHops(final String value) {
+        return List.of(value.split(",")).stream()
+                .map(String::trim)
+                .filter(entry -> !entry.isEmpty())
+                .toList();
     }
 
     private static String unquote(final String value) {
@@ -68,5 +145,91 @@ public final class DefaultClientIpResolver implements ClientIpResolver {
             return value.substring(1, value.length() - 1);
         }
         return value;
+    }
+
+    private static String normalizeAddress(final String value) {
+        final String trimmed = DefaultClientIpResolver.unquote(value.trim());
+        if (trimmed.startsWith("[") && trimmed.contains("]")) {
+            return trimmed.substring(1, trimmed.indexOf(']'));
+        }
+        final int colon = trimmed.indexOf(':');
+        if (colon > 0
+                && trimmed.indexOf(':', colon + 1) < 0
+                && trimmed.substring(colon + 1).chars().allMatch(Character::isDigit)) {
+            return trimmed.substring(0, colon);
+        }
+        return trimmed;
+    }
+
+    private static byte @Nullable [] parseAddress(final String value) {
+        final String normalized = DefaultClientIpResolver.normalizeAddress(value);
+        if (!DefaultClientIpResolver.isNumericAddress(normalized)) {
+            return null;
+        }
+        try {
+            return InetAddress.getByName(normalized).getAddress();
+        } catch (final UnknownHostException ex) {
+            return null;
+        }
+    }
+
+    private static boolean isNumericAddress(final String value) {
+        final String lower = value.toLowerCase(Locale.ROOT);
+        return lower.chars()
+                .allMatch(ch -> (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || ch == '.' || ch == ':');
+    }
+
+    private static final class IpNetwork {
+
+        private final byte[] address;
+        private final int prefixLength;
+
+        private IpNetwork(final byte[] address, final int prefixLength) {
+            this.address = address.clone();
+            this.prefixLength = prefixLength;
+        }
+
+        private static IpNetwork parse(final String cidr) {
+            final String trimmed = cidr.trim();
+            final int slash = trimmed.indexOf('/');
+            final String addressText = slash < 0 ? trimmed : trimmed.substring(0, slash);
+            final byte @Nullable [] parsedAddress = DefaultClientIpResolver.parseAddress(addressText);
+            if (parsedAddress == null) {
+                throw new IllegalArgumentException("Invalid trusted proxy CIDR: " + cidr);
+            }
+            final int maxPrefix = parsedAddress.length * Byte.SIZE;
+            final int parsedPrefix = slash < 0
+                    ? maxPrefix
+                    : DefaultClientIpResolver.parsePrefix(trimmed.substring(slash + 1), maxPrefix, cidr);
+            return new IpNetwork(parsedAddress, parsedPrefix);
+        }
+
+        private boolean contains(final byte[] candidate) {
+            if (candidate.length != this.address.length) {
+                return false;
+            }
+            int remainingBits = this.prefixLength;
+            for (int index = 0; index < this.address.length && remainingBits > 0; index++) {
+                final int bits = Math.min(Byte.SIZE, remainingBits);
+                final int mask = 0xFF << (Byte.SIZE - bits);
+                if ((this.address[index] & mask) != (candidate[index] & mask)) {
+                    return false;
+                }
+                remainingBits -= bits;
+            }
+            return true;
+        }
+    }
+
+    private static int parsePrefix(final String value, final int maxPrefix, final String cidr) {
+        try {
+            final int prefix = Integer.parseInt(value);
+            if (prefix >= 0 && prefix <= maxPrefix) {
+                return prefix;
+            }
+        } catch (final NumberFormatException ignored) {
+            // handled below with a message that includes the full CIDR value
+        }
+        throw new IllegalArgumentException("Invalid trusted proxy CIDR: " + cidr);
     }
 }

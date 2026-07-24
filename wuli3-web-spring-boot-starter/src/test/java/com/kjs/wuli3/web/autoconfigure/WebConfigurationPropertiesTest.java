@@ -173,7 +173,7 @@ class WebConfigurationPropertiesTest {
                 TestApplication.class,
                 ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.trusted-proxy-enabled=true")
+            properties = "wuli3.web.context.trusted-proxy-cidrs=10.0.0.0/8")
     @AutoConfigureMockMvc
     @Nested
     class TrustedProxyEnabledTest {

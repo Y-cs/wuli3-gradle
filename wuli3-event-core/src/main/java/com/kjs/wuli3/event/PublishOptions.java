@@ -1,10 +1,9 @@
 package com.kjs.wuli3.event;
 
-import lombok.Getter;
-import org.jspecify.annotations.Nullable;
-
 import java.time.Duration;
 import java.util.Objects;
+import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 不可变的发布通道与投递能力请求。
@@ -132,8 +131,11 @@ public final class PublishOptions {
      */
     public PublishOptions setDelayTime(final Duration delayTime) {
         return new PublishOptions(
-                this.channel, this.async, this.afterCommit,
-                Objects.requireNonNull(delayTime, "delayTime cannot be null"), this.orderKey);
+                this.channel,
+                this.async,
+                this.afterCommit,
+                Objects.requireNonNull(delayTime, "delayTime cannot be null"),
+                this.orderKey);
     }
 
     /**

@@ -31,7 +31,16 @@ val verifyGradleBomConsumer = tasks.register<Exec>("verifyGradleBomConsumer") {
     group = "verification"
     dependsOn(publishAllPublicationsToTemporaryRepository)
     workingDir(layout.projectDirectory.dir("integration-tests/gradle-consumer"))
-    commandLine("../../gradlew", "--no-daemon", "--gradle-user-home", "../../build/consumer-gradle-home", "test")
+    commandLine(
+        "../../gradlew",
+        "--no-daemon",
+        "--gradle-user-home",
+        "../../build/consumer-gradle-home",
+        "--project-cache-dir",
+        "../../build/consumer-gradle-project-cache",
+        "clean",
+        "test",
+    )
 }
 
 val cleanMavenConsumerRepository = tasks.register<Delete>("cleanMavenConsumerRepository") {

@@ -14,5 +14,4 @@ public record ErrorAlertContext(
         @Nullable String requestId,
         String method,
         String requestUri,
-        @Nullable String queryString,
         String remoteAddr) {}

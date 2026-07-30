@@ -23,7 +23,7 @@ public final class DefaultClientIpResolver implements ClientIpResolver {
     public DefaultClientIpResolver(final WebContextProperties properties) {
         this.properties = properties;
         this.trustedProxyNetworks =
-                properties.getTrustedProxyCidr().stream().map(IpNetwork::parse).toList();
+                properties.getTrustedProxyCidrs().stream().map(IpNetwork::parse).toList();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.kjs.wuli3.json.provider;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -28,7 +29,19 @@ public final class JsonMapperTimeAssembly implements JsonMapperAssemblyChain {
     }
 
     public JavaTimeModule javaTimeModule() {
-        final JavaTimeModule module = new JavaTimeModule();
+        return this.configure(new JavaTimeModule());
+    }
+
+    /**
+     * 创建具有唯一标识的时间模块，用于覆盖容器默认的 Java 时间模块。
+     *
+     * @return 独立持有且使用项目时间格式的模块
+     */
+    public SimpleModule javaTimeOverrideModule() {
+        return this.configure(new SimpleModule("wuli3-java-time"));
+    }
+
+    private <M extends SimpleModule> M configure(final M module) {
         module.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormats.DATE));
         module.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormats.DATE));
         module.addSerializer(LocalTime.class, new LocalTimeSerializer(DateTimeFormats.TIME));

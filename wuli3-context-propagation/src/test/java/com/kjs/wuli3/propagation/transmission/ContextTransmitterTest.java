@@ -8,6 +8,7 @@ import com.kjs.wuli3.propagation.codec.DefaultPropagationContextCodecs;
 import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
+import com.kjs.wuli3.propagation.snapshot.ContextScope;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -57,12 +58,13 @@ class ContextTransmitterTest {
         final ContextTransmitter transmitter =
                 new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.invocationOnly());
 
-        transmitter.readFrom(carrier);
-
-        assertThat(this.holder.get(InvocationContext.class))
-                .get()
-                .extracting(InvocationContext::getRequestId, InvocationContext::getOriginIp)
-                .containsExactly("rid-2", "10.0.0.2");
+        try (ContextScope scope = transmitter.readScoped(carrier)) {
+            assertThat(scope).isNotNull();
+            assertThat(this.holder.get(InvocationContext.class))
+                    .get()
+                    .extracting(InvocationContext::getRequestId, InvocationContext::getOriginIp)
+                    .containsExactly("rid-2", "10.0.0.2");
+        }
     }
 
     @Test
@@ -74,12 +76,13 @@ class ContextTransmitterTest {
         final ContextTransmitter transmitter =
                 new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.trustedInternal());
 
-        transmitter.readFrom(carrier);
-
-        assertThat(this.holder.get(AuthContext.class))
-                .get()
-                .extracting(AuthContext::getUserId, AuthContext::getUsername)
-                .containsExactly(42L, "alice");
+        try (ContextScope scope = transmitter.readScoped(carrier)) {
+            assertThat(scope).isNotNull();
+            assertThat(this.holder.get(AuthContext.class))
+                    .get()
+                    .extracting(AuthContext::getUserId, AuthContext::getUsername)
+                    .containsExactly(42L, "alice");
+        }
     }
 
     @Test
@@ -90,8 +93,58 @@ class ContextTransmitterTest {
         final ContextTransmitter transmitter =
                 new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.trustedInternal());
 
-        transmitter.readFrom(carrier);
+        try (ContextScope scope = transmitter.readScoped(carrier)) {
+            assertThat(scope).isNotNull();
+            assertThat(this.holder.get(AuthContext.class)).isEmpty();
+        }
+    }
 
-        assertThat(this.holder.get(AuthContext.class)).isEmpty();
+    @Test
+    void scopedReadClearsMissingAuthAndRestoresPreviousContext() {
+        this.holder.put(new InvocationContext("10.0.0.1", "rid-previous"));
+        this.holder.put(new AuthContext(42L, "alice"));
+        final MapContextCarrier carrier = new MapContextCarrier(Map.of(
+                InvocationContextCodec.REQUEST_ID, "rid-current",
+                InvocationContextCodec.ORIGIN_IP, "10.0.0.2"));
+        final ContextTransmitter transmitter =
+                new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.trustedInternal());
+
+        try (ContextScope scope = transmitter.readScoped(carrier)) {
+            assertThat(scope).isNotNull();
+            assertThat(this.holder.get(InvocationContext.class))
+                    .get()
+                    .extracting(InvocationContext::getRequestId)
+                    .isEqualTo("rid-current");
+            assertThat(this.holder.get(AuthContext.class)).isEmpty();
+        }
+
+        assertThat(this.holder.get(InvocationContext.class))
+                .get()
+                .extracting(InvocationContext::getRequestId)
+                .isEqualTo("rid-previous");
+        assertThat(this.holder.get(AuthContext.class))
+                .get()
+                .extracting(AuthContext::getUserId)
+                .isEqualTo(42L);
+    }
+
+    @Test
+    void scopedReadClearsInvalidAuthWithinScope() {
+        this.holder.put(new AuthContext(42L, "alice"));
+        final MapContextCarrier carrier = new MapContextCarrier(Map.of(
+                AuthContextCodec.USER_ID, "invalid",
+                AuthContextCodec.USERNAME, "mallory"));
+        final ContextTransmitter transmitter =
+                new ContextTransmitter(this.holder, this.holder, DefaultPropagationContextCodecs.trustedInternal());
+
+        try (ContextScope scope = transmitter.readScoped(carrier)) {
+            assertThat(scope).isNotNull();
+            assertThat(this.holder.get(AuthContext.class)).isEmpty();
+        }
+
+        assertThat(this.holder.get(AuthContext.class))
+                .get()
+                .extracting(AuthContext::getUsername)
+                .isEqualTo("alice");
     }
 }

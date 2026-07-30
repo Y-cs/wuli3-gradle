@@ -2,6 +2,7 @@ package com.kjs.wuli3.web.internal.response;
 
 import com.kjs.wuli3.core.error.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorSeverity;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertContext;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
@@ -83,7 +84,6 @@ public class WebExceptionHandler {
         MethodArgumentTypeMismatchException.class, ServletRequestBindingException.class,
         ConstraintViolationException.class, HttpMessageNotReadableException.class,
         HttpMediaTypeNotSupportedException.class, HttpRequestMethodNotSupportedException.class,
-        IllegalArgumentException.class,
     })
     public ResponseEntity<?> handleBadRequest(final Exception ex, final HttpServletRequest request) {
         return this.handleFrameworkException(ex, request);
@@ -193,6 +193,9 @@ public class WebExceptionHandler {
             final HttpServletRequest request,
             final HttpStatus status,
             final ErrorCode responseCode) {
+        if (!WebExceptionHandler.shouldAlert(error, status)) {
+            return;
+        }
         this.errorAlertNotifiers.dispatch(new ErrorAlertContext(
                 error,
                 status,
@@ -200,8 +203,19 @@ public class WebExceptionHandler {
                 this.requestId(),
                 request.getMethod(),
                 request.getRequestURI(),
-                request.getQueryString(),
                 request.getRemoteAddr()));
+    }
+
+    private static boolean shouldAlert(final Throwable error, final HttpStatus status) {
+        if (status.is5xxServerError()) {
+            return true;
+        }
+        if (error instanceof ErrorCodeException errorCodeException) {
+            final ErrorSeverity severity =
+                    errorCodeException.getResolvedErrorPolicy().severity();
+            return severity == ErrorSeverity.CRITICAL || severity == ErrorSeverity.FATAL;
+        }
+        return false;
     }
 
     private @Nullable String requestId() {

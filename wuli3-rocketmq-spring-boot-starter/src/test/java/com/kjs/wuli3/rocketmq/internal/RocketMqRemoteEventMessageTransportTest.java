@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import com.kjs.wuli3.event.EventEnvelope;
 import com.kjs.wuli3.event.EventMessageTransport.UnsupportedCapabilityException;
 import com.kjs.wuli3.event.PublishOptions;
-import com.kjs.wuli3.rocketmq.autoconfigure.RocketMqContextMode;
 import java.time.Duration;
 import java.time.Instant;
 import org.apache.rocketmq.client.producer.SendCallback;
@@ -61,8 +60,7 @@ class RocketMqRemoteEventMessageTransportTest {
     }
 
     private static RocketMqRemoteEventMessageTransport transport(final RocketMQTemplate template) {
-        return new RocketMqRemoteEventMessageTransport(
-                template, new RocketMqEventMessageEncoder(null, RocketMqContextMode.INVOCATION_ONLY));
+        return new RocketMqRemoteEventMessageTransport(template, new RocketMqEventMessageEncoder(null));
     }
 
     private static EventEnvelope<String> envelope() {

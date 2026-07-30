@@ -57,7 +57,7 @@ class ClientIpResolverCidrTest {
 
     private static DefaultClientIpResolver resolver(final String... trustedProxyCidrs) {
         final WebContextProperties properties = new WebContextProperties();
-        properties.setTrustedProxyCidr(new ArrayList<>(List.of(trustedProxyCidrs)));
+        properties.setTrustedProxyCidrs(new ArrayList<>(List.of(trustedProxyCidrs)));
         return new DefaultClientIpResolver(properties);
     }
 

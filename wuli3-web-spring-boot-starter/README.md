@@ -11,7 +11,8 @@ Spring MVC Web 能力增强 starter。
 - 参数校验错误映射。
 - `X-Request-Id` 生成和透传。
 - MDC `requestId` 写入。
-- `ContextPropagator`、`ContextTransmitter` 等上下文传播基础 Bean。
+- `ContextPropagator` 等线程内上下文传播基础 Bean。
+- 为 Boot 管理的 `RestClient.Builder` 和 `RestTemplateBuilder` 自动配置调用链上下文出站传播。
 - Java Time Jackson 配置。
 
 统一响应和异常处理的完整使用说明见 [Web 统一响应处理使用文档](docs/response-handling.md)。
@@ -43,7 +44,12 @@ Spring MVC Web 能力增强 starter。
 - 方法或类标注 `@NativeResponse` 时，默认只跳过成功响应包装，异常仍返回统一错误体。
 - 方法或类标注 `@NativeResponse(NativeResponseMode.ALL)` 时，成功和异常都跳过统一响应体；异常返回 Spring 标准 `ProblemDetail`。
 - 异常场景使用语义 HTTP 状态码，例如参数错误 400、方法不支持 405、媒体类型不支持 415、系统异常 500。
-- 参数校验失败时，字段级错误详情默认放在失败响应的 `data.errors` 中。
+- 业务代码需要返回可识别错误时必须抛出 `ErrorCodeException`；裸 `IllegalArgumentException`、`IllegalStateException`
+  等编程异常按服务端 500 处理。
+- 参数校验失败时，字段级错误详情默认放在失败响应的 `data.errors` 中，每项只包含稳定的 `field`、`code`
+  和 `message`，不回显 rejected/invalid value。
+- `ErrorAlertNotifier` 默认只接收 5xx，或 core-error 策略严重度为 `CRITICAL`、`FATAL` 的异常。
+- HTTP 客户端出站只传播 `X-Request-Id` 和 `X-Origin-Ip`，不会自动传播用户认证信息。
 
 配置项：
 

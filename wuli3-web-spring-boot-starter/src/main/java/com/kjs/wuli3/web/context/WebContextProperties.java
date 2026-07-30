@@ -80,7 +80,7 @@ public class WebContextProperties {
     /**
      * 允许作为直接 peer 信任转发头的代理网段；为空时忽略所有转发头。
      */
-    private List<@NotBlank String> trustedProxyCidr = new ArrayList<>();
+    private List<@NotBlank String> trustedProxyCidrs = new ArrayList<>();
 
     /**
      * 命中可信代理网段后用于解析客户端 IP 的请求头优先级。

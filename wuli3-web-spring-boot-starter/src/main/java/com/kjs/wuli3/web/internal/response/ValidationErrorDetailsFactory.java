@@ -19,6 +19,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
  */
 final class ValidationErrorDetailsFactory {
 
+    private static final String MISSING_PARAMETER = "MissingParameter";
+    private static final String TYPE_MISMATCH = "TypeMismatch";
+    private static final String MISSING_PARAMETER_MESSAGE = "缺少必填参数";
+    private static final String TYPE_MISMATCH_MESSAGE = "参数类型错误";
+
     private final WebResponseProperties responseProperties;
 
     ValidationErrorDetailsFactory(final WebResponseProperties responseProperties) {
@@ -38,13 +43,13 @@ final class ValidationErrorDetailsFactory {
             case MissingServletRequestParameterException missingParameterException ->
                 new ValidationErrorDetails(List.of(new ValidationErrorDetails.Item(
                         missingParameterException.getParameterName(),
-                        ValidationErrorDetailsFactory.detailMessage(missingParameterException),
-                        null)));
+                        ValidationErrorDetailsFactory.MISSING_PARAMETER,
+                        ValidationErrorDetailsFactory.MISSING_PARAMETER_MESSAGE)));
             case MethodArgumentTypeMismatchException typeMismatchException ->
                 new ValidationErrorDetails(List.of(new ValidationErrorDetails.Item(
                         typeMismatchException.getName(),
-                        ValidationErrorDetailsFactory.detailMessage(typeMismatchException),
-                        typeMismatchException.getValue())));
+                        ValidationErrorDetailsFactory.TYPE_MISMATCH,
+                        ValidationErrorDetailsFactory.TYPE_MISMATCH_MESSAGE)));
             default -> null;
         };
     }
@@ -54,12 +59,14 @@ final class ValidationErrorDetailsFactory {
         for (final FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             errors.add(new ValidationErrorDetails.Item(
                     fieldError.getField(),
-                    ValidationErrorDetailsFactory.message(fieldError),
-                    fieldError.getRejectedValue()));
+                    ValidationErrorDetailsFactory.code(fieldError),
+                    ValidationErrorDetailsFactory.message(fieldError)));
         }
         for (final ObjectError objectError : ex.getBindingResult().getGlobalErrors()) {
             errors.add(new ValidationErrorDetails.Item(
-                    objectError.getObjectName(), ValidationErrorDetailsFactory.message(objectError), null));
+                    objectError.getObjectName(),
+                    ValidationErrorDetailsFactory.code(objectError),
+                    ValidationErrorDetailsFactory.message(objectError)));
         }
         return new ValidationErrorDetails(errors);
     }
@@ -68,24 +75,24 @@ final class ValidationErrorDetailsFactory {
         final List<ValidationErrorDetails.Item> errors = ex.getConstraintViolations().stream()
                 .map(violation -> new ValidationErrorDetails.Item(
                         ValidationErrorDetailsFactory.lastPathNode(violation.getPropertyPath()),
-                        violation.getMessage(),
-                        violation.getInvalidValue()))
+                        violation
+                                .getConstraintDescriptor()
+                                .getAnnotation()
+                                .annotationType()
+                                .getSimpleName(),
+                        violation.getMessage()))
                 .toList();
         return new ValidationErrorDetails(errors);
     }
 
     private static String message(final ObjectError objectError) {
         final String defaultMessage = objectError.getDefaultMessage();
+        return defaultMessage == null ? WebErrors.BAD_REQUEST.getMessage() : defaultMessage;
+    }
+
+    private static String code(final ObjectError objectError) {
         final String code = objectError.getCode();
-        return defaultMessage == null ? ValidationErrorDetailsFactory.detailMessage(code) : defaultMessage;
-    }
-
-    private static String detailMessage(final Throwable ex) {
-        return ValidationErrorDetailsFactory.detailMessage(ex.getMessage());
-    }
-
-    private static String detailMessage(final @Nullable String message) {
-        return message == null ? WebErrors.BAD_REQUEST.getMessage() : message;
+        return code == null ? WebErrors.BAD_REQUEST.getName() : code;
     }
 
     private static @Nullable String lastPathNode(final Path path) {

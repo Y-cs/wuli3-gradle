@@ -7,9 +7,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.kjs.wuli3.event.EventEnvelope;
 import com.kjs.wuli3.event.EventMessageTransport.UnsupportedCapabilityException;
 import com.kjs.wuli3.event.PublishOptions;
+import com.kjs.wuli3.propagation.codec.DefaultPropagationContextCodecs;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextStore;
+import com.kjs.wuli3.propagation.transmission.ContextTransmitter;
 import com.kjs.wuli3.rocketmq.autoconfigure.RocketMqContextMode;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -33,7 +35,7 @@ class RocketMqEventMessageEncoderTest {
                 "payload");
 
         final RocketMqWireMessage wireMessage = new RocketMqEventMessageEncoder(
-                        contextStore, RocketMqContextMode.INVOCATION_ONLY)
+                        RocketMqEventMessageEncoderTest.transmitter(contextStore, RocketMqContextMode.INVOCATION_ONLY))
                 .encode(envelope, RocketMqEventMessageEncoderTest.remote());
         final String body = new String(wireMessage.body(), StandardCharsets.UTF_8);
 
@@ -49,7 +51,7 @@ class RocketMqEventMessageEncoderTest {
         contextStore.put(new AuthContext(7L, "alice"));
 
         final RocketMqWireMessage wireMessage = new RocketMqEventMessageEncoder(
-                        contextStore, RocketMqContextMode.TRUSTED_INTERNAL)
+                        RocketMqEventMessageEncoderTest.transmitter(contextStore, RocketMqContextMode.TRUSTED_INTERNAL))
                 .encode(RocketMqEventMessageEncoderTest.envelope("orders"), RocketMqEventMessageEncoderTest.remote());
 
         assertThat(new String(wireMessage.body(), StandardCharsets.UTF_8)).contains("X-User-Id", "7", "alice");
@@ -57,8 +59,7 @@ class RocketMqEventMessageEncoderTest {
 
     @Test
     void rejectsInvalidRemoteCapabilitiesBeforeCallingAnSdk() {
-        final RocketMqEventMessageEncoder encoder =
-                new RocketMqEventMessageEncoder(null, RocketMqContextMode.INVOCATION_ONLY);
+        final RocketMqEventMessageEncoder encoder = new RocketMqEventMessageEncoder(null);
 
         assertThatThrownBy(() -> encoder.encode(
                         RocketMqEventMessageEncoderTest.envelope("orders"),
@@ -73,8 +74,7 @@ class RocketMqEventMessageEncoderTest {
 
     @Test
     void rejectsLocalChannel() {
-        final RocketMqEventMessageEncoder encoder =
-                new RocketMqEventMessageEncoder(null, RocketMqContextMode.INVOCATION_ONLY);
+        final RocketMqEventMessageEncoder encoder = new RocketMqEventMessageEncoder(null);
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() ->
@@ -88,5 +88,15 @@ class RocketMqEventMessageEncoderTest {
 
     private static PublishOptions remote() {
         return new PublishOptions(PublishOptions.Channel.REMOTE);
+    }
+
+    private static ContextTransmitter transmitter(
+            final ContextStore contextStore, final RocketMqContextMode contextMode) {
+        return new ContextTransmitter(
+                contextStore,
+                contextStore,
+                contextMode == RocketMqContextMode.TRUSTED_INTERNAL
+                        ? DefaultPropagationContextCodecs.trustedInternal()
+                        : DefaultPropagationContextCodecs.invocationOnly());
     }
 }

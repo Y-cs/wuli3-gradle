@@ -2,6 +2,7 @@ package com.kjs.wuli3.json.provider;
 
 import com.fasterxml.jackson.databind.cfg.ConfigFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Locale;
 import java.util.Map;
@@ -26,6 +27,15 @@ public final class JacksonProvider {
 
     public static JavaTimeModule javaTimeModule() {
         return JSON_MAPPER_TIME_ASSEMBLY.javaTimeModule();
+    }
+
+    /**
+     * 为容器管理且采用增量配置的映射器创建具有唯一标识的时间模块。
+     *
+     * @return 在容器默认配置后应用项目日期时间格式的模块
+     */
+    public static SimpleModule javaTimeOverrideModule() {
+        return JSON_MAPPER_TIME_ASSEMBLY.javaTimeOverrideModule();
     }
 
     public static JsonMapperBaseAssembly getJsonMapperBaseAssembly() {

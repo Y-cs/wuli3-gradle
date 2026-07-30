@@ -40,10 +40,10 @@ public class WebJsonAutoConfiguration {
                         desensitizationStrategies.orderedStream().toList()),
                 visibilityPolicy.getIfAvailable(DesensitizationVisibilityPolicy::alwaysMask));
         return builder -> {
-            builder.modules(
-                    JacksonProvider.javaTimeModule(),
+            builder.postConfigurer(objectMapper -> objectMapper.registerModules(
+                    JacksonProvider.javaTimeOverrideModule(),
                     resourceAssembly.resourcePathModule(),
-                    desensitizationAssembly.desensitizationModule());
+                    desensitizationAssembly.desensitizationModule()));
             builder.locale(JacksonProvider.defaultLocale());
             builder.timeZone(JacksonProvider.defaultTimeZone());
             for (final ConfigFeature feature : JacksonProvider.featuresToEnable()) {

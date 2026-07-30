@@ -7,8 +7,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.kjs.wuli3.core.error.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorSeverity;
 import com.kjs.wuli3.core.error.ErrorVisibility;
 import com.kjs.wuli3.core.error.SystemErrors;
 import com.kjs.wuli3.json.datatype.resource.ResourcePath;
@@ -48,6 +54,8 @@ import org.springframework.boot.context.annotation.ImportCandidates;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.web.client.RestClientCustomizer;
+import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -102,8 +110,11 @@ class WebAutoConfigurationTest {
     @Test
     void contextPropagationBeansAreConfigured() {
         assertThat(applicationContext.getBean(ContextPropagator.class)).isNotNull();
-        assertThat(applicationContext.getBean(InvocationContextCodec.class)).isNotNull();
-        assertThat(applicationContext.getBean(ContextTransmitter.class)).isNotNull();
+        assertThat(applicationContext.getBeansOfType(RestClientCustomizer.class))
+                .containsKey("wuli3InvocationContextRestClientCustomizer");
+        assertThat(applicationContext.getBeansOfType(RestTemplateCustomizer.class))
+                .containsKey("wuli3InvocationContextRestTemplateCustomizer");
+        assertThat(applicationContext.getBeansOfType(ContextTransmitter.class)).isEmpty();
         assertThat(RequestIds.HEADER_NAME).isEqualTo(InvocationContextCodec.REQUEST_ID);
     }
 
@@ -145,6 +156,13 @@ class WebAutoConfigurationTest {
     }
 
     @Test
+    void webObjectMapperKeepsBusinessModuleBeans() throws Exception {
+        mockMvc.perform(get("/business-json"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value("business:kept"));
+    }
+
+    @Test
     void webContextContainsRequestMetadata() throws Exception {
         mockMvc.perform(get("/web-context?keyword=java")
                         .header(RequestIds.HEADER_NAME, "rid-web")
@@ -152,10 +170,7 @@ class WebAutoConfigurationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.requestId").value("rid-web"))
                 .andExpect(jsonPath("$.data.method").value("GET"))
-                .andExpect(jsonPath("$.data.requestUri").value("/web-context"))
-                .andExpect(jsonPath("$.data.queryString").value("keyword=java"))
-                .andExpect(jsonPath("$.data.header").value("test-header"))
-                .andExpect(jsonPath("$.data.parameter").value("java"));
+                .andExpect(jsonPath("$.data.requestUri").value("/web-context"));
     }
 
     @Test
@@ -246,6 +261,8 @@ class WebAutoConfigurationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("WEB.BAD_REQUEST"))
                 .andExpect(jsonPath("$.data.errors[0].field").value("name"))
+                .andExpect(jsonPath("$.data.errors[0].code").value("NotBlank"))
+                .andExpect(jsonPath("$.data.errors[0].rejectedValue").doesNotExist())
                 .andExpect(jsonPath("$.data.errors[0].message").value("不能为空"));
     }
 
@@ -279,15 +296,34 @@ class WebAutoConfigurationTest {
         errorAlertNotifier.reset();
         failingErrorAlertNotifier.reset();
 
-        mockMvc.perform(get("/boom").header(RequestIds.HEADER_NAME, "rid-alert"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/critical").header(RequestIds.HEADER_NAME, "rid-alert"))
+                .andExpect(status().isInternalServerError());
 
         assertThat(errorAlertNotifier.await()).isTrue();
         assertThat(failingErrorAlertNotifier.await()).isTrue();
         assertThat(errorAlertNotifier.error()).isInstanceOf(ErrorCodeException.class);
-        assertThat(errorAlertNotifier.requestUri()).isEqualTo("/boom");
-        assertThat(errorAlertNotifier.status()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(errorAlertNotifier.requestUri()).isEqualTo("/critical");
+        assertThat(errorAlertNotifier.status()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(errorAlertNotifier.responseCode()).isEqualTo(WebErrors.INTERNAL_ERROR);
+    }
+
+    @Test
+    void normalBusinessErrorDoesNotAlert() throws Exception {
+        errorAlertNotifier.reset();
+        failingErrorAlertNotifier.reset();
+
+        mockMvc.perform(get("/boom")).andExpect(status().isBadRequest());
+
+        assertThat(errorAlertNotifier.await(100)).isFalse();
+        assertThat(failingErrorAlertNotifier.await(100)).isFalse();
+    }
+
+    @Test
+    void illegalArgumentIsTreatedAsServerFailure() throws Exception {
+        mockMvc.perform(get("/illegal-argument"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value(WebErrors.INTERNAL_ERROR.getMessage()));
     }
 
     @Test
@@ -351,6 +387,20 @@ class WebAutoConfigurationTest {
         TestResourcePathResolver testResourcePathResolver() {
             return new TestResourcePathResolver();
         }
+
+        @Bean
+        Module businessJacksonModule() {
+            final SimpleModule module = new SimpleModule("business-test");
+            module.addSerializer(BusinessValue.class, new JsonSerializer<>() {
+                @Override
+                public void serialize(
+                        final BusinessValue value, final JsonGenerator generator, final SerializerProvider serializers)
+                        throws IOException {
+                    generator.writeString("business:" + value.value());
+                }
+            });
+            return module;
+        }
     }
 
     static final class TestErrorAlertNotifier implements ErrorAlertNotifier {
@@ -375,6 +425,10 @@ class WebAutoConfigurationTest {
 
         private boolean await() throws InterruptedException {
             return this.latch.get().await(2, TimeUnit.SECONDS);
+        }
+
+        private boolean await(final long timeoutMillis) throws InterruptedException {
+            return this.latch.get().await(timeoutMillis, TimeUnit.MILLISECONDS);
         }
 
         private @Nullable Throwable error() {
@@ -410,6 +464,10 @@ class WebAutoConfigurationTest {
         private boolean await() throws InterruptedException {
             return this.latch.get().await(2, TimeUnit.SECONDS);
         }
+
+        private boolean await(final long timeoutMillis) throws InterruptedException {
+            return this.latch.get().await(timeoutMillis, TimeUnit.MILLISECONDS);
+        }
     }
 
     @RestController
@@ -442,10 +500,7 @@ class WebAutoConfigurationTest {
             return new WebContextView(
                     webContextAccessor.requestId().orElse(""),
                     webContextAccessor.method().orElse(""),
-                    webContextAccessor.requestUri().orElse(""),
-                    webContextAccessor.queryString().orElse(""),
-                    webContextAccessor.header("X-Test").orElse(""),
-                    webContextAccessor.parameter("keyword").orElse(""));
+                    webContextAccessor.requestUri().orElse(""));
         }
 
         @PostMapping("/body")
@@ -473,6 +528,11 @@ class WebAutoConfigurationTest {
         @GetMapping("/json-time")
         TimeView jsonTime() {
             return new TimeView(LocalDateTime.of(2026, 6, 22, 10, 30, 5));
+        }
+
+        @GetMapping("/business-json")
+        BusinessValue businessJson() {
+            return new BusinessValue("kept");
         }
 
         @GetMapping("/entity")
@@ -519,6 +579,16 @@ class WebAutoConfigurationTest {
             throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT);
         }
 
+        @GetMapping("/critical")
+        String critical() {
+            throw new ErrorCodeException(SystemErrors.INTERNAL_ERROR).severity(ErrorSeverity.CRITICAL);
+        }
+
+        @GetMapping("/illegal-argument")
+        String illegalArgument() {
+            throw new IllegalArgumentException("programming error");
+        }
+
         @GetMapping("/code-only")
         String codeOnly() {
             throw new ErrorCodeException(SystemErrors.UNSUPPORTED_OPERATION, "hidden message")
@@ -546,8 +616,7 @@ class WebAutoConfigurationTest {
 
     record SecurityView(Long userId, String username) {}
 
-    record WebContextView(
-            String requestId, String method, String requestUri, String queryString, String header, String parameter) {}
+    record WebContextView(String requestId, String method, String requestUri) {}
 
     record BodyView(String first, String second) {}
 
@@ -556,6 +625,8 @@ class WebAutoConfigurationTest {
             String path) {}
 
     record TimeView(LocalDateTime dateTime) {}
+
+    record BusinessValue(String value) {}
 
     record ValidatedRequest(@NotBlank(message = "不能为空") String name) {}
 

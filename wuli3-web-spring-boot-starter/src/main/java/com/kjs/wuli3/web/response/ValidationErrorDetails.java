@@ -15,8 +15,5 @@ public record ValidationErrorDetails(List<Item> errors) {
     /**
      * 单个错误项。
      */
-    public record Item(
-            @Nullable String field,
-            String message,
-            @Nullable Object rejectedValue) {}
+    public record Item(@Nullable String field, String code, String message) {}
 }

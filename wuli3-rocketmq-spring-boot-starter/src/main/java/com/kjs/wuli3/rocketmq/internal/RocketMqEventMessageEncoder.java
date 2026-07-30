@@ -4,12 +4,10 @@ import com.kjs.wuli3.event.EventEnvelope;
 import com.kjs.wuli3.event.EventMessageTransport.UnsupportedCapabilityException;
 import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.json.core.Jsons;
+import com.kjs.wuli3.propagation.carrier.MapContextCarrier;
 import com.kjs.wuli3.propagation.codec.AuthContextCodec;
 import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
-import com.kjs.wuli3.propagation.context.AuthContext;
-import com.kjs.wuli3.propagation.context.InvocationContext;
-import com.kjs.wuli3.propagation.store.ContextReader;
-import com.kjs.wuli3.rocketmq.autoconfigure.RocketMqContextMode;
+import com.kjs.wuli3.propagation.transmission.ContextTransmitter;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -31,19 +29,15 @@ public final class RocketMqEventMessageEncoder {
             AuthContextCodec.USER_ID.toLowerCase(Locale.ROOT),
             AuthContextCodec.USERNAME.toLowerCase(Locale.ROOT));
 
-    private final @Nullable ContextReader contextReader;
-    private final RocketMqContextMode contextMode;
+    private final @Nullable ContextTransmitter contextTransmitter;
 
     /**
-     * 使用当前上下文重建保留传播头信息的编码器。
+     * 使用专属上下文传播器重建保留传播头信息的编码器。
      *
-     * @param contextReader 可选的上下文来源
-     * @param contextMode 允许传播的上下文范围
+     * @param contextTransmitter 可选的 RocketMQ 上下文传播器
      */
-    public RocketMqEventMessageEncoder(
-            final @Nullable ContextReader contextReader, final RocketMqContextMode contextMode) {
-        this.contextReader = contextReader;
-        this.contextMode = Objects.requireNonNull(contextMode, "contextMode");
+    public RocketMqEventMessageEncoder(final @Nullable ContextTransmitter contextTransmitter) {
+        this.contextTransmitter = contextTransmitter;
     }
 
     /**
@@ -86,19 +80,12 @@ public final class RocketMqEventMessageEncoder {
                 headers.put(key, value);
             }
         });
-        if (this.contextReader == null) {
+        if (this.contextTransmitter == null) {
             return headers;
         }
-        this.contextReader.get(InvocationContext.class).ifPresent(context -> {
-            headers.put(InvocationContextCodec.REQUEST_ID, context.getRequestId());
-            headers.put(InvocationContextCodec.ORIGIN_IP, context.getOriginIp());
-        });
-        if (this.contextMode == RocketMqContextMode.TRUSTED_INTERNAL) {
-            this.contextReader.get(AuthContext.class).ifPresent(context -> {
-                headers.put(AuthContextCodec.USER_ID, String.valueOf(context.getUserId()));
-                headers.put(AuthContextCodec.USERNAME, context.getUsername());
-            });
-        }
+        final MapContextCarrier carrier = new MapContextCarrier();
+        this.contextTransmitter.writeTo(carrier);
+        headers.putAll(carrier.asMap());
         return headers;
     }
 

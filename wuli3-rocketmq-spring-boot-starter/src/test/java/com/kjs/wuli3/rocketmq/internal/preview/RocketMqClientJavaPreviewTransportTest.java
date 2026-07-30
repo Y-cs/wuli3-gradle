@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import com.kjs.wuli3.event.EventEnvelope;
 import com.kjs.wuli3.event.PublishOptions;
-import com.kjs.wuli3.rocketmq.autoconfigure.RocketMqContextMode;
 import com.kjs.wuli3.rocketmq.internal.RocketMqEventMessageEncoder;
 import java.lang.reflect.Modifier;
 import java.time.Clock;
@@ -68,10 +67,7 @@ class RocketMqClientJavaPreviewTransportTest {
         when(builder.build()).thenReturn(mock(Message.class));
         final Clock clock = Clock.fixed(Instant.ofEpochMilli(1_000L), ZoneOffset.UTC);
         final RocketMqClientJavaPreviewTransport transport = new RocketMqClientJavaPreviewTransport(
-                producer,
-                clientServiceProvider,
-                new RocketMqEventMessageEncoder(null, RocketMqContextMode.INVOCATION_ONLY),
-                clock);
+                producer, clientServiceProvider, new RocketMqEventMessageEncoder(null), clock);
 
         transport.send(
                 RocketMqClientJavaPreviewTransportTest.envelope(),
@@ -98,10 +94,7 @@ class RocketMqClientJavaPreviewTransportTest {
     private static RocketMqClientJavaPreviewTransport transport(
             final Producer producer, final ClientServiceProvider clientServiceProvider) {
         return new RocketMqClientJavaPreviewTransport(
-                producer,
-                clientServiceProvider,
-                new RocketMqEventMessageEncoder(null, RocketMqContextMode.INVOCATION_ONLY),
-                Clock.systemUTC());
+                producer, clientServiceProvider, new RocketMqEventMessageEncoder(null), Clock.systemUTC());
     }
 
     private static MessageBuilder builder(final ClientServiceProvider clientServiceProvider) {

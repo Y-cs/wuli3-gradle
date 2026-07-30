@@ -69,8 +69,7 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
                 || error instanceof MethodArgumentTypeMismatchException
                 || error instanceof ServletRequestBindingException
                 || error instanceof HttpMessageNotReadableException
-                || error instanceof ConstraintViolationException
-                || error instanceof IllegalArgumentException;
+                || error instanceof ConstraintViolationException;
     }
 
     private static HttpStatus status(final ErrorSeverity severity) {

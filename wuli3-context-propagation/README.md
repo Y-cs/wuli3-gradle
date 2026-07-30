@@ -89,7 +89,7 @@ final MapContextCarrier carrier = new MapContextCarrier();
 transmitter.writeTo(carrier);
 ```
 
-从载体恢复上下文：
+从载体恢复上下文时必须使用作用域，防止线程复用时残留上一请求身份：
 
 ```java
 final MapContextCarrier carrier = new MapContextCarrier(Map.of(
@@ -97,7 +97,9 @@ final MapContextCarrier carrier = new MapContextCarrier(Map.of(
         InvocationContextCodec.ORIGIN_IP, "10.0.0.1"
 ));
 
-transmitter.readFrom(carrier);
+try (ContextScope ignored = transmitter.readScoped(carrier)) {
+    // 在协议入站处理范围内调用业务逻辑
+}
 ```
 
 可信内部调用链需要传播认证元数据时，显式使用 `trustedInternal()`：

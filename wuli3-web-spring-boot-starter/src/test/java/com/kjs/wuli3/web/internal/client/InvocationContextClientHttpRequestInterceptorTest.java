@@ -5,10 +5,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.kjs.wuli3.propagation.codec.AuthContextCodec;
-import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
+import com.kjs.wuli3.propagation.encoding.AuthContextEncoder;
+import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
@@ -28,10 +28,10 @@ class InvocationContextClientHttpRequestInterceptorTest {
         final InvocationContextClientHttpRequestInterceptor interceptor =
                 new InvocationContextClientHttpRequestInterceptor(contextStore);
         final HttpHeaders headers = new HttpHeaders();
-        headers.set(InvocationContextCodec.REQUEST_ID, "forged-request");
-        headers.set(InvocationContextCodec.ORIGIN_IP, "203.0.113.8");
-        headers.set(AuthContextCodec.USER_ID, "99");
-        headers.set(AuthContextCodec.USERNAME, "mallory");
+        headers.set(InvocationContextEncoder.REQUEST_ID, "forged-request");
+        headers.set(InvocationContextEncoder.ORIGIN_IP, "203.0.113.8");
+        headers.set(AuthContextEncoder.USER_ID, "99");
+        headers.set(AuthContextEncoder.USERNAME, "mallory");
         final HttpRequest request = mock(HttpRequest.class);
         final ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
         final ClientHttpResponse response = mock(ClientHttpResponse.class);
@@ -43,21 +43,24 @@ class InvocationContextClientHttpRequestInterceptorTest {
 
         assertThat(interceptor.intercept(request, body, execution)).isSameAs(response);
 
-        assertThat(headers.getFirst(InvocationContextCodec.REQUEST_ID)).isEqualTo("request-42");
-        assertThat(headers.getFirst(InvocationContextCodec.ORIGIN_IP)).isEqualTo("10.0.0.8");
-        assertThat(headers).doesNotContainKey(AuthContextCodec.USER_ID).doesNotContainKey(AuthContextCodec.USERNAME);
+        assertThat(headers.getFirst(InvocationContextEncoder.REQUEST_ID)).isEqualTo("request-42");
+        assertThat(headers.getFirst(InvocationContextEncoder.ORIGIN_IP)).isEqualTo("10.0.0.8");
+        assertThat(headers)
+                .doesNotContainKey(AuthContextEncoder.USER_ID)
+                .doesNotContainKey(AuthContextEncoder.USERNAME);
         verify(execution).execute(request, body);
     }
 
     @Test
     void removesReservedHeadersWhenNoContextIsAvailable() throws Exception {
+        final ContextStore contextStore = new ContextStore();
         final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(new ContextStore());
+                new InvocationContextClientHttpRequestInterceptor(contextStore);
         final HttpHeaders headers = new HttpHeaders();
-        headers.set(InvocationContextCodec.REQUEST_ID, "forged-request");
-        headers.set(InvocationContextCodec.ORIGIN_IP, "203.0.113.8");
-        headers.set(AuthContextCodec.USER_ID, "99");
-        headers.set(AuthContextCodec.USERNAME, "mallory");
+        headers.set(InvocationContextEncoder.REQUEST_ID, "forged-request");
+        headers.set(InvocationContextEncoder.ORIGIN_IP, "203.0.113.8");
+        headers.set(AuthContextEncoder.USER_ID, "99");
+        headers.set(AuthContextEncoder.USERNAME, "mallory");
         final HttpRequest request = mock(HttpRequest.class);
         final ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
         final ClientHttpResponse response = mock(ClientHttpResponse.class);
@@ -68,9 +71,9 @@ class InvocationContextClientHttpRequestInterceptorTest {
         assertThat(interceptor.intercept(request, body, execution)).isSameAs(response);
 
         assertThat(headers)
-                .doesNotContainKey(InvocationContextCodec.REQUEST_ID)
-                .doesNotContainKey(InvocationContextCodec.ORIGIN_IP)
-                .doesNotContainKey(AuthContextCodec.USER_ID)
-                .doesNotContainKey(AuthContextCodec.USERNAME);
+                .doesNotContainKey(InvocationContextEncoder.REQUEST_ID)
+                .doesNotContainKey(InvocationContextEncoder.ORIGIN_IP)
+                .doesNotContainKey(AuthContextEncoder.USER_ID)
+                .doesNotContainKey(AuthContextEncoder.USERNAME);
     }
 }

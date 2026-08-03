@@ -1,42 +1,20 @@
 package com.kjs.wuli3.propagation.context;
 
-import java.util.Map;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 /**
- * InvocationContext
+ * 调用链中需要传播的请求元数据。
  *
- * @author GuoYang create on 2026/6/25 15:00
+ * @param originIp 调用来源的 IP 地址
+ * @param requestId 用于关联调用链路的请求标识
  */
-@Getter
-@ToString
-@EqualsAndHashCode
-public class InvocationContext extends AbstractContext implements PropagationContext {
+public record InvocationContext(String originIp, String requestId) implements PropagationContext {
 
-    private final String originIp;
-
-    private final String requestId;
-
-    public InvocationContext(final String originIp, final String requestId) {
-        this(Map.of(), originIp, requestId);
-    }
-
-    private InvocationContext(
-            final Map<ContextKey<?>, Object> extensions, final String originIp, final String requestId) {
-        super(extensions);
-        this.originIp = originIp;
-        this.requestId = requestId;
-    }
-
+    /**
+     * 返回调用上下文的类型，用作上下文容器中的存取键。
+     *
+     * @return {@link InvocationContext} 的类型
+     */
     @Override
-    public Context snapshotCopy() {
-        return new InvocationContext(this.extensionSnapshot(), this.originIp, this.requestId);
-    }
-
-    @Override
-    public Class<? extends Context> type() {
+    public Class<? extends PropagationContext> type() {
         return InvocationContext.class;
     }
 }

@@ -4,10 +4,13 @@ import com.kjs.wuli3.event.EventEnvelope;
 import com.kjs.wuli3.event.EventMessageTransport.UnsupportedCapabilityException;
 import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.json.core.Jsons;
-import com.kjs.wuli3.propagation.carrier.MapContextCarrier;
-import com.kjs.wuli3.propagation.codec.AuthContextCodec;
-import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
-import com.kjs.wuli3.propagation.transmission.ContextTransmitter;
+import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
+import com.kjs.wuli3.propagation.context.InvocationContext;
+import com.kjs.wuli3.propagation.encoding.AuthContextEncoder;
+import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
+import com.kjs.wuli3.propagation.store.ContextReader;
+import com.kjs.wuli3.rocketmq.autoconfigure.RocketMqContextMode;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -18,33 +21,39 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
-/** 在不依赖任一 RocketMQ Producer SDK 的前提下编码公共事件线协议。 */
+/**
+ * 在不依赖任一 RocketMQ Producer SDK 的前提下编码公共事件线协议。
+ */
 public final class RocketMqEventMessageEncoder {
 
     private static final int MAX_TOPIC_BYTES = 127;
     private static final Pattern TOPIC_PATTERN = Pattern.compile("[%a-zA-Z0-9_-]+");
     private static final Set<String> RESERVED_HEADERS = Set.of(
-            InvocationContextCodec.REQUEST_ID.toLowerCase(Locale.ROOT),
-            InvocationContextCodec.ORIGIN_IP.toLowerCase(Locale.ROOT),
-            AuthContextCodec.USER_ID.toLowerCase(Locale.ROOT),
-            AuthContextCodec.USERNAME.toLowerCase(Locale.ROOT));
+            InvocationContextEncoder.REQUEST_ID.toLowerCase(Locale.ROOT),
+            InvocationContextEncoder.ORIGIN_IP.toLowerCase(Locale.ROOT),
+            AuthContextEncoder.USER_ID.toLowerCase(Locale.ROOT),
+            AuthContextEncoder.USERNAME.toLowerCase(Locale.ROOT));
 
-    private final @Nullable ContextTransmitter contextTransmitter;
+    private final @Nullable ContextReader contextReader;
+    private final RocketMqContextMode contextMode;
 
     /**
-     * 使用专属上下文传播器重建保留传播头信息的编码器。
+     * 使用当前上下文重建保留传播头信息的编码器。
      *
-     * @param contextTransmitter 可选的 RocketMQ 上下文传播器
+     * @param contextReader 可选的当前上下文读取器
+     * @param contextMode   可跨越 RocketMQ 边界的上下文类型
      */
-    public RocketMqEventMessageEncoder(final @Nullable ContextTransmitter contextTransmitter) {
-        this.contextTransmitter = contextTransmitter;
+    public RocketMqEventMessageEncoder(
+            final @Nullable ContextReader contextReader, final RocketMqContextMode contextMode) {
+        this.contextReader = contextReader;
+        this.contextMode = Objects.requireNonNull(contextMode, "contextMode");
     }
 
     /**
      * 校验并序列化事件，不调用任一 RocketMQ 客户端 SDK。
      *
      * @param envelope 待序列化事件
-     * @param options 请求的远程投递能力
+     * @param options  请求的远程投递能力
      * @return 与 SDK 无关的线消息
      */
     public RocketMqWireMessage encode(final EventEnvelope<?> envelope, final PublishOptions options) {
@@ -80,12 +89,16 @@ public final class RocketMqEventMessageEncoder {
                 headers.put(key, value);
             }
         });
-        if (this.contextTransmitter == null) {
+        final @Nullable ContextReader currentContextReader = this.contextReader;
+        if (currentContextReader == null) {
             return headers;
         }
-        final MapContextCarrier carrier = new MapContextCarrier();
-        this.contextTransmitter.writeTo(carrier);
-        headers.putAll(carrier.asMap());
+        final ContextSnapshot snapshot = currentContextReader.capture();
+        snapshot.get(InvocationContext.class)
+                .ifPresent(context -> InvocationContextEncoder.writeTo(context, headers::put));
+        if (this.contextMode == RocketMqContextMode.TRUSTED_INTERNAL) {
+            snapshot.get(AuthContext.class).ifPresent(context -> AuthContextEncoder.writeTo(context, headers::put));
+        }
         return headers;
     }
 

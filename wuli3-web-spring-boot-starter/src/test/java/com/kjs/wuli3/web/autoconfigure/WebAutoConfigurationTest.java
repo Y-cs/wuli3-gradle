@@ -21,24 +21,19 @@ import com.kjs.wuli3.json.datatype.resource.ResourcePath;
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
-import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
-import com.kjs.wuli3.propagation.snapshot.ContextPropagator;
-import com.kjs.wuli3.propagation.transmission.ContextTransmitter;
+import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.RequestIds;
-import com.kjs.wuli3.web.context.WebContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertContext;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
 import com.kjs.wuli3.web.error.WebErrors;
 import com.kjs.wuli3.web.response.ApiResponse;
 import com.kjs.wuli3.web.response.NativeResponse;
 import com.kjs.wuli3.web.response.NativeResponseMode;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +64,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootTest(
-        properties = "wuli3.web.context.request-body-cache-enabled=true",
         classes = {
             WebAutoConfigurationTest.TestApplication.class,
             WebAutoConfigurationTest.ControllerConfiguration.class,
@@ -108,14 +102,12 @@ class WebAutoConfigurationTest {
     }
 
     @Test
-    void contextPropagationBeansAreConfigured() {
-        assertThat(applicationContext.getBean(ContextPropagator.class)).isNotNull();
+    void requestContextBeansAreConfigured() {
         assertThat(applicationContext.getBeansOfType(RestClientCustomizer.class))
                 .containsKey("wuli3InvocationContextRestClientCustomizer");
         assertThat(applicationContext.getBeansOfType(RestTemplateCustomizer.class))
                 .containsKey("wuli3InvocationContextRestTemplateCustomizer");
-        assertThat(applicationContext.getBeansOfType(ContextTransmitter.class)).isEmpty();
-        assertThat(RequestIds.HEADER_NAME).isEqualTo(InvocationContextCodec.REQUEST_ID);
+        assertThat(RequestIds.HEADER_NAME).isEqualTo(InvocationContextEncoder.REQUEST_ID);
     }
 
     @Test
@@ -160,25 +152,6 @@ class WebAutoConfigurationTest {
         mockMvc.perform(get("/business-json"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value("business:kept"));
-    }
-
-    @Test
-    void webContextContainsRequestMetadata() throws Exception {
-        mockMvc.perform(get("/web-context?keyword=java")
-                        .header(RequestIds.HEADER_NAME, "rid-web")
-                        .header("X-Test", "test-header"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.requestId").value("rid-web"))
-                .andExpect(jsonPath("$.data.method").value("GET"))
-                .andExpect(jsonPath("$.data.requestUri").value("/web-context"));
-    }
-
-    @Test
-    void requestBodyCanBeReadMoreThanOnce() throws Exception {
-        mockMvc.perform(post("/body").contentType(MediaType.TEXT_PLAIN).content("payload"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.first").value("payload"))
-                .andExpect(jsonPath("$.data.second").value("payload"));
     }
 
     @Test
@@ -361,16 +334,14 @@ class WebAutoConfigurationTest {
     static class ControllerConfiguration {
         @Bean
         TestController testController(
-                InvocationContextAccessor invocationContextAccessor,
-                AuthContextAccessor authContextAccessor,
-                WebContextAccessor webContextAccessor) {
-            return new TestController(invocationContextAccessor, authContextAccessor, webContextAccessor);
+                InvocationContextAccessor invocationContextAccessor, AuthContextAccessor authContextAccessor) {
+            return new TestController(invocationContextAccessor, authContextAccessor);
         }
 
         @Bean
         @Primary
         AuthContextResolver testSecurityContextResolver() {
-            return request -> new AuthContext(42L, "alice");
+            return request -> java.util.Optional.of(new AuthContext(42L, "alice"));
         }
 
         @Bean
@@ -474,15 +445,10 @@ class WebAutoConfigurationTest {
     static class TestController {
         private final InvocationContextAccessor invocationContextAccessor;
         private final AuthContextAccessor authContextAccessor;
-        private final WebContextAccessor webContextAccessor;
 
-        TestController(
-                InvocationContextAccessor invocationContextAccessor,
-                AuthContextAccessor authContextAccessor,
-                WebContextAccessor webContextAccessor) {
+        TestController(InvocationContextAccessor invocationContextAccessor, AuthContextAccessor authContextAccessor) {
             this.invocationContextAccessor = invocationContextAccessor;
             this.authContextAccessor = authContextAccessor;
-            this.webContextAccessor = webContextAccessor;
         }
 
         @GetMapping("/ok")
@@ -493,19 +459,6 @@ class WebAutoConfigurationTest {
         @GetMapping("/context")
         ContextView context() {
             return new ContextView(invocationContextAccessor.requestId().orElse(""));
-        }
-
-        @GetMapping("/web-context")
-        WebContextView webContext() {
-            return new WebContextView(
-                    webContextAccessor.requestId().orElse(""),
-                    webContextAccessor.method().orElse(""),
-                    webContextAccessor.requestUri().orElse(""));
-        }
-
-        @PostMapping("/body")
-        BodyView body(HttpServletRequest request) throws IOException {
-            return new BodyView(readBody(request), readBody(request));
         }
 
         @GetMapping("/security")
@@ -606,19 +559,11 @@ class WebAutoConfigurationTest {
             throw new ErrorCodeException(SystemErrors.ILLEGAL_STATE, "hidden message")
                     .visibility(ErrorVisibility.INTERNAL);
         }
-
-        private static String readBody(HttpServletRequest request) throws IOException {
-            return new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        }
     }
 
     record ContextView(String requestId) {}
 
     record SecurityView(Long userId, String username) {}
-
-    record WebContextView(String requestId, String method, String requestUri) {}
-
-    record BodyView(String first, String second) {}
 
     record ResourceView(
             @ResourcePath(type = TestResourcePathResolver.TYPE)

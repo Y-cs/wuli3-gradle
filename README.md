@@ -6,19 +6,25 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 
 | 模块 | 说明 |
 | --- | --- |
-| `build-logic` | Gradle 约定插件，统一 Java、Spring、质量检测规则。 |
-| `wuli3-dependencies` | 统一依赖版本平台。 |
-| `wuli3-core` | 无 Spring 依赖的基础能力：错误模型、分页、函数式增强、时间工具。 |
-| `wuli3-json` | Jackson 对象提供和 JSON 操作支持。 |
-| `wuli3-event-core` | 纯 Java 事件信封、发布选项和消息传输契约。 |
-| `wuli3-event-spring-boot-starter` | Spring 本地事件发布与 REMOTE 提交后尽力投递编排。 |
-| `wuli3-web-spring-boot-starter` | Spring MVC 增强：统一响应、异常处理、MDC、请求 ID。 |
-| `wuli3-rocketmq-spring-boot-starter` | 默认 `RocketMQTemplate` 远程事件传输适配与条件自动配置。 |
-| 其他数据 starter | MySQL、Redis、Elasticsearch、MongoDB 依赖聚合。 |
+| [`build-logic`](guide/build-logic.md) | Gradle 约定插件，统一 Java、Spring、质量检测和发布规则。 |
+| [`wuli3-dependencies`](guide/wuli3-dependencies.md) | 统一依赖版本平台。 |
+| [`wuli3-core`](guide/wuli3-core.md) | 无 Spring 依赖的错误模型、断言、ID、时间和 Stream 工具。 |
+| [`wuli3-json`](guide/wuli3-json.md) | Jackson facade、Mapper 装配、资源路径和脱敏。 |
+| [`wuli3-event-core`](guide/wuli3-event-core.md) | 纯 Java 事件信封、发布选项和消息传输契约。 |
+| [`wuli3-event-spring-boot-starter`](guide/wuli3-event-spring-boot-starter.md) | Spring LOCAL/REMOTE 事件路由。 |
+| [`wuli3-context-propagation`](guide/wuli3-context-propagation.md) | 固定上下文、线程存储、异步快照和出站编码。 |
+| [`wuli3-web-spring-boot-starter`](guide/wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应和异常处理。 |
+| [`wuli3-mysql-spring-boot-starter`](guide/wuli3-mysql-spring-boot-starter.md) | MyBatis-Plus 依赖聚合。 |
+| [`wuli3-redis-spring-boot-starter`](guide/wuli3-redis-spring-boot-starter.md) | Spring Data Redis 与 Redisson 依赖聚合。 |
+| [`wuli3-rocketmq-spring-boot-starter`](guide/wuli3-rocketmq-spring-boot-starter.md) | `RocketMQTemplate` 远程事件发送适配。 |
+| [`wuli3-elasticsearch-spring-boot-starter`](guide/wuli3-elasticsearch-spring-boot-starter.md) | Spring Data Elasticsearch 依赖聚合。 |
+| [`wuli3-mongodb-spring-boot-starter`](guide/wuli3-mongodb-spring-boot-starter.md) | Spring Data MongoDB 依赖聚合。 |
 
 `integration-tests/` 不是 Gradle 业务模块，而是用于验证发布产物能否被外部 Gradle/Maven 项目正确消费的独立测试工程。
 
-事件发布的完整边界、事务语义和 RocketMQ 配置见 [`docs/event-publication.md`](docs/event-publication.md)。
+所有模块文档统一从 [`guide/README.md`](guide/README.md) 进入。事件发布边界见
+[`wuli3-event-spring-boot-starter`](guide/wuli3-event-spring-boot-starter.md)，RocketMQ 配置见
+[`wuli3-rocketmq-spring-boot-starter`](guide/wuli3-rocketmq-spring-boot-starter.md)。
 
 ## 质量门禁
 
@@ -70,7 +76,7 @@ CI 推荐执行顺序：
 
 CI 环境需要 JDK 21、Maven 和 Maven Central 网络访问。消费验证只使用构建目录中的临时 Maven 仓库，不需要正式仓库凭据。
 正式发布必须在消费验证成功后执行，发布凭据只从 CI secret 或环境变量注入。目录结构与扩展规则见
-[`integration-tests/README.md`](integration-tests/README.md)。
+[`integration-tests` 使用指南](guide/integration-tests.md)。
 
 ## Maven 项目使用 BOM
 

@@ -1,38 +1,20 @@
 package com.kjs.wuli3.propagation.context;
 
-import java.util.Map;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-
 /**
  * 业务代码可读取的认证与授权元数据。
+ *
+ * @param userId 已认证用户的唯一标识
+ * @param username 已认证用户的用户名
  */
-@Getter
-@ToString
-@EqualsAndHashCode
-public class AuthContext extends AbstractContext implements PropagationContext {
+public record AuthContext(Long userId, String username) implements PropagationContext {
 
-    private final Long userId;
-    private final String username;
-
-    public AuthContext(final Long userId, final String username) {
-        this(Map.of(), userId, username);
-    }
-
-    private AuthContext(final Map<ContextKey<?>, Object> extensions, final Long userId, final String username) {
-        super(extensions);
-        this.userId = userId;
-        this.username = username;
-    }
-
+    /**
+     * 返回认证上下文的类型，用作上下文容器中的存取键。
+     *
+     * @return {@link AuthContext} 的类型
+     */
     @Override
-    public Context snapshotCopy() {
-        return new AuthContext(this.extensionSnapshot(), this.userId, this.username);
-    }
-
-    @Override
-    public Class<? extends Context> type() {
+    public Class<? extends PropagationContext> type() {
         return AuthContext.class;
     }
 }

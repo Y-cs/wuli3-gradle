@@ -1,17 +1,17 @@
 package com.kjs.wuli3.propagation.context;
 
 /**
- * Context
+ * 当前执行中可存储的上下文。
  *
- * @author GuoYang create on 2026/6/25 14:45
+ * <p>
+ * 普通上下文只在当前执行范围内有效；只有 {@link PropagationContext} 才能进入跨异步任务和协议边界的快照。
  */
-public sealed interface Context permits ExtendableContext, LocalContext, PropagationContext {
-
-    Class<? extends Context> type();
+public interface Context {
 
     /**
-     * Returns an isolated value for a captured snapshot. Immutable implementations may return {@code this}; mutable
-     * implementations must return an independent copy.
+     * 返回当前上下文的具体类型，供上下文容器作为唯一键存取。
+     *
+     * @return 当前上下文的具体类型
      */
-    Context snapshotCopy();
+    Class<? extends Context> type();
 }

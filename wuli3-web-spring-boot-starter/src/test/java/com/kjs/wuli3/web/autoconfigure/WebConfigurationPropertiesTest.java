@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.MOCK;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -17,9 +16,6 @@ import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.RequestIds;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
-import jakarta.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +27,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 class WebConfigurationPropertiesTest {
@@ -224,52 +218,6 @@ class WebConfigurationPropertiesTest {
                 TestApplication.class,
                 ControllerConfiguration.class,
             },
-            properties = "wuli3.web.context.request-body-cache-enabled=false")
-    @AutoConfigureMockMvc
-    @Nested
-    class BodyCacheDisabledTest {
-        @Autowired
-        private MockMvc mockMvc;
-
-        @Test
-        void bodyCacheIsDisabledByDefault() throws Exception {
-            mockMvc.perform(post("/body").contentType(MediaType.TEXT_PLAIN).content("payload"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.first").value("payload"))
-                    .andExpect(jsonPath("$.data.second").value(""));
-        }
-    }
-
-    @SpringBootTest(
-            webEnvironment = MOCK,
-            classes = {
-                TestApplication.class,
-                ControllerConfiguration.class,
-            },
-            properties = {
-                "wuli3.web.context.request-body-cache-enabled=true",
-                "wuli3.web.context.max-cache-body-size=4B"
-            })
-    @AutoConfigureMockMvc
-    @Nested
-    class BodyCacheLimitTest {
-        @Autowired
-        private MockMvc mockMvc;
-
-        @Test
-        void bodyCacheLimitReturnsPayloadTooLarge() throws Exception {
-            mockMvc.perform(post("/body").contentType(MediaType.TEXT_PLAIN).content("payload"))
-                    .andExpect(status().isPayloadTooLarge())
-                    .andExpect(jsonPath("$.code").value("WEB.PAYLOAD_TOO_LARGE"));
-        }
-    }
-
-    @SpringBootTest(
-            webEnvironment = MOCK,
-            classes = {
-                TestApplication.class,
-                ControllerConfiguration.class,
-            },
             properties = "wuli3.web.context.enabled=false")
     @AutoConfigureMockMvc
     @Nested
@@ -331,7 +279,7 @@ class WebConfigurationPropertiesTest {
         @Bean
         @Primary
         AuthContextResolver testSecurityContextResolver() {
-            return request -> new AuthContext(1L, "tester");
+            return request -> java.util.Optional.of(new AuthContext(1L, "tester"));
         }
     }
 
@@ -367,19 +315,7 @@ class WebConfigurationPropertiesTest {
         String boom() {
             throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT);
         }
-
-        @PostMapping("/body")
-        BodyView body(HttpServletRequest request) throws IOException {
-            return new BodyView(
-                    WebConfigurationPropertiesTest.readBody(request), WebConfigurationPropertiesTest.readBody(request));
-        }
     }
 
     record ContextView(String requestId) {}
-
-    record BodyView(String first, String second) {}
-
-    private static String readBody(final HttpServletRequest request) throws IOException {
-        return new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-    }
 }

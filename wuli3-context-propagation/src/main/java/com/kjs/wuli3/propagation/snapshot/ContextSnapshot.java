@@ -59,7 +59,7 @@ public final class ContextSnapshot {
      */
     public <T extends Context> Optional<T> get(final Class<T> type) {
         final Class<T> actualType = Objects.requireNonNull(type, "type");
-        return Optional.ofNullable(actualType.cast(this.contexts.get(actualType)));
+        return Optional.of(actualType.cast(this.contexts.get(actualType)));
     }
 
     /**

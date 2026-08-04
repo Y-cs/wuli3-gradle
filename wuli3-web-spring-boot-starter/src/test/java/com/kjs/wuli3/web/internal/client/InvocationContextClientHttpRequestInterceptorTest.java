@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.encoding.AuthContextEncoder;
+import com.kjs.wuli3.propagation.encoding.ContextEncoder;
 import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.net.URI;
@@ -26,7 +27,8 @@ class InvocationContextClientHttpRequestInterceptorTest {
         contextStore.put(new InvocationContext("10.0.0.8", "request-42"));
         contextStore.put(new AuthContext(7L, "alice"));
         final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(contextStore);
+                new InvocationContextClientHttpRequestInterceptor(
+                        contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder()));
         final HttpHeaders headers = new HttpHeaders();
         headers.set(InvocationContextEncoder.REQUEST_ID, "forged-request");
         headers.set(InvocationContextEncoder.ORIGIN_IP, "203.0.113.8");
@@ -54,7 +56,8 @@ class InvocationContextClientHttpRequestInterceptorTest {
     void removesReservedHeadersWhenNoContextIsAvailable() throws Exception {
         final ContextStore contextStore = new ContextStore();
         final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(contextStore);
+                new InvocationContextClientHttpRequestInterceptor(
+                        contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder()));
         final HttpHeaders headers = new HttpHeaders();
         headers.set(InvocationContextEncoder.REQUEST_ID, "forged-request");
         headers.set(InvocationContextEncoder.ORIGIN_IP, "203.0.113.8");

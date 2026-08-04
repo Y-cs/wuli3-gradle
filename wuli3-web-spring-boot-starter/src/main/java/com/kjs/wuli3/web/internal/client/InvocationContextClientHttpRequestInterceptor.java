@@ -2,14 +2,13 @@ package com.kjs.wuli3.web.internal.client;
 
 import com.kjs.wuli3.propagation.encoding.ContextEncoder;
 import com.kjs.wuli3.propagation.store.ContextReader;
+import java.io.IOException;
+import java.util.Objects;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * 将当前调用链上下文写入 HTTP 出站请求。
@@ -21,17 +20,18 @@ public final class InvocationContextClientHttpRequestInterceptor implements Clie
     private final ContextReader contextReader;
     private final ContextEncoder contextEncoder;
 
-    public InvocationContextClientHttpRequestInterceptor(final ContextReader contextReader) {
+    public InvocationContextClientHttpRequestInterceptor(
+            final ContextReader contextReader, final ContextEncoder contextEncoder) {
         this.contextReader = Objects.requireNonNull(contextReader, "contextReader");
-        this.contextEncoder = new ContextEncoder(ContextEncoder.standardContextEncoder());
+        this.contextEncoder = Objects.requireNonNull(contextEncoder, "contextEncoder");
     }
 
     @Override
-    public ClientHttpResponse intercept(final HttpRequest request, final byte[] body,
-            final ClientHttpRequestExecution execution) throws IOException {
+    public ClientHttpResponse intercept(
+            final HttpRequest request, final byte[] body, final ClientHttpRequestExecution execution)
+            throws IOException {
         final HttpHeaders headers = request.getHeaders();
-        this.contextEncoder.reservedFieldNames()
-                .forEach(headers::remove);
+        this.contextEncoder.reservedFieldNames().forEach(headers::remove);
         this.contextEncoder.writeTo(this.contextReader.capture(), headers::set);
         return execution.execute(request, body);
     }

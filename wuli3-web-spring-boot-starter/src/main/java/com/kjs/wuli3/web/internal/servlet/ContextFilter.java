@@ -13,26 +13,25 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.MDC;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public final class ContextFilter extends OncePerRequestFilter {
 
     private final ContextWriter contextWriter;
-    private final @Nullable AuthContextResolver authContextResolver;
+    private final AuthContextResolver authContextResolver;
     private final RequestIdResolver requestIdResolver;
     private final ClientIpResolver clientIpResolver;
     private final WebContextProperties contextProperties;
 
     public ContextFilter(
             final ContextWriter contextWriter,
-            final @Nullable AuthContextResolver authContextResolver,
+            final AuthContextResolver authContextResolver,
             final RequestIdResolver requestIdResolver,
             final ClientIpResolver clientIpResolver,
             final WebContextProperties contextProperties) {
         this.contextWriter = Objects.requireNonNull(contextWriter, "contextWriter");
-        this.authContextResolver = authContextResolver;
+        this.authContextResolver = Objects.requireNonNull(authContextResolver, "authContextResolver");
         this.requestIdResolver = Objects.requireNonNull(requestIdResolver, "requestIdResolver");
         this.clientIpResolver = Objects.requireNonNull(clientIpResolver, "clientIpResolver");
         this.contextProperties = Objects.requireNonNull(contextProperties, "contextProperties");
@@ -49,9 +48,7 @@ public final class ContextFilter extends OncePerRequestFilter {
         response.setHeader(this.contextProperties.getRequestIdHeaderName(), requestId);
         MDC.put(RequestIds.MDC_KEY, requestId);
         try {
-            if (this.authContextResolver != null) {
-                this.authContextResolver.resolve(request).ifPresent(this.contextWriter::put);
-            }
+            this.authContextResolver.resolve(request).ifPresent(this.contextWriter::put);
             filterChain.doFilter(request, response);
         } finally {
             MDC.remove(RequestIds.MDC_KEY);

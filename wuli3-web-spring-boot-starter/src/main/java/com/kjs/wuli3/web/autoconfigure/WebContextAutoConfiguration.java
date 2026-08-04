@@ -2,6 +2,7 @@ package com.kjs.wuli3.web.autoconfigure;
 
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
+import com.kjs.wuli3.propagation.encoding.ContextEncoder;
 import com.kjs.wuli3.propagation.store.ContextReader;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.propagation.store.ContextWriter;
@@ -9,11 +10,11 @@ import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.ClientIpResolver;
 import com.kjs.wuli3.web.context.RequestIdResolver;
 import com.kjs.wuli3.web.context.WebContextProperties;
+import com.kjs.wuli3.web.internal.auth.TrustedHttpAuthContextResolver;
 import com.kjs.wuli3.web.internal.client.InvocationContextClientHttpRequestInterceptor;
 import com.kjs.wuli3.web.internal.context.DefaultClientIpResolver;
 import com.kjs.wuli3.web.internal.context.DefaultRequestIdResolver;
 import com.kjs.wuli3.web.internal.servlet.ContextFilter;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -37,6 +38,12 @@ public class WebContextAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    ContextEncoder contextEncoder() {
+        return new ContextEncoder(ContextEncoder.standardContextEncoder());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     InvocationContextAccessor invocationContextAccessor(final ContextReader contextReader) {
         return new InvocationContextAccessor(contextReader);
     }
@@ -47,19 +54,25 @@ public class WebContextAutoConfiguration {
         return new AuthContextAccessor(contextReader);
     }
 
-    /** Writes only invocation metadata to Boot-managed HTTP clients. */
     @Bean
-    RestClientCustomizer wuli3InvocationContextRestClientCustomizer(final ContextReader contextReader) {
+    @ConditionalOnMissingBean
+    AuthContextResolver authContextResolver() {
+        return new TrustedHttpAuthContextResolver();
+    }
+
+    @Bean
+    RestClientCustomizer wuli3InvocationContextRestClientCustomizer(
+            final ContextReader contextReader, final ContextEncoder contextEncoder) {
         final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(contextReader);
+                new InvocationContextClientHttpRequestInterceptor(contextReader, contextEncoder);
         return builder -> builder.requestInterceptor(interceptor);
     }
 
-    /** Writes only invocation metadata to Boot-managed HTTP clients. */
     @Bean
-    RestTemplateCustomizer wuli3InvocationContextRestTemplateCustomizer(final ContextReader contextReader) {
+    RestTemplateCustomizer wuli3InvocationContextRestTemplateCustomizer(
+            final ContextReader contextReader, final ContextEncoder contextEncoder) {
         final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(contextReader);
+                new InvocationContextClientHttpRequestInterceptor(contextReader, contextEncoder);
         return restTemplate -> restTemplate.getInterceptors().add(interceptor);
     }
 
@@ -81,12 +94,12 @@ public class WebContextAutoConfiguration {
     @ConditionalOnProperty(prefix = "wuli3.web.context", name = "enabled", havingValue = "true", matchIfMissing = true)
     FilterRegistrationBean<ContextFilter> contextFilterRegistration(
             final ContextWriter contextWriter,
-            final ObjectProvider<AuthContextResolver> authContextResolvers,
+            final AuthContextResolver authContextResolver,
             final RequestIdResolver requestIdResolver,
             final ClientIpResolver clientIpResolver,
             final WebContextProperties properties) {
-        final ContextFilter filter = new ContextFilter(
-                contextWriter, authContextResolvers.getIfAvailable(), requestIdResolver, clientIpResolver, properties);
+        final ContextFilter filter =
+                new ContextFilter(contextWriter, authContextResolver, requestIdResolver, clientIpResolver, properties);
         final FilterRegistrationBean<ContextFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setOrder(properties.getFilterOrder());
         return registration;

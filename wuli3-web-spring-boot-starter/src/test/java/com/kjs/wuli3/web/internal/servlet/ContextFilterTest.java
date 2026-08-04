@@ -8,7 +8,6 @@ import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.WebContextProperties;
 import java.util.Optional;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -16,9 +15,9 @@ import org.springframework.mock.web.MockHttpServletResponse;
 class ContextFilterTest {
 
     @Test
-    void doesNotCreateAuthenticationContextWithoutResolver() throws Exception {
+    void doesNotCreateAuthenticationContextWhenResolverReturnsEmpty() throws Exception {
         final ContextStore contextStore = new ContextStore();
-        final ContextFilter filter = ContextFilterTest.filter(contextStore, null);
+        final ContextFilter filter = ContextFilterTest.filter(contextStore, request -> Optional.empty());
 
         filter.doFilter(
                 new MockHttpServletRequest("GET", "/orders"), new MockHttpServletResponse(), (request, response) -> {
@@ -49,7 +48,7 @@ class ContextFilterTest {
     }
 
     private static ContextFilter filter(
-            final ContextStore contextStore, final @Nullable AuthContextResolver authContextResolver) {
+            final ContextStore contextStore, final AuthContextResolver authContextResolver) {
         return new ContextFilter(
                 contextStore,
                 authContextResolver,

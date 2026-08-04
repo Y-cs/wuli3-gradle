@@ -1,4 +1,4 @@
-/** 提供固定传播上下文的出站协议编码器。 */
+/** 提供固定传播上下文的协议字段编码器及显式组合能力。 */
 @NullMarked
 package com.kjs.wuli3.propagation.encoding;
 

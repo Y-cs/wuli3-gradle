@@ -1,9 +1,8 @@
 package com.kjs.wuli3.propagation.store;
 
-import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.ContextScope;
+import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
-
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,8 +36,7 @@ public final class ContextStore implements ContextReader, ContextWriter {
      */
     @Override
     public <T extends Context> void put(final T context) {
-        this.current()
-                .put(context);
+        this.current().put(context);
     }
 
     /**
@@ -78,8 +76,7 @@ public final class ContextStore implements ContextReader, ContextWriter {
         final ContextSnapshot actualSnapshot = Objects.requireNonNull(snapshot, "snapshot");
         final ContextContainer previous = this.holder.get();
         final ContextContainer restored = new ContextContainer();
-        actualSnapshot.values()
-                .forEach(restored::put);
+        actualSnapshot.values().forEach(restored::put);
         this.holder.set(restored);
         return () -> {
             if (previous == null) {

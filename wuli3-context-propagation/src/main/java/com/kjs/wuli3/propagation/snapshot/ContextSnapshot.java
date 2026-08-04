@@ -1,8 +1,11 @@
 package com.kjs.wuli3.propagation.snapshot;
 
 import com.kjs.wuli3.propagation.context.Context;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 可跨异步任务和协议边界传递的不可变上下文快照。
@@ -59,7 +62,7 @@ public final class ContextSnapshot {
      */
     public <T extends Context> Optional<T> get(final Class<T> type) {
         final Class<T> actualType = Objects.requireNonNull(type, "type");
-        return Optional.of(actualType.cast(this.contexts.get(actualType)));
+        return Optional.ofNullable(actualType.cast(this.contexts.get(actualType)));
     }
 
     /**

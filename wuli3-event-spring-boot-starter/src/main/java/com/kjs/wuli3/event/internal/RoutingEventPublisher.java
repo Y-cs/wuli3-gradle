@@ -1,10 +1,10 @@
 package com.kjs.wuli3.event.internal;
 
 import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.EventMessageTransport;
+import com.kjs.wuli3.event.EventTransport;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.PublishOptions;
-import com.kjs.wuli3.event.spring.TransactionalEventMessageTransport;
+import com.kjs.wuli3.event.spring.TransactionalEventTransport;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -13,8 +13,8 @@ import java.util.Objects;
  */
 public final class RoutingEventPublisher implements EventPublisher {
 
-    private final EventMessageTransport localPublisher;
-    private final EventMessageTransport remotePublisher;
+    private final EventTransport localPublisher;
+    private final EventTransport remotePublisher;
 
     /**
      * 创建将本地和远程通道路由到相应传输实现的发布器。
@@ -23,10 +23,10 @@ public final class RoutingEventPublisher implements EventPublisher {
      * @param remotePublisher 将由事务同步包装的远程传输实现
      */
     public RoutingEventPublisher(
-            final EventMessageTransport localPublisher, final EventMessageTransport remotePublisher) {
-        this.localPublisher = new TransactionalEventMessageTransport(
+            final EventTransport localPublisher, final EventTransport remotePublisher) {
+        this.localPublisher = new TransactionalEventTransport(
                 Objects.requireNonNull(localPublisher, "localPublisher cannot be null"));
-        this.remotePublisher = new TransactionalEventMessageTransport(
+        this.remotePublisher = new TransactionalEventTransport(
                 Objects.requireNonNull(remotePublisher, "remotePublisher cannot be null"));
     }
 
@@ -40,7 +40,7 @@ public final class RoutingEventPublisher implements EventPublisher {
         this.selectPublisher(options).sends(envelopes, options);
     }
 
-    private EventMessageTransport selectPublisher(final PublishOptions options) {
+    private EventTransport selectPublisher(final PublishOptions options) {
         Objects.requireNonNull(options, "options cannot be null");
         return options.isLocal() ? this.localPublisher : this.remotePublisher;
     }

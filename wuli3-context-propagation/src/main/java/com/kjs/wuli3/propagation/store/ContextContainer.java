@@ -1,9 +1,13 @@
 package com.kjs.wuli3.propagation.store;
 
 import com.kjs.wuli3.propagation.context.Context;
+import com.kjs.wuli3.propagation.context.PropagationContext;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 按具体上下文类型保存当前执行上下文的可变容器。
@@ -67,8 +71,7 @@ public final class ContextContainer {
      * @return 不可修改的上下文集合
      */
     public Collection<Context> values() {
-        return Map.copyOf(this.contexts)
-                .values();
+        return Map.copyOf(this.contexts).values();
     }
 
     /**
@@ -79,7 +82,8 @@ public final class ContextContainer {
      * @return 当前容器的传播上下文快照
      */
     public ContextSnapshot capture() {
-        return ContextSnapshot.of(this.contexts.values()
+        return ContextSnapshot.of(this.contexts.values().stream()
+                .filter(PropagationContext.class::isInstance)
                 .toArray(Context[]::new));
     }
 }

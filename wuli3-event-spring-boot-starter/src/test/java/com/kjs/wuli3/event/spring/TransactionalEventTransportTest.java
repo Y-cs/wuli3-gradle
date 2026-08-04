@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.EventMessageTransport;
+import com.kjs.wuli3.event.EventTransport;
 import com.kjs.wuli3.event.PublishOptions;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-class TransactionalEventMessageTransportTest {
+class TransactionalEventTransportTest {
 
     @AfterEach
     void clearTransactionState() {
@@ -25,11 +25,11 @@ class TransactionalEventMessageTransportTest {
     @Test
     void sendsImmediatelyWithoutAnActualTransaction() {
         final RecordingTransport delegate = new RecordingTransport();
-        final TransactionalEventMessageTransport transport = new TransactionalEventMessageTransport(delegate);
+        final TransactionalEventTransport transport = new TransactionalEventTransport(delegate);
 
         transport.send(
-                TransactionalEventMessageTransportTest.envelope("event-1"),
-                TransactionalEventMessageTransportTest.remote());
+                TransactionalEventTransportTest.envelope("event-1"),
+                TransactionalEventTransportTest.remote());
 
         assertThat(delegate.sent()).hasSize(1);
     }
@@ -39,11 +39,11 @@ class TransactionalEventMessageTransportTest {
         TransactionSynchronizationManager.initSynchronization();
         TransactionSynchronizationManager.setActualTransactionActive(true);
         final RecordingTransport delegate = new RecordingTransport();
-        final TransactionalEventMessageTransport transport = new TransactionalEventMessageTransport(delegate);
+        final TransactionalEventTransport transport = new TransactionalEventTransport(delegate);
 
         transport.send(
-                TransactionalEventMessageTransportTest.envelope("event-1"),
-                TransactionalEventMessageTransportTest.remote());
+                TransactionalEventTransportTest.envelope("event-1"),
+                TransactionalEventTransportTest.remote());
 
         assertThat(delegate.sent()).isEmpty();
         TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
@@ -55,11 +55,11 @@ class TransactionalEventMessageTransportTest {
         TransactionSynchronizationManager.initSynchronization();
         TransactionSynchronizationManager.setActualTransactionActive(true);
         final RecordingTransport delegate = new RecordingTransport();
-        final TransactionalEventMessageTransport transport = new TransactionalEventMessageTransport(delegate);
+        final TransactionalEventTransport transport = new TransactionalEventTransport(delegate);
 
         transport.send(
-                TransactionalEventMessageTransportTest.envelope("event-1"),
-                TransactionalEventMessageTransportTest.remote());
+                TransactionalEventTransportTest.envelope("event-1"),
+                TransactionalEventTransportTest.remote());
         TransactionSynchronizationManager.getSynchronizations()
                 .forEach(synchronization ->
                         synchronization.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK));
@@ -70,13 +70,13 @@ class TransactionalEventMessageTransportTest {
     @Test
     void failsWhenAnActualTransactionHasNoSynchronization() {
         TransactionSynchronizationManager.setActualTransactionActive(true);
-        final TransactionalEventMessageTransport transport =
-                new TransactionalEventMessageTransport(new RecordingTransport());
+        final TransactionalEventTransport transport =
+                new TransactionalEventTransport(new RecordingTransport());
 
         assertThatIllegalStateException()
                 .isThrownBy(() -> transport.send(
-                        TransactionalEventMessageTransportTest.envelope("event-1"),
-                        TransactionalEventMessageTransportTest.remote()))
+                        TransactionalEventTransportTest.envelope("event-1"),
+                        TransactionalEventTransportTest.remote()))
                 .withMessage("An actual transaction is active but transaction synchronization is not active");
     }
 
@@ -85,12 +85,12 @@ class TransactionalEventMessageTransportTest {
         TransactionSynchronizationManager.initSynchronization();
         TransactionSynchronizationManager.setActualTransactionActive(true);
         final RecordingTransport delegate = new RecordingTransport();
-        final TransactionalEventMessageTransport transport = new TransactionalEventMessageTransport(delegate);
+        final TransactionalEventTransport transport = new TransactionalEventTransport(delegate);
         final List<EventEnvelope<?>> envelopes = new ArrayList<>();
-        envelopes.add(TransactionalEventMessageTransportTest.envelope("event-1"));
+        envelopes.add(TransactionalEventTransportTest.envelope("event-1"));
 
-        transport.sends(envelopes, TransactionalEventMessageTransportTest.remote());
-        envelopes.add(TransactionalEventMessageTransportTest.envelope("event-2"));
+        transport.sends(envelopes, TransactionalEventTransportTest.remote());
+        envelopes.add(TransactionalEventTransportTest.envelope("event-2"));
         TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
 
         assertThat(delegate.sent()).extracting(EventEnvelope::eventId).containsExactly("event-1");
@@ -104,7 +104,7 @@ class TransactionalEventMessageTransportTest {
         return new PublishOptions(PublishOptions.Channel.REMOTE).afterCommit();
     }
 
-    private static final class RecordingTransport implements EventMessageTransport {
+    private static final class RecordingTransport implements EventTransport {
 
         private final List<EventEnvelope<?>> sent = new ArrayList<>();
 

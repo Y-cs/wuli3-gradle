@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import com.kjs.wuli3.event.EventEnvelope;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.PublishOptions;
-import com.kjs.wuli3.event.remote.RemoteEventMessageTransport;
+import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import java.time.Instant;
 import java.util.Collection;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class EventAutoConfigurationTest {
     @Test
     void usesTheApplicationRemoteTransportWhenProvided() {
         this.contextRunner
-                .withBean(RemoteEventMessageTransport.class, RecordingRemoteTransport::new)
+                .withBean(RemoteEventTransport.class, RecordingRemoteTransport::new)
                 .run(context -> {
                     final EventPublisher publisher = context.getBean(EventPublisher.class);
                     final RecordingRemoteTransport transport = context.getBean(RecordingRemoteTransport.class);
@@ -49,7 +49,7 @@ class EventAutoConfigurationTest {
         return new EventEnvelope<>("orders", "order.paid.v1", "event-1", Instant.EPOCH, "payload");
     }
 
-    private static final class RecordingRemoteTransport implements RemoteEventMessageTransport {
+    private static final class RecordingRemoteTransport implements RemoteEventTransport {
 
         private final java.util.List<EventEnvelope<?>> sent = new java.util.ArrayList<>();
 

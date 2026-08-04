@@ -1,8 +1,8 @@
 package com.kjs.wuli3.propagation.store;
 
+import com.kjs.wuli3.propagation.ContextScope;
 import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
-import com.kjs.wuli3.propagation.ContextScope;
 
 /**
  * 提供当前调用上下文的可变访问。

@@ -2,7 +2,7 @@
 
 固定上下文模型、当前线程存储和异步快照能力的核心模块。
 
-本模块不提供协议无关的 carrier、通用 codec 或入站上下文恢复框架。协议边界只有真实适配器时才实现，避免为 HTTP、消息或 RPC 预先建立一层未被使用的抽象。
+本模块不提供协议无关的 carrier 或全局入站恢复框架。它只定义固定上下文的字段读写契约，并由真实协议适配器决定哪些上下文可跨越该边界，避免把信任策略隐藏在通用传输组件中。
 
 ## 引入
 
@@ -20,30 +20,30 @@ dependencies {
 - `ContextSnapshot`：只包含 `PropagationContext` 的不可变快照，是异步和出站协议共同使用的传递值。
 - `ContextStore`：基于当前线程保存完整上下文，并实现读取、修改、捕获和恢复能力。
 - `ContextReader` / `ContextWriter`：分别暴露读取与修改当前上下文的能力，依赖方只注入所需一侧。
-- `snapshot.ContextPropagator`：在快照操作能力之上包装异步任务。
+- `ContextPropagator`：在快照操作能力之上包装异步任务。
 - `InvocationContext`：请求标识和来源地址。
 - `AuthContext`：可信内部链路可传播的认证元数据。
+- `ContextFieldEncoder`：一个固定 `PropagationContext` 与协议字段之间的双向映射。
+- `ContextEncoder`：按显式白名单组合多个 `ContextFieldEncoder`，统一读取、写入和保留字段计算。
 
 上下文不提供任意 key/value 扩展袋。出现租户、区域或灰度等真实需求时，应新增受控的值对象和明确的传播契约。
 
 普通 `Context` 不会进入 `ContextSnapshot`，因此不会随异步任务或远程协议迁移。无传播上下文时使用 `ContextSnapshot.empty()` 表示，而不是复用可变 `ContextContainer` 的空实例。
 
-## 出站编码
+## 协议字段编码
 
-两个固定编码器只负责把已有上下文写给具体协议的字段写入器：
+两个固定编码器定义稳定字段契约：
 
 - `InvocationContextEncoder` 写入 `X-Request-Id` 和 `X-Origin-Ip`。
 - `AuthContextEncoder` 写入 `X-User-Id` 和 `X-Username`，只能用于明确可信的内部边界。
 
-HTTP 或消息适配器先捕获一次快照，再按自身的协议白名单写入所需字段：
+协议适配器使用 `ContextEncoder` 声明白名单，而不是逐一判断上下文类型：
 
 ```java
-final ContextSnapshot snapshot = contextReader.capture();
-snapshot.get(InvocationContext.class)
-        .ifPresent(context -> InvocationContextEncoder.writeTo(context, headers::set));
+final ContextEncoder encoder = new ContextEncoder(ContextEncoder.standardContextEncoder());
+encoder.reservedFieldNames().forEach(headers::remove);
+encoder.writeTo(contextReader.capture(), headers::set);
 ```
-
-公网入站请求不应信任认证 header；认证上下文应由安全模块从 token、session 或框架 principal 中解析。入站适配器在完成字段校验和信任判断后，可以构造 `ContextSnapshot` 并通过 `ContextWriter#restore` 在调用作用域内安装它；核心模块不提供会绕过这些规则的通用字段解码器。
 
 ## 基本使用
 

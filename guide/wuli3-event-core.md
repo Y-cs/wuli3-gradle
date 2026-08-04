@@ -58,7 +58,7 @@ eventPublisher.publish(envelope, options);
 ## 扩展端口
 
 - `EventPublisher`：应用发布入口，支持单条和批量发布。
-- `EventMessageTransport`：通用发送端口。
+- `EventTransport`：通用发送端口。
 
 仅引入本模块不会创建 `EventPublisher` 实现。Spring 应用通常同时引入
 [wuli3-event-spring-boot-starter](wuli3-event-spring-boot-starter.md)。

@@ -5,20 +5,20 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.EventMessageTransport.UnsupportedCapabilityException;
+import com.kjs.wuli3.event.EventTransport.UnsupportedCapabilityException;
 import com.kjs.wuli3.event.PublishOptions;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
-class SpringLocalEventMessageTransportTest {
+class SpringLocalEventTransportTest {
 
     @Test
     void publishesImmediatelyThroughSpring() {
         final List<Object> published = new ArrayList<>();
-        final SpringLocalEventMessageTransport transport = new SpringLocalEventMessageTransport(published::add);
-        final EventEnvelope<String> envelope = SpringLocalEventMessageTransportTest.envelope("event-1");
+        final SpringLocalEventTransport transport = new SpringLocalEventTransport(published::add);
+        final EventEnvelope<String> envelope = SpringLocalEventTransportTest.envelope("event-1");
 
         transport.send(envelope, PublishOptions.defaults());
 
@@ -27,8 +27,8 @@ class SpringLocalEventMessageTransportTest {
 
     @Test
     void rejectsRemoteOrExecutionOptions() {
-        final SpringLocalEventMessageTransport transport = new SpringLocalEventMessageTransport(event -> {});
-        final EventEnvelope<String> envelope = SpringLocalEventMessageTransportTest.envelope("event-1");
+        final SpringLocalEventTransport transport = new SpringLocalEventTransport(event -> {});
+        final EventEnvelope<String> envelope = SpringLocalEventTransportTest.envelope("event-1");
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> transport.send(envelope, new PublishOptions(PublishOptions.Channel.REMOTE)))

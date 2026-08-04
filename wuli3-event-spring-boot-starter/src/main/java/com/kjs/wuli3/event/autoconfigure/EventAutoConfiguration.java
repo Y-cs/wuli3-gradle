@@ -1,10 +1,10 @@
 package com.kjs.wuli3.event.autoconfigure;
 
 import com.kjs.wuli3.event.EventPublisher;
-import com.kjs.wuli3.event.internal.DefaultRemoteEventMessageTransport;
+import com.kjs.wuli3.event.internal.DefaultRemoteEventTransport;
 import com.kjs.wuli3.event.internal.RoutingEventPublisher;
-import com.kjs.wuli3.event.remote.RemoteEventMessageTransport;
-import com.kjs.wuli3.event.spring.SpringLocalEventMessageTransport;
+import com.kjs.wuli3.event.remote.RemoteEventTransport;
+import com.kjs.wuli3.event.spring.SpringLocalEventTransport;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,25 +21,25 @@ public class EventAutoConfiguration {
 
     /** 创建本地 Spring 事件传输实现。 */
     @Bean
-    @ConditionalOnMissingBean(SpringLocalEventMessageTransport.class)
-    SpringLocalEventMessageTransport springLocalEventMessageTransport(
+    @ConditionalOnMissingBean(SpringLocalEventTransport.class)
+    SpringLocalEventTransport springLocalEventMessageTransport(
             final ApplicationEventPublisher applicationEventPublisher) {
-        return new SpringLocalEventMessageTransport(applicationEventPublisher);
+        return new SpringLocalEventTransport(applicationEventPublisher);
     }
 
     /** 未配置远程传输实现时的占位 bean。 */
     @Bean
-    @ConditionalOnMissingBean(RemoteEventMessageTransport.class)
-    DefaultRemoteEventMessageTransport defaultRemoteEventMessageTransport() {
-        return new DefaultRemoteEventMessageTransport();
+    @ConditionalOnMissingBean(RemoteEventTransport.class)
+    DefaultRemoteEventTransport defaultRemoteEventMessageTransport() {
+        return new DefaultRemoteEventTransport();
     }
 
     /** 创建按通道路由的应用事件发布器。 */
     @Bean
     @ConditionalOnMissingBean(EventPublisher.class)
     EventPublisher eventPublisher(
-            final SpringLocalEventMessageTransport springLocalEventMessageTransport,
-            final RemoteEventMessageTransport remoteEventMessageTransport) {
+            final SpringLocalEventTransport springLocalEventMessageTransport,
+            final RemoteEventTransport remoteEventMessageTransport) {
         return new RoutingEventPublisher(springLocalEventMessageTransport, remoteEventMessageTransport);
     }
 }

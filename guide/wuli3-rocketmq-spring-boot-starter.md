@@ -1,6 +1,6 @@
 # wuli3-rocketmq-spring-boot-starter 使用指南
 
-该 starter 在存在 `RocketMQTemplate` 时，为事件模块提供 `RemoteEventMessageTransport` 发送实现。当前只实现生产者链路。
+该 starter 在存在 `RocketMQTemplate` 时，为事件模块提供 `RemoteEventTransport` 发送实现，并提供可手动使用的消息上下文恢复支持。
 
 ## 引入
 
@@ -44,31 +44,35 @@ eventPublisher.publish(envelope, options);
 
 ## 上下文传播
 
-Encoder 直接读取可选的 `ContextReader`，并使用固定上下文编码器写入消息 header；不复用 Web 层策略，也不创建通用传播器 Bean。
+Encoder 读取可选的 `ContextReader`，并通过 `ContextEncoder` 按显式白名单把传播字段写入 `RocketMessageWrapper.headers`。`EventEnvelope` 不承载传输 header，其 JSON body 只包含事件语义字段。
 
-默认只传播调用链信息：
+如需在完全可信的内部边界传播认证信息，应显式覆盖该 Bean：
 
-```properties
-wuli3.rocketmq.event.context-mode=INVOCATION_ONLY
+```java
+@Bean
+ContextEncoder rocketMqContextEncoder() {
+    return ContextEncoder.trustedInternal();
+}
 ```
 
-仅当生产者和消费者之间存在可信内部身份边界时，才能显式传播认证信息：
+`trustedInternal()` 会额外传播 `X-User-Id` 和 `X-Username`。它同时决定 `RocketMessageWrapperEncoder` 的出站字段和 `RocketContextSupport` 的入站字段，因此只应在该应用接入的消息边界都可信时使用。
 
-```properties
-wuli3.rocketmq.event.context-mode=TRUSTED_INTERNAL
+消费适配器需要明确控制上下文作用域：
+
+```java
+try (ContextScope ignored = rocketMqContextSupport.restoreFrom(messageExt.getProperties())) {
+    listener.handle(envelope);
+}
 ```
 
-`TRUSTED_INTERNAL` 会额外传播 `X-User-Id` 和 `X-Username`。消息中的保留传播字段不能由业务 Header
-覆盖，Encoder 会使用当前上下文重新生成这些字段。
-
-当前 starter 只实现发送端，没有通用的消息入站上下文恢复 API。未来实现 Listener 时，应基于实际消息消费、认证和线程模型，在 Listener 适配器内明确定义字段校验与上下文生命周期。
+`restoreFrom` 只恢复字段编码器识别出的上下文，不会自动注册或包裹 RocketMQ Listener。实际 Listener 仍应根据消息来源、线程模型、重试和死信策略决定调用时机。非法认证字段由 `AuthContextEncoder` 忽略，避免消费适配器承担解析细节。
 
 ## 投递边界
 
 - `afterCommit` 是提交后尽力发送，不是 Outbox 或可靠消息。
 - 异步发送失败由 transport 记录日志，不会回滚已经提交的业务事务。
-- 业务 header 不能覆盖四个保留上下文字段；编码器会先删除再按当前上下文重建。
-- 消费端的幂等、重试、死信和上下文恢复不在当前模块范围内。
+- 传播 header 属于 RocketMQ 消息属性，不进入 `EventEnvelope` 的 JSON body。
+- 消费端的自动 Listener、幂等、重试和死信不在当前模块范围内；上下文恢复通过 `RocketContextSupport` 显式完成。
 
 ## 验证
 

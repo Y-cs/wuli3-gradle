@@ -26,7 +26,7 @@
 - `wuli3-core` 不依赖 Spring，错误身份、错误策略与 Web/HTTP 表达分离。
 - `wuli3-json` 通过 Jackson Module 扩展时间、枚举、资源路径和脱敏能力，没有把 Spring 依赖带入 JSON 核心。
 - `wuli3-context-propagation` 把上下文、载体和协议编解码分开，HTTP、RPC、消息队列适配可以位于独立 starter。
-- RocketMQ 自动配置要求存在 `RocketMQTemplate`，并允许应用通过 `RemoteEventMessageTransport` 替换默认实现。
+- RocketMQ 自动配置要求存在 `RocketMQTemplate`，并允许应用通过 `RemoteEventTransport` 替换默认实现。
 - 缺少远程传输时会显式失败，而不是静默丢弃远程事件。
 - 数据 starter 没有制造统一 Repository、Client 等缺乏真实语义的中间抽象。
 
@@ -163,7 +163,7 @@ RemoteEventEnvelope -> RemoteEventPublisher -> RemoteEventMessageTransport
 - `JsonMapperNumberStrAssembly` 当前未进入标准 assembly，也没有生产调用方，可删除或改为明确的可选模块。
 - `JsonFunction` 是 public，但唯一消费入口 `Jsons.execute` 是包级方法，应降为包私有。
 - Web README 声明 `internal` 不属于扩展 API，但多个 internal 类和构造器仍为 public；应通过可见性或兼容性规则真正收口。
-- `RocketMqClientJavaPreviewTransport` 位于生产源码、依赖为 `compileOnly`、没有 Bean 或公共工厂，消费者无法正常使用。应删除、迁到测试原型，或拆为明确实验模块。
+- `RocketV5RemoteEventTransport` 位于生产源码、依赖为 `compileOnly`、没有 Bean 或公共工厂，消费者无法正常使用。应删除、迁到测试原型，或拆为明确实验模块。
 
 ## 5. 业务场景覆盖
 

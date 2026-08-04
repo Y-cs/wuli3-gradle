@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.util.Collection;
 
 /** 通过具体的本地或远程投递机制发送事件信封。 */
-public interface EventMessageTransport {
+public interface EventTransport {
 
     /**
      * 按请求的传输能力发送一个事件。

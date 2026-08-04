@@ -1,7 +1,7 @@
 package com.kjs.wuli3.event.spring;
 
 import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.EventMessageTransport;
+import com.kjs.wuli3.event.EventTransport;
 import com.kjs.wuli3.event.PublishOptions;
 import java.util.Collection;
 import java.util.List;
@@ -12,16 +12,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * 将远程传输调用延后到当前事务提交后执行。
  */
-public final class TransactionalEventMessageTransport implements EventMessageTransport {
+public final class TransactionalEventTransport implements EventTransport {
 
-    private final EventMessageTransport delegate;
+    private final EventTransport delegate;
 
     /**
      * 使用指定的远程传输实现创建事务感知包装器。
      *
      * @param delegate 提交后调用的远程传输实现
      */
-    public TransactionalEventMessageTransport(final EventMessageTransport delegate) {
+    public TransactionalEventTransport(final EventTransport delegate) {
         this.delegate = Objects.requireNonNull(delegate, "delegate cannot be null");
     }
 
@@ -33,7 +33,7 @@ public final class TransactionalEventMessageTransport implements EventMessageTra
             this.delegate.send(envelope, options);
             return;
         }
-        TransactionalEventMessageTransport.requireSynchronization();
+        TransactionalEventTransport.requireSynchronization();
         this.registerAfterCommit(() -> this.delegate.send(envelope, options));
     }
 
@@ -45,7 +45,7 @@ public final class TransactionalEventMessageTransport implements EventMessageTra
             this.delegate.sends(envelopes, options);
             return;
         }
-        TransactionalEventMessageTransport.requireSynchronization();
+        TransactionalEventTransport.requireSynchronization();
         final List<EventEnvelope<?>> snapshot = List.copyOf(envelopes);
         this.registerAfterCommit(() -> this.delegate.sends(snapshot, options));
     }

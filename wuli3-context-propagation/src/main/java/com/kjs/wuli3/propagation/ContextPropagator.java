@@ -1,7 +1,6 @@
 package com.kjs.wuli3.propagation;
 
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
-
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;

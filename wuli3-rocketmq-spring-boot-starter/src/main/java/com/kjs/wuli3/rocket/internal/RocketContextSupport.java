@@ -1,0 +1,77 @@
+package com.kjs.wuli3.rocket.internal;
+
+import com.kjs.wuli3.propagation.ContextPropagator;
+import com.kjs.wuli3.propagation.ContextScope;
+import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
+import com.kjs.wuli3.propagation.store.ContextWriter;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * 从 RocketMQ 消息 headers 恢复传播上下文。
+ */
+public final class RocketContextSupport {
+
+    private final ContextWriter contextWriter;
+    private final ContextEncoder contextEncoder;
+
+    /**
+     * 创建 RocketMQ 上下文支持实例。
+     *
+     * @param contextWriter  上下文写入器
+     * @param contextEncoder 上下文字段编码器
+     * @throws NullPointerException 当任一参数为 {@code null} 时
+     */
+    public RocketContextSupport(final ContextWriter contextWriter, final ContextEncoder contextEncoder) {
+        this.contextWriter = Objects.requireNonNull(contextWriter, "contextWriter");
+        this.contextEncoder = Objects.requireNonNull(contextEncoder, "contextEncoder");
+    }
+
+    /**
+     * 从消息 headers 解码并恢复上下文。
+     *
+     * <p>关闭返回的作用域后，会恢复进入作用域前的完整上下文。
+     *
+     * <p>典型用法：
+     * <pre>{@code
+     * try (ContextScope ignored = rocketMqContextSupport.restoreFrom(message.getProperties())) {
+     *     handleMessage(message);
+     * }
+     * }</pre>
+     *
+     * @param headers 消息 headers（来自 {@code MessageExt.getProperties()} 或 {@code RocketMessageWrapper.headers()}）
+     * @return 用于恢复先前上下文的作用域
+     * @throws NullPointerException 当 {@code headers} 为 {@code null} 时
+     */
+    @SuppressWarnings("NullAway")
+    public RocketContextPropagator restoreFrom(final Map<String, ?> headers) {
+        final Map<String, ?> actualHeaders = Objects.requireNonNull(headers, "headers");
+        final Function<String, @Nullable String> fieldReader = key -> {
+            final Object value = actualHeaders.get(key);
+            return value == null ? null : value.toString();
+        };
+        final ContextSnapshot contextSnapshot = this.contextEncoder.readFrom(fieldReader);
+        return new RocketContextPropagator(this.contextWriter, contextSnapshot);
+    }
+
+    @RequiredArgsConstructor
+    public static final class RocketContextPropagator implements ContextPropagator {
+
+        private final ContextWriter contextWriter;
+        private final ContextSnapshot contextSnapshot;
+
+        @Override
+        public ContextSnapshot capture() {
+            return contextSnapshot;
+        }
+
+        @Override
+        public ContextScope restore(ContextSnapshot snapshot) {
+            return contextWriter.restore(snapshot);
+        }
+    }
+}

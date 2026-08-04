@@ -1,7 +1,7 @@
 # wuli3-event-spring-boot-starter 使用指南
 
 该 starter 为 `wuli3-event-core` 提供 Spring Boot 自动配置：默认 LOCAL 事件使用 Spring
-`ApplicationEventPublisher`，REMOTE 事件委托给 `RemoteEventMessageTransport`。
+`ApplicationEventPublisher`，REMOTE 事件委托给 `RemoteEventTransport`。
 
 ## 引入
 
@@ -13,7 +13,7 @@ dependencies {
 
 自动配置会在缺少用户实现时创建：
 
-- `SpringLocalEventMessageTransport`
+- `SpringLocalEventTransport`
 - 远程占位 transport
 - `EventPublisher`
 
@@ -60,7 +60,7 @@ final PublishOptions options =
 eventPublisher.publish(envelope, options);
 ```
 
-应用必须提供 `RemoteEventMessageTransport` Bean。未配置时，REMOTE 发布会抛出
+应用必须提供 `RemoteEventTransport` Bean。未配置时，REMOTE 发布会抛出
 `IllegalStateException("No RemoteEventMessageTransport is configured")`。RocketMQ 可使用
 [wuli3-rocketmq-spring-boot-starter](wuli3-rocketmq-spring-boot-starter.md)。
 

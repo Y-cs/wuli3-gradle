@@ -35,7 +35,14 @@ dependencies {
 两个固定编码器定义稳定字段契约：
 
 - `InvocationContextEncoder` 写入 `X-Request-Id` 和 `X-Origin-Ip`。
-- `AuthContextEncoder` 写入 `X-User-Id` 和 `X-Username`，只能用于明确可信的内部边界。
+- `AuthContextEncoder` 写入 `X-User-Id` 和 `X-Username`。
+
+`ContextEncoder.standardContextEncoder()` 当前返回上述两个编码器，因此会同时读写调用标识和认证信息。协议适配器若只允许传播调用标识，应显式构造白名单：
+
+```java
+final ContextEncoder invocationOnly =
+        new ContextEncoder(List.of(new InvocationContextEncoder()));
+```
 
 协议适配器使用 `ContextEncoder` 声明白名单，而不是逐一判断上下文类型：
 
@@ -44,6 +51,8 @@ final ContextEncoder encoder = new ContextEncoder(ContextEncoder.standardContext
 encoder.reservedFieldNames().forEach(headers::remove);
 encoder.writeTo(contextReader.capture(), headers::set);
 ```
+
+`reservedFieldNames()` 只包含当前实例所配置编码器管理的字段，不会自动加入未配置编码器的字段。
 
 ## 基本使用
 

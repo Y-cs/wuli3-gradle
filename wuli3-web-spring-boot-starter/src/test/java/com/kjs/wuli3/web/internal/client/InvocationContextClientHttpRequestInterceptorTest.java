@@ -21,7 +21,7 @@ import org.springframework.http.client.ClientHttpResponse;
 class InvocationContextClientHttpRequestInterceptorTest {
 
     @Test
-    void writesOnlyInvocationContextToTheOutgoingRequest() throws Exception {
+    void rebuildsStandardPropagationHeadersFromTheCurrentContext() throws Exception {
         final ContextStore contextStore = new ContextStore();
         contextStore.put(new InvocationContext("10.0.0.8", "request-42"));
         contextStore.put(new AuthContext(7L, "alice"));
@@ -45,9 +45,8 @@ class InvocationContextClientHttpRequestInterceptorTest {
 
         assertThat(headers.getFirst(InvocationContextEncoder.REQUEST_ID)).isEqualTo("request-42");
         assertThat(headers.getFirst(InvocationContextEncoder.ORIGIN_IP)).isEqualTo("10.0.0.8");
-        assertThat(headers)
-                .doesNotContainKey(AuthContextEncoder.USER_ID)
-                .doesNotContainKey(AuthContextEncoder.USERNAME);
+        assertThat(headers.getFirst(AuthContextEncoder.USER_ID)).isEqualTo("7");
+        assertThat(headers.getFirst(AuthContextEncoder.USERNAME)).isEqualTo("alice");
         verify(execution).execute(request, body);
     }
 

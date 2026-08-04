@@ -46,16 +46,18 @@ eventPublisher.publish(envelope, options);
 
 Encoder 读取可选的 `ContextReader`，并通过 `ContextEncoder` 按显式白名单把传播字段写入 `RocketMessageWrapper.headers`。`EventEnvelope` 不承载传输 header，其 JSON body 只包含事件语义字段。
 
-如需在完全可信的内部边界传播认证信息，应显式覆盖该 Bean：
+默认自动配置使用 `ContextEncoder.standardContextEncoder()`，当前会传播 `X-Request-Id`、`X-Origin-Ip`、`X-User-Id` 和 `X-Username`。因此该 starter 应只用于允许传播认证信息的可信消息边界。
+
+若边界只允许传播调用标识，应显式覆盖该 Bean：
 
 ```java
 @Bean
 ContextEncoder rocketMqContextEncoder() {
-    return ContextEncoder.trustedInternal();
+    return new ContextEncoder(List.of(new InvocationContextEncoder()));
 }
 ```
 
-`trustedInternal()` 会额外传播 `X-User-Id` 和 `X-Username`。它同时决定 `RocketMessageWrapperEncoder` 的出站字段和 `RocketContextSupport` 的入站字段，因此只应在该应用接入的消息边界都可信时使用。
+同一个 `ContextEncoder` Bean 同时决定 `RocketMessageWrapperEncoder` 的出站字段和 `RocketContextSupport` 的入站字段。缩小白名单后，入站恢复也只会接受对应字段。
 
 消费适配器需要明确控制上下文作用域：
 

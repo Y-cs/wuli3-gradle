@@ -30,8 +30,9 @@ wuli3.web.context.client-ip-header-priority=X-Forwarded-For,X-Real-IP,Forwarded
 只有直接 peer 命中 `trusted-proxy-cidrs` 时才读取转发头；列表为空时忽略所有转发头。公网身份信息不能从 header
 直接恢复，应用应提供 `AuthContextResolver` Bean，从 token、session 或安全框架 principal 构造 `AuthContext`。
 
-Boot 管理的 `RestClient.Builder` 和 `RestTemplateBuilder` 会自动安装出站拦截器，只传播 `X-Request-Id` 和
-`X-Origin-Ip`，不会传播认证信息。
+Boot 管理的 `RestClient.Builder` 和 `RestTemplateBuilder` 会自动安装出站拦截器。当前拦截器使用
+`ContextEncoder.standardContextEncoder()`，会重建并传播 `X-Request-Id`、`X-Origin-Ip`、`X-User-Id` 和
+`X-Username`；现有自动配置没有提供缩小该 HTTP 白名单的扩展点，因此出站目标必须是可信内部服务。
 
 应用可以通过 Bean 替换以下默认 SPI：
 

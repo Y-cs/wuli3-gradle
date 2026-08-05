@@ -39,6 +39,7 @@ dependencies {
         api("org.junit.jupiter:junit-jupiter:5.12.2")
         api("org.assertj:assertj-core:3.27.3")
         api("org.apache.rocketmq:rocketmq-spring-boot-starter:2.3.4")
+        api("org.apache.rocketmq:rocketmq-client-java:5.2.0")
     }
 }
 

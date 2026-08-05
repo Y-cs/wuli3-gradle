@@ -18,8 +18,8 @@ class RocketContextSupportTest {
     void decodesHeadersAndRestoresThePreviousContextAfterScopeClose() {
         final ContextStore contextStore = new ContextStore();
         contextStore.put(new InvocationContext("127.0.0.1", "previous"));
-        final RocketContextSupport support = new RocketContextSupport(
-                contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder()));
+        final RocketContextSupport support =
+                new RocketContextSupport(contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder()));
         final RocketContextSupport.RocketContextPropagator propagator = support.restoreFrom(Map.of(
                 InvocationContextEncoder.REQUEST_ID, "request-42",
                 InvocationContextEncoder.ORIGIN_IP, "10.0.0.8",
@@ -36,8 +36,7 @@ class RocketContextSupportTest {
             scope.close();
         }
 
-        assertThat(contextStore.get(InvocationContext.class))
-                .contains(new InvocationContext("127.0.0.1", "previous"));
+        assertThat(contextStore.get(InvocationContext.class)).contains(new InvocationContext("127.0.0.1", "previous"));
         assertThat(contextStore.get(AuthContext.class)).isEmpty();
     }
 }

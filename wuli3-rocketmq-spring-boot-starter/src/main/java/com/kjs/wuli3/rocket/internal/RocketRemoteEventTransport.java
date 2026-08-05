@@ -7,6 +7,9 @@ import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapper;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -16,10 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * 基于 {@link RocketMQTemplate} 的默认尽力而为远程事件传输实现。

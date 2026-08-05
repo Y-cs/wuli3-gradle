@@ -55,6 +55,7 @@ com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
 - `org.junit.jupiter:junit-jupiter:5.12.2`
 - `org.assertj:assertj-core:3.27.3`
 - `org.apache.rocketmq:rocketmq-spring-boot-starter:2.3.4`
+- `org.apache.rocketmq:rocketmq-client-java:5.2.0`
 
 ## Gradle 项目使用
 

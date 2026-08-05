@@ -19,14 +19,12 @@ private static final EventEnvelopeTemplate ORDER_PAID =
         EventEnvelopeTemplate.of("orders", "order.paid.v1");
 
 final EventEnvelope<OrderPaid> envelope = ORDER_PAID.wrap(payload);
-final EventEnvelope<OrderPaid> withHeader = envelope.withHeader("tenant", "tenant-1");
 ```
 
 `EventEnvelope` 包含：
 
 | 字段 | 说明 |
 | --- | --- |
-| `headers` | 浅不可变的传输元数据。 |
 | `topic` | 逻辑远程主题。 |
 | `eventType` | 稳定事件契约名称。 |
 | `eventId` | 唯一事件标识。 |
@@ -66,7 +64,7 @@ eventPublisher.publish(envelope, options);
 ## 使用边界
 
 - `EventEnvelopeTemplate.wrap(...)` 使用当前时间和 UUID；需要可测试时间或业务 ID 时使用带 `Supplier<String>` 的模板或直接构造信封。
-- headers 只做浅复制，值对象本身仍应保持不可变。
+- `EventEnvelope` 不承载协议 header；具体消息传输适配器负责其编码和隔离。
 - `afterCommit` 不是可靠消息保证；模块没有 Outbox、重试、去重或投递审计。
 - 远程 `topic` 还必须满足具体消息中间件的限制。
 

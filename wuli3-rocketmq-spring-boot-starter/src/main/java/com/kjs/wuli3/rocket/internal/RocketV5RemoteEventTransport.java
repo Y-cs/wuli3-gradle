@@ -8,7 +8,10 @@ import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapper;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
-import lombok.AccessLevel;
+import java.time.Clock;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Objects;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.client.apis.ClientException;
@@ -19,16 +22,13 @@ import org.apache.rocketmq.client.apis.producer.Producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Clock;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Objects;
-
 /**
- * 仅供审查的 Java Client 传输实现；运行时启动和 Producer 生命周期仍由调用方负责。
+ * 基于 RocketMQ Java Client v5 的远程事件传输实现。
+ *
+ * <p>应用负责创建并关闭 {@link Producer}；starter 只在选择 v5 客户端时注入该 Producer。
  */
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-final class RocketV5RemoteEventTransport implements RemoteEventTransport {
+@RequiredArgsConstructor
+public final class RocketV5RemoteEventTransport implements RemoteEventTransport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RocketV5RemoteEventTransport.class);
 
@@ -101,7 +101,7 @@ final class RocketV5RemoteEventTransport implements RemoteEventTransport {
         this.producer.sendAsync(message).whenComplete((receipt, throwable) -> {
             if (throwable != null) {
                 RocketV5RemoteEventTransport.LOGGER.error(
-                        "Async RocketMQ Java Client preview publication failed: topic={}, eventId={}, eventType={}",
+                        "Async RocketMQ Java Client v5 event publication failed: topic={}, eventId={}, eventType={}",
                         envelope.topic(),
                         envelope.eventId(),
                         envelope.eventType(),

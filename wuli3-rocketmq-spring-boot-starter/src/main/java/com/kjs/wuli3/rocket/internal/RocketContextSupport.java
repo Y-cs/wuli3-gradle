@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
 /**
- * 从 RocketMQ 消息 headers 恢复传播上下文。
+ * 从 RocketMQ 消息 headers 解码传播上下文，由消费适配器显式恢复。
  */
 public final class RocketContextSupport {
 
@@ -32,19 +32,21 @@ public final class RocketContextSupport {
     }
 
     /**
-     * 从消息 headers 解码并恢复上下文。
+     * 从消息 headers 解码传播上下文。
      *
-     * <p>关闭返回的作用域后，会恢复进入作用域前的完整上下文。
+     * <p>调用返回传播器的 {@link ContextPropagator#restore(ContextSnapshot)} 后，关闭作用域会恢复进入
+     * 作用域前的完整上下文。
      *
      * <p>典型用法：
      * <pre>{@code
-     * try (ContextScope ignored = rocketMqContextSupport.restoreFrom(message.getProperties())) {
+     * final ContextPropagator propagator = rocketMqContextSupport.restoreFrom(message.getProperties());
+     * try (ContextScope ignored = propagator.restore(propagator.capture())) {
      *     handleMessage(message);
      * }
      * }</pre>
      *
      * @param headers 消息 headers（来自 {@code MessageExt.getProperties()} 或 {@code RocketMessageWrapper.headers()}）
-     * @return 用于恢复先前上下文的作用域
+     * @return 持有解码快照的传播器
      * @throws NullPointerException 当 {@code headers} 为 {@code null} 时
      */
     @SuppressWarnings("NullAway")

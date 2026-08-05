@@ -32,15 +32,15 @@ class RocketRemoteEventTransportTest {
         transport.send(envelope, RocketRemoteEventTransportTest.remote());
         transport.send(envelope, RocketRemoteEventTransportTest.remote().async());
         transport.send(envelope, RocketRemoteEventTransportTest.remote().setOrderKey("order-42"));
-        transport.send(envelope, RocketRemoteEventTransportTest.remote().setOrderKey("order-42").async());
         transport.send(
-                envelope, RocketRemoteEventTransportTest.remote().setDelayTime(Duration.ofSeconds(5)));
+                envelope,
+                RocketRemoteEventTransportTest.remote().setOrderKey("order-42").async());
+        transport.send(envelope, RocketRemoteEventTransportTest.remote().setDelayTime(Duration.ofSeconds(5)));
 
         verify(template).syncSend(eq("orders"), any(Message.class));
         verify(template).asyncSend(eq("orders"), any(Message.class), any(SendCallback.class));
         verify(template).syncSendOrderly(eq("orders"), any(Message.class), eq("order-42"));
-        verify(template)
-                .asyncSendOrderly(eq("orders"), any(Message.class), eq("order-42"), any(SendCallback.class));
+        verify(template).asyncSendOrderly(eq("orders"), any(Message.class), eq("order-42"), any(SendCallback.class));
         verify(template).syncSendDelayTimeMills(eq("orders"), any(Message.class), eq(5000L));
     }
 
@@ -49,7 +49,8 @@ class RocketRemoteEventTransportTest {
         final RocketMQTemplate template = mock(RocketMQTemplate.class);
         final RocketRemoteEventTransport transport = RocketRemoteEventTransportTest.transport(template);
 
-        transport.sends(List.of(RocketRemoteEventTransportTest.envelope(), RocketRemoteEventTransportTest.envelope()),
+        transport.sends(
+                List.of(RocketRemoteEventTransportTest.envelope(), RocketRemoteEventTransportTest.envelope()),
                 RocketRemoteEventTransportTest.remote());
 
         verify(template, org.mockito.Mockito.times(2)).syncSend(eq("orders"), any(Message.class));
@@ -69,9 +70,10 @@ class RocketRemoteEventTransportTest {
                 .hasCauseInstanceOf(IllegalStateException.class);
 
         final RocketMQTemplate untouchedTemplate = mock(RocketMQTemplate.class);
-        final RocketRemoteEventTransport untouchedTransport = RocketRemoteEventTransportTest.transport(untouchedTemplate);
-        assertThatThrownBy(() -> untouchedTransport.send(
-                        RocketRemoteEventTransportTest.envelope(), PublishOptions.defaults()))
+        final RocketRemoteEventTransport untouchedTransport =
+                RocketRemoteEventTransportTest.transport(untouchedTemplate);
+        assertThatThrownBy(() ->
+                        untouchedTransport.send(RocketRemoteEventTransportTest.envelope(), PublishOptions.defaults()))
                 .isInstanceOf(ErrorCodeException.class);
         verifyNoInteractions(untouchedTemplate);
     }

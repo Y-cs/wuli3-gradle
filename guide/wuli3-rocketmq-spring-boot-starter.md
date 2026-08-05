@@ -1,6 +1,6 @@
 # wuli3-rocketmq-spring-boot-starter 使用指南
 
-该 starter 在存在 `RocketMQTemplate` 时，为事件模块提供 `RemoteEventTransport` 发送实现，并提供可手动使用的消息上下文恢复支持。
+该 starter 根据所选 RocketMQ 客户端为事件模块提供 `RemoteEventTransport` 发送实现，并提供可手动使用的消息上下文恢复支持。
 
 ## 引入
 
@@ -21,7 +21,46 @@ rocketmq:
     group: order-service
 ```
 
-具体连接、认证和 producer 参数由 RocketMQ Spring Boot starter 管理。没有 `RocketMQTemplate` 时，本模块自动配置不生效。
+以上是 v4 的配置方式；具体连接、认证和 producer 参数由 RocketMQ Spring Boot starter 管理。选择 v4 时没有 `RocketMQTemplate`，本模块不会注册 v4 transport。
+
+## 选择客户端
+
+默认使用由 RocketMQ Spring Boot starter 管理的 v4 `RocketMQTemplate`：
+
+```yaml
+wuli3:
+  rocketmq:
+    client-version: v4
+```
+
+`wuli3.rocketmq.client-version` 只决定 starter 自动注入哪个 transport：
+
+| 配置 | 前提 | 自动注入 |
+| --- | --- | --- |
+| 未设置或 `v4` | 存在 `RocketMQTemplate` | 基于 v4 的 `RocketRemoteEventTransport` |
+| `v5` | 运行时包含 Java Client v5，且存在一个 `Producer` Bean | 基于 v5 的 `RocketV5RemoteEventTransport` |
+
+应用自己声明的 `RemoteEventTransport` 始终优先于上述自动配置。选择 v5 时设置 `client-version: v5`。v5 依赖在本 starter 中是 `compileOnly`，应用必须显式引入它，并提供由 Spring 关闭的 `Producer` Bean；starter 会通过 SPI 创建可覆盖的 `ClientServiceProvider` Bean。已选择 v5 但未提供 `Producer` 时，应用会在启动时失败，不会静默回退到 v4 或默认 transport。
+
+```kotlin
+dependencies {
+    implementation("org.apache.rocketmq:rocketmq-client-java")
+}
+```
+
+```java
+@Bean(destroyMethod = "close")
+Producer rocketV5Producer(final ClientServiceProvider clientServiceProvider) throws ClientException {
+    final ClientConfiguration clientConfiguration =
+            ClientConfiguration.newBuilder().setEndpoints("your-v5-endpoint:8081").build();
+    return clientServiceProvider.newProducerBuilder()
+            .setClientConfiguration(clientConfiguration)
+            .setTopics("orders")
+            .build();
+}
+```
+
+应用负责 v5 Producer 的 endpoint、凭据和预声明 topic；调用 `setTopics(...)` 时应列出该 Producer 会发送的全部 topic。v5 选中后不会注入 v4 transport，即使应用同时配置了 `RocketMQTemplate`。
 
 ## 发布远程事件
 
@@ -59,15 +98,16 @@ ContextEncoder rocketMqContextEncoder() {
 
 同一个 `ContextEncoder` Bean 同时决定 `RocketMessageWrapperEncoder` 的出站字段和 `RocketContextSupport` 的入站字段。缩小白名单后，入站恢复也只会接受对应字段。
 
-消费适配器需要明确控制上下文作用域：
+消费适配器需要先得到已解码的 `ContextPropagator`，再显式恢复作用域：
 
 ```java
-try (ContextScope ignored = rocketMqContextSupport.restoreFrom(messageExt.getProperties())) {
+final ContextPropagator propagator = rocketMqContextSupport.restoreFrom(messageExt.getProperties());
+try (ContextScope ignored = propagator.restore(propagator.capture())) {
     listener.handle(envelope);
 }
 ```
 
-`restoreFrom` 只恢复字段编码器识别出的上下文，不会自动注册或包裹 RocketMQ Listener。实际 Listener 仍应根据消息来源、线程模型、重试和死信策略决定调用时机。非法认证字段由 `AuthContextEncoder` 忽略，避免消费适配器承担解析细节。
+`restoreFrom` 只解码字段编码器识别出的上下文并返回 `ContextPropagator`，不会自动注册或包裹 RocketMQ Listener。实际 Listener 仍应根据消息来源、线程模型、重试和死信策略决定调用时机。非法认证字段由 `AuthContextEncoder` 忽略，避免消费适配器承担解析细节。
 
 ## 投递边界
 

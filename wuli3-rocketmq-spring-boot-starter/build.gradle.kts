@@ -7,6 +7,6 @@ dependencies {
     api(project(":wuli3-context-propagation"))
     api("org.apache.rocketmq:rocketmq-spring-boot-starter")
     implementation(project(":wuli3-json"))
-    compileOnly("org.apache.rocketmq:rocketmq-client-java:5.2.0")
-    testImplementation("org.apache.rocketmq:rocketmq-client-java:5.2.0")
+    compileOnly("org.apache.rocketmq:rocketmq-client-java")
+    testImplementation("org.apache.rocketmq:rocketmq-client-java")
 }

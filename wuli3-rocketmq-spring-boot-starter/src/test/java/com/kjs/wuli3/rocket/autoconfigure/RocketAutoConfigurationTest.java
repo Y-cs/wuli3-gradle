@@ -7,46 +7,107 @@ import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.rocket.internal.RocketContextSupport;
 import com.kjs.wuli3.rocket.internal.RocketRemoteEventTransport;
+import com.kjs.wuli3.rocket.internal.RocketV5RemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
 import java.util.Collection;
+import org.apache.rocketmq.client.apis.ClientServiceProvider;
+import org.apache.rocketmq.client.apis.producer.Producer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 class RocketAutoConfigurationTest {
 
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(RocketAutoConfiguration.class))
-            .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class));
+    private final ApplicationContextRunner contextRunner =
+            new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RocketAutoConfiguration.class));
 
     @Test
     void registersDefaultEncoderAndTransportWhenTemplateIsAvailable() {
-        this.contextRunner.run(context -> {
-            assertThat(context).hasSingleBean(RocketMessageWrapperEncoder.class);
-            assertThat(context).hasSingleBean(RemoteEventTransport.class);
-            assertThat(context).hasSingleBean(RocketRemoteEventTransport.class);
-            assertThat(context).doesNotHaveBean(RocketContextSupport.class);
-        });
+        this.contextRunner
+                .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(RocketMessageWrapperEncoder.class);
+                    assertThat(context).hasSingleBean(RemoteEventTransport.class);
+                    assertThat(context).hasSingleBean(RocketRemoteEventTransport.class);
+                    assertThat(context).doesNotHaveBean(RocketContextSupport.class);
+                });
     }
 
     @Test
     void registersInboundContextSupportWhenAWriterIsAvailable() {
-        this.contextRunner.withBean(ContextStore.class, ContextStore::new).run(context -> {
-            assertThat(context).hasSingleBean(RocketContextSupport.class);
-        });
+        this.contextRunner
+                .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class))
+                .withBean(ContextStore.class, ContextStore::new)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(RocketContextSupport.class);
+                });
     }
 
     @Test
     void backsOffForApplicationProvidedBeans() {
         this.contextRunner
+                .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class))
                 .withBean(RemoteEventTransport.class, NoopRemoteTransport::new)
-                .withBean(RocketMessageWrapperEncoder.class, () -> new RocketMessageWrapperEncoder(null,
-                        new com.kjs.wuli3.propagation.encoding.ContextEncoder(java.util.List.of())))
+                .withBean(
+                        RocketMessageWrapperEncoder.class,
+                        () -> new RocketMessageWrapperEncoder(
+                                null, new com.kjs.wuli3.propagation.encoding.ContextEncoder(java.util.List.of())))
                 .run(context -> {
                     assertThat(context).hasSingleBean(RemoteEventTransport.class);
                     assertThat(context).doesNotHaveBean(RocketRemoteEventTransport.class);
                     assertThat(context).hasSingleBean(RocketMessageWrapperEncoder.class);
+                });
+    }
+
+    @Test
+    void selectsV5TransportWhenConfigured() {
+        this.contextRunner
+                .withPropertyValues("wuli3.rocketmq.client-version=v5")
+                .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class))
+                .withBean(Producer.class, () -> mock(Producer.class))
+                .withBean(ClientServiceProvider.class, () -> mock(ClientServiceProvider.class))
+                .run(context -> {
+                    assertThat(context.getBean(RocketProperties.class).getClientVersion())
+                            .isEqualTo(RocketProperties.ClientVersion.V5);
+                    assertThat(context).hasSingleBean(RemoteEventTransport.class);
+                    assertThat(context).hasSingleBean(RocketV5RemoteEventTransport.class);
+                    assertThat(context).doesNotHaveBean(RocketRemoteEventTransport.class);
+                });
+    }
+
+    @Test
+    void failsStartupWhenV5IsSelectedWithoutAnApplicationProducer() {
+        this.contextRunner
+                .withPropertyValues("wuli3.rocketmq.client-version=v5")
+                .withBean(ClientServiceProvider.class, () -> mock(ClientServiceProvider.class))
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure()).hasMessageContaining("Producer");
+                });
+    }
+
+    @Test
+    void registersV5TransportWithoutV4Template() {
+        this.contextRunner
+                .withPropertyValues("wuli3.rocketmq.client-version=v5")
+                .withBean(Producer.class, () -> mock(Producer.class))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(ClientServiceProvider.class);
+                    assertThat(context).hasSingleBean(RemoteEventTransport.class);
+                    assertThat(context).hasSingleBean(RocketV5RemoteEventTransport.class);
+                });
+    }
+
+    @Test
+    void keepsV4TransportUsableWithoutTheOptionalV5Client() {
+        this.contextRunner
+                .withClassLoader(new FilteredClassLoader("org.apache.rocketmq.client.apis"))
+                .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(RemoteEventTransport.class);
+                    assertThat(context).hasSingleBean(RocketRemoteEventTransport.class);
                 });
     }
 

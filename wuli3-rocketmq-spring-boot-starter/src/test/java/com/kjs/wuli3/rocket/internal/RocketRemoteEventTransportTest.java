@@ -8,9 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.EventTransport;
-import com.kjs.wuli3.event.PublishOptions;
+import com.kjs.wuli3.event.envelope.EventEnvelope;
+import com.kjs.wuli3.event.error.SendFailedException;
 import com.kjs.wuli3.propagation.encoding.ContextEncoder;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
 import java.time.Duration;
@@ -29,13 +28,15 @@ class RocketRemoteEventTransportTest {
         final RocketRemoteEventTransport transport = RocketRemoteEventTransportTest.transport(template);
         final EventEnvelope<String> envelope = RocketRemoteEventTransportTest.envelope();
 
-        transport.send(envelope, RocketRemoteEventTransportTest.remote());
-        transport.send(envelope, RocketRemoteEventTransportTest.remote().async());
-        transport.send(envelope, RocketRemoteEventTransportTest.remote().setOrderKey("order-42"));
+        transport.send(RocketRemoteEventTransportTest.options(), envelope);
+        transport.send(RocketRemoteEventTransportTest.options().withAsync(), envelope);
+        transport.send(RocketRemoteEventTransportTest.options().withOrderKey("order-42"), envelope);
         transport.send(
-                envelope,
-                RocketRemoteEventTransportTest.remote().setOrderKey("order-42").async());
-        transport.send(envelope, RocketRemoteEventTransportTest.remote().setDelayTime(Duration.ofSeconds(5)));
+                RocketRemoteEventTransportTest.options()
+                        .withOrderKey("order-42")
+                        .withAsync(),
+                envelope);
+        transport.send(RocketRemoteEventTransportTest.options().withDelay(Duration.ofSeconds(5)), envelope);
 
         verify(template).syncSend(eq("orders"), any(Message.class));
         verify(template).asyncSend(eq("orders"), any(Message.class), any(SendCallback.class));
@@ -49,9 +50,10 @@ class RocketRemoteEventTransportTest {
         final RocketMQTemplate template = mock(RocketMQTemplate.class);
         final RocketRemoteEventTransport transport = RocketRemoteEventTransportTest.transport(template);
 
-        transport.sends(
-                List.of(RocketRemoteEventTransportTest.envelope(), RocketRemoteEventTransportTest.envelope()),
-                RocketRemoteEventTransportTest.remote());
+        transport.send(
+                RocketRemoteEventTransportTest.options(),
+                RocketRemoteEventTransportTest.envelope(),
+                RocketRemoteEventTransportTest.envelope());
 
         verify(template, org.mockito.Mockito.times(2)).syncSend(eq("orders"), any(Message.class));
     }
@@ -65,15 +67,16 @@ class RocketRemoteEventTransportTest {
         final RocketRemoteEventTransport failingTransport = RocketRemoteEventTransportTest.transport(failingTemplate);
 
         assertThatThrownBy(() -> failingTransport.send(
-                        RocketRemoteEventTransportTest.envelope(), RocketRemoteEventTransportTest.remote()))
-                .isInstanceOf(EventTransport.SendFailedException.class)
+                        RocketRemoteEventTransportTest.options(), RocketRemoteEventTransportTest.envelope()))
+                .isInstanceOf(SendFailedException.class)
                 .hasCauseInstanceOf(IllegalStateException.class);
 
         final RocketMQTemplate untouchedTemplate = mock(RocketMQTemplate.class);
         final RocketRemoteEventTransport untouchedTransport =
                 RocketRemoteEventTransportTest.transport(untouchedTemplate);
-        assertThatThrownBy(() ->
-                        untouchedTransport.send(RocketRemoteEventTransportTest.envelope(), PublishOptions.defaults()))
+        final EventEnvelope<String> invalidEnvelope =
+                new EventEnvelope<>("invalid topic", "order.paid.v1", "event-1", Instant.EPOCH, "payload");
+        assertThatThrownBy(() -> untouchedTransport.send(RocketRemoteEventTransportTest.options(), invalidEnvelope))
                 .isInstanceOf(ErrorCodeException.class);
         verifyNoInteractions(untouchedTemplate);
     }
@@ -87,7 +90,7 @@ class RocketRemoteEventTransportTest {
         return new EventEnvelope<>("orders", "order.paid.v1", "event-1", Instant.EPOCH, "payload");
     }
 
-    private static PublishOptions remote() {
-        return new PublishOptions(PublishOptions.Channel.REMOTE);
+    private static RocketPublishOptions options() {
+        return new RocketPublishOptions();
     }
 }

@@ -1,15 +1,13 @@
 package com.kjs.wuli3.rocket.autoconfigure;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
+import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.rocket.internal.RocketContextSupport;
+import com.kjs.wuli3.rocket.internal.RocketPublishOptions;
 import com.kjs.wuli3.rocket.internal.RocketRemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.RocketV5RemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
-import java.util.Collection;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.producer.Producer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -17,6 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 class RocketAutoConfigurationTest {
 
@@ -49,7 +50,7 @@ class RocketAutoConfigurationTest {
     void backsOffForApplicationProvidedBeans() {
         this.contextRunner
                 .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class))
-                .withBean(RemoteEventTransport.class, NoopRemoteTransport::new)
+                .withBean(RemoteEventTransport.class, NoopRocketTransport::new)
                 .withBean(
                         RocketMessageWrapperEncoder.class,
                         () -> new RocketMessageWrapperEncoder(
@@ -58,6 +59,17 @@ class RocketAutoConfigurationTest {
                     assertThat(context).hasSingleBean(RemoteEventTransport.class);
                     assertThat(context).doesNotHaveBean(RocketRemoteEventTransport.class);
                     assertThat(context).hasSingleBean(RocketMessageWrapperEncoder.class);
+                });
+    }
+
+    @Test
+    void coexistsWithARemoteTransportForAnotherOptionsType() {
+        this.contextRunner
+                .withBean(RocketMQTemplate.class, () -> mock(RocketMQTemplate.class))
+                .withBean(OtherRemoteTransport.class, OtherRemoteTransport::new)
+                .run(context -> {
+                    assertThat(context).getBeans(RemoteEventTransport.class).hasSize(2);
+                    assertThat(context).hasSingleBean(RocketRemoteEventTransport.class);
                 });
     }
 
@@ -111,16 +123,29 @@ class RocketAutoConfigurationTest {
                 });
     }
 
-    private static final class NoopRemoteTransport implements RemoteEventTransport {
+    private static final class NoopRocketTransport implements RemoteEventTransport<RocketPublishOptions> {
+
+        @Override
+        public Class<RocketPublishOptions> supportedOptionsType() {
+            return RocketPublishOptions.class;
+        }
 
         @Override
         public void send(
-                final com.kjs.wuli3.event.EventEnvelope<?> envelope,
-                final com.kjs.wuli3.event.PublishOptions options) {}
+                final RocketPublishOptions options, final com.kjs.wuli3.event.envelope.EventEnvelope<?>... envelopes) {}
+    }
+
+    private record OtherOptions() implements PublishOptions {}
+
+    private static final class OtherRemoteTransport implements RemoteEventTransport<OtherOptions> {
 
         @Override
-        public void sends(
-                final Collection<com.kjs.wuli3.event.EventEnvelope<?>> envelopes,
-                final com.kjs.wuli3.event.PublishOptions options) {}
+        public Class<OtherOptions> supportedOptionsType() {
+            return OtherOptions.class;
+        }
+
+        @Override
+        public void send(
+                final OtherOptions options, final com.kjs.wuli3.event.envelope.EventEnvelope<?>... envelopes) {}
     }
 }

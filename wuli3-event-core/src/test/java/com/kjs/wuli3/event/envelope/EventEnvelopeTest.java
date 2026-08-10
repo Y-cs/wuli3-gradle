@@ -1,4 +1,4 @@
-package com.kjs.wuli3.event;
+package com.kjs.wuli3.event.envelope;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;

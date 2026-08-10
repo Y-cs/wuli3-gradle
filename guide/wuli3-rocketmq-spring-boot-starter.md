@@ -40,7 +40,11 @@ wuli3:
 | 未设置或 `v4` | 存在 `RocketMQTemplate` | 基于 v4 的 `RocketRemoteEventTransport` |
 | `v5` | 运行时包含 Java Client v5，且存在一个 `Producer` Bean | 基于 v5 的 `RocketV5RemoteEventTransport` |
 
-应用自己声明的 `RemoteEventTransport` 始终优先于上述自动配置。选择 v5 时设置 `client-version: v5`。v5 依赖在本 starter 中是 `compileOnly`，应用必须显式引入它，并提供由 Spring 关闭的 `Producer` Bean；starter 会通过 SPI 创建可覆盖的 `ClientServiceProvider` Bean。已选择 v5 但未提供 `Producer` 时，应用会在启动时失败，不会静默回退到 v4 或默认 transport。
+应用自己声明的 `RocketEventTransport` 优先于上述自动配置；其他 options 类型的
+`RemoteEventTransport` 可以与 RocketMQ transport 同时注册。选择 v5 时设置 `client-version: v5`。
+v5 依赖在本 starter 中是 `compileOnly`，应用必须显式引入它，并提供由 Spring 关闭的
+`Producer` Bean；starter 会通过 SPI 创建可覆盖的 `ClientServiceProvider` Bean。已选择 v5
+但未提供 `Producer` 时，应用会在启动时失败，不会静默回退到 v4 或默认 transport。
 
 ```kotlin
 dependencies {
@@ -68,18 +72,20 @@ Producer rocketV5Producer(final ClientServiceProvider clientServiceProvider) thr
 final EventEnvelope<OrderPaid> envelope =
         EventEnvelopeTemplate.of("orders", "order.paid.v1").wrap(payload);
 
-final PublishOptions options =
-        new PublishOptions(PublishOptions.Channel.REMOTE).afterCommit();
+final RocketPublishOptions options = new RocketPublishOptions()
+        .withAfterCommit();
 
-eventPublisher.publish(envelope, options);
+eventPublisher.publish(options, envelope);
 ```
 
-支持同步、异步、顺序和精确延迟发送，但精确延迟不能与 `async` 或 order key 组合。编码器要求：
+`RocketPublishOptions` 通过 `withAsync()`、`withAfterCommit()`、`withOrderKey(...)` 和
+`withDelay(...)` 创建不可变副本。支持同步、异步、顺序和精确延迟发送，但精确延迟不能与
+`async` 或 order key 组合。v4 支持异步顺序发送；Java Client v5 不支持异步 FIFO，选择 v5
+时 `async` 不能与 order key 组合。编码器要求：
 
-- channel 必须是 `REMOTE`。
 - topic 长度不超过 127 字节。
 - topic 只能包含字母、数字、`%`、`-` 和 `_`。
-- 非正数 delay 会被拒绝。
+- 非正数 delay 和空白 order key 会在构造选项时被拒绝。
 
 ## 上下文传播
 

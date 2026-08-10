@@ -108,25 +108,25 @@
 
 证据：
 
-- `wuli3-event-core/src/main/java/com/kjs/wuli3/event/EventEnvelope.java:13`
-- `wuli3-event-core/src/main/java/com/kjs/wuli3/event/EventPublisher.java:5`
-- `wuli3-event-core/src/main/java/com/kjs/wuli3/event/EventPublisher.java:21`
-- `wuli3-event-spring-boot-starter/src/main/java/com/kjs/wuli3/event/spring/SpringLocalEventMessageTransport.java:29`
+- `wuli3-event-core/src/main/java/com/kjs/wuli3/event/envelope/EventEnvelope.java:13`
+- `wuli3-event-core/src/main/java/com/kjs/wuli3/event/EventPublisher.java:6`
+- `wuli3-event-spring-boot-starter/src/main/java/com/kjs/wuli3/event/transport/SpringLocalEventTransport.java:18`
 
-`EventEnvelope` 强制要求远程消息关注的 `topic`、稳定事件类型和事件 ID，但 `EventPublisher` 默认走 LOCAL，Spring 最终发布的也是整个信封。普通 `@EventListener(OrderPaid.class)` 无法自然按 payload 类型监听，业务即使只需要本地事件也必须构造远程元数据。
+`EventEnvelope` 仍强制要求远程消息关注的 `topic`、稳定事件类型和事件 ID，Spring 最终发布的也是整个信封。普通 `@EventListener(OrderPaid.class)` 无法自然按 payload 类型监听，业务即使只需要本地事件也必须构造远程元数据。
 
 建议本地事件直接使用 Spring `ApplicationEventPublisher` 发布业务对象；`EventEnvelope`、`PublishOptions` 和传输能力只服务远程集成事件。不要为了统一入口重新制造框架事件总线，也不要在没有可靠投递需求时重新引入 Outbox。
 
-同时，README 将 REMOTE 描述为“提交后投递”，但 `new PublishOptions(Channel.REMOTE)` 默认 `afterCommit=false`。应修正文档或将远程默认语义收敛为一个明确选择。
+原有全局 `LOCAL`/`REMOTE` 选项及默认通道已经删除；当前由具体 options 类型选择 transport，事务、异步和 RocketMQ 能力也由对应选项显式表达。指南已同步到该代码契约。
 
 ### 3.7 HIGH：仓库自身质量门禁不通过
 
-当前工作区执行 `rtk ./gradlew check --continue`：
+当前工作区执行 `rtk ./gradlew check`：
 
-- `wuli3-event-core`、`wuli3-event-spring-boot-starter`、`wuli3-rocketmq-spring-boot-starter` 的 Spotless 检查失败。
-- 未跟踪 `DefaultClientIpResolverTest` 调用不存在的 `setTrustedProxyCidr`，导致 Web 测试编译失败。
+- 事件 core、Spring 事件 starter 和 RocketMQ starter 的独立 `check` 已通过。
+- 仓库级门禁仍被 `wuli3-context-propagation` 的格式问题和 `ContextEncoder` 星号导入的 Checkstyle 错误阻断。
+- 未跟踪的 Web 测试仍属于独立工作区改动，本次事件重构未修改它。
 
-对纯 `HEAD` 快照执行同一检查后，除上述三个格式问题外，Web 的 39 个测试全部因 `slf4j-simple` 与 Logback 冲突而无法启动 Spring 上下文。根因位于：
+此前对纯 `HEAD` 快照执行同一检查时，Web 的 39 个测试全部因 `slf4j-simple` 与 Logback 冲突而无法启动 Spring 上下文。根因位于：
 
 - `build-logic/src/main/kotlin/com/kjs/wuli3/JavaConventionsPlugin.kt:95`
 - `build-logic/src/main/kotlin/com/kjs/wuli3/SpringConventionsPlugin.kt:12`
@@ -163,7 +163,6 @@ RemoteEventEnvelope -> RemoteEventPublisher -> RemoteEventMessageTransport
 - `JsonMapperNumberStrAssembly` 当前未进入标准 assembly，也没有生产调用方，可删除或改为明确的可选模块。
 - `JsonFunction` 是 public，但唯一消费入口 `Jsons.execute` 是包级方法，应降为包私有。
 - Web README 声明 `internal` 不属于扩展 API，但多个 internal 类和构造器仍为 public；应通过可见性或兼容性规则真正收口。
-- `RocketV5RemoteEventTransport` 位于生产源码、依赖为 `compileOnly`、没有 Bean 或公共工厂，消费者无法正常使用。应删除、迁到测试原型，或拆为明确实验模块。
 
 ## 5. 业务场景覆盖
 

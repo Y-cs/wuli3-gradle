@@ -33,30 +33,20 @@ final EventEnvelope<OrderPaid> envelope = ORDER_PAID.wrap(payload);
 
 ## 发布选项
 
-`PublishOptions.defaults()` 表示同步 `LOCAL` 发布。远程发布从明确的通道开始：
+`PublishOptions` 是标记接口，不再包含全局 `LOCAL`/`REMOTE` 通道或所有传输的能力并集。
+每个 transport 使用独立的具体选项类型声明其能力，`EventPublisher` 根据该具体类型路由：
 
 ```java
-final PublishOptions options = new PublishOptions(PublishOptions.Channel.REMOTE)
-        .afterCommit();
-
-eventPublisher.publish(envelope, options);
+eventPublisher.publish(options, envelope);
 ```
 
-可选能力：
-
-| API | 语义 |
-| --- | --- |
-| `async()` | 请求异步发送。 |
-| `afterCommit()` | 有活动事务时，在提交成功后发送。 |
-| `delaySeconds(long)` / `setDelayTime(Duration)` | 请求延迟发送。 |
-| `setOrderKey(String)` | 请求按业务键有序发送。 |
-
-选项只表达调用方需求；具体 transport 可以拒绝不支持的组合并抛出 `UnsupportedCapabilityException`。
+未注册对应选项类型时会抛出 `UnsupportedCapabilityException`。具体选项的构造方式和能力限制由提供它的 starter 定义。
 
 ## 扩展端口
 
-- `EventPublisher`：应用发布入口，支持单条和批量发布。
-- `EventTransport`：通用发送端口。
+- `EventPublisher`：应用发布入口，通过 varargs 支持一个或多个信封。
+- `EventTransport<PO>`：声明具体选项类型的发送端口。
+- `RoutingEventPublisher`：按 `supportedOptionsType()` 注册并路由 transport。
 
 仅引入本模块不会创建 `EventPublisher` 实现。Spring 应用通常同时引入
 [wuli3-event-spring-boot-starter](wuli3-event-spring-boot-starter.md)。
@@ -65,7 +55,7 @@ eventPublisher.publish(envelope, options);
 
 - `EventEnvelopeTemplate.wrap(...)` 使用当前时间和 UUID；需要可测试时间或业务 ID 时使用带 `Supplier<String>` 的模板或直接构造信封。
 - `EventEnvelope` 不承载协议 header；具体消息传输适配器负责其编码和隔离。
-- `afterCommit` 不是可靠消息保证；模块没有 Outbox、重试、去重或投递审计。
+- core 不定义事务或异步语义；这些能力由具体 starter 的选项和 transport 实现。
 - 远程 `topic` 还必须满足具体消息中间件的限制。
 
 ## 验证

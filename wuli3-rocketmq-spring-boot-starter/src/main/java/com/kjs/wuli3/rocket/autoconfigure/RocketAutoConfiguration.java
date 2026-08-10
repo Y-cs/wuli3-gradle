@@ -9,7 +9,6 @@ import com.kjs.wuli3.rocket.internal.RocketContextSupport;
 import com.kjs.wuli3.rocket.internal.RocketRemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.RocketV5RemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
-import java.time.Clock;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.producer.Producer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -24,6 +23,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Clock;
 
 /**
  * 自动配置默认的 RocketMQ 远程事件传输实现。
@@ -44,20 +45,6 @@ public class RocketAutoConfiguration {
     }
 
     /**
-     * 创建由不同 RocketMQ 客户端实现共享的事件编码器。
-     *
-     * @param contextReaders 可选的当前上下文读取器
-     * @param contextEncoder 上下文字段编码器
-     * @return 公共事件编码器
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    RocketMessageWrapperEncoder rocketMqEventMessageEncoder(
-            final ObjectProvider<ContextReader> contextReaders, final ContextEncoder contextEncoder) {
-        return new RocketMessageWrapperEncoder(contextReaders.getIfUnique(), contextEncoder);
-    }
-
-    /**
      * 创建消费端上下文解码支持；消费适配器自行决定何时恢复和关闭上下文作用域。
      *
      * @param contextWriter  上下文写入器
@@ -70,6 +57,20 @@ public class RocketAutoConfiguration {
     RocketContextSupport rocketMqContextSupport(
             final ContextWriter contextWriter, final ContextEncoder contextEncoder) {
         return new RocketContextSupport(contextWriter, contextEncoder);
+    }
+
+    /**
+     * 创建由不同 RocketMQ 客户端实现共享的事件编码器。
+     *
+     * @param contextReaders 可选的当前上下文读取器
+     * @param contextEncoder 上下文字段编码器
+     * @return 公共事件编码器
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    RocketMessageWrapperEncoder rocketMqEventMessageEncoder(
+            final ObjectProvider<ContextReader> contextReaders, final ContextEncoder contextEncoder) {
+        return new RocketMessageWrapperEncoder(contextReaders.getIfUnique(), contextEncoder);
     }
 
     /**

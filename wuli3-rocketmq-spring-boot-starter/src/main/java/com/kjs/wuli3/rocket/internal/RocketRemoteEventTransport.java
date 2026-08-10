@@ -1,15 +1,11 @@
 package com.kjs.wuli3.rocket.internal;
 
 import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.EventTransport;
-import com.kjs.wuli3.event.PublishOptions;
+import com.kjs.wuli3.event.envelope.EventEnvelope;
+import com.kjs.wuli3.event.error.SendFailedException;
 import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapper;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.rocketmq.client.producer.SendCallback;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -20,10 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+import java.time.Duration;
+import java.util.Objects;
+
 /**
  * 基于 {@link RocketMQTemplate} 的默认尽力而为远程事件传输实现。
  */
-public final class RocketRemoteEventTransport implements RemoteEventTransport {
+public final class RocketRemoteEventTransport implements RemoteEventTransport<RocketPublishOptions> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RocketRemoteEventTransport.class);
 
@@ -43,21 +42,24 @@ public final class RocketRemoteEventTransport implements RemoteEventTransport {
     }
 
     @Override
-    public void send(final EventEnvelope<?> envelope, final PublishOptions options) {
-        final RocketMessageWrapper wireMessage = this.encoder.encode(envelope, options);
-        this.sendEncoded(wireMessage, envelope, options);
+    public Class<RocketPublishOptions> supportedOptionsType() {
+        return RocketPublishOptions.class;
     }
 
     @Override
-    public void sends(final Collection<EventEnvelope<?>> envelopes, final PublishOptions options) {
+    public void send(final RocketPublishOptions options, final EventEnvelope<?>... envelopes) {
+        Objects.requireNonNull(options, "options");
         Objects.requireNonNull(envelopes, "envelopes");
         for (final EventEnvelope<?> envelope : envelopes) {
-            this.send(envelope, options);
+            final RocketMessageWrapper wireMessage = this.encoder.encode(envelope, options);
+            this.sendEncoded(wireMessage, envelope, options);
         }
     }
 
     private void sendEncoded(
-            final RocketMessageWrapper wireMessage, final EventEnvelope<?> envelope, final PublishOptions options) {
+            final RocketMessageWrapper wireMessage,
+            final EventEnvelope<?> envelope,
+            final RocketPublishOptions options) {
         try {
             final Message<byte[]> message = MessageBuilder.withPayload(wireMessage.body())
                     .copyHeaders(wireMessage.headers())
@@ -67,7 +69,7 @@ public final class RocketRemoteEventTransport implements RemoteEventTransport {
             final Duration delay = wireMessage.delay();
             if (delay != null) {
                 this.rocketMQTemplate.syncSendDelayTimeMills(wireMessage.topic(), message, delay.toMillis());
-            } else if (wireMessage.orderKey() != null && options.isAsync()) {
+            } else if (wireMessage.orderKey() != null && options.async()) {
                 this.rocketMQTemplate.asyncSendOrderly(
                         wireMessage.topic(),
                         message,
@@ -75,7 +77,7 @@ public final class RocketRemoteEventTransport implements RemoteEventTransport {
                         new RocketRemoteEventTransportCallback(envelope));
             } else if (wireMessage.orderKey() != null) {
                 this.rocketMQTemplate.syncSendOrderly(wireMessage.topic(), message, wireMessage.orderKey());
-            } else if (options.isAsync()) {
+            } else if (options.async()) {
                 this.rocketMQTemplate.asyncSend(
                         wireMessage.topic(), message, new RocketRemoteEventTransportCallback(envelope));
             } else {
@@ -84,7 +86,7 @@ public final class RocketRemoteEventTransport implements RemoteEventTransport {
         } catch (final ErrorCodeException exception) {
             throw exception;
         } catch (final RuntimeException exception) {
-            throw new EventTransport.SendFailedException("RocketMQ event send failed", exception);
+            throw new SendFailedException("RocketMQ event send failed", exception);
         }
     }
 

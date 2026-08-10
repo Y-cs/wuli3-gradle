@@ -1,9 +1,9 @@
 package com.kjs.wuli3.consumer;
 
 import com.kjs.wuli3.core.id.UuidStringIdGenerator;
-import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.EventEnvelopeTemplate;
 import com.kjs.wuli3.event.EventPublisher;
+import com.kjs.wuli3.event.envelope.EventEnvelope;
+import com.kjs.wuli3.event.envelope.EventEnvelopeTemplate;
 import com.kjs.wuli3.json.provider.JacksonProvider;
 import java.time.Instant;
 

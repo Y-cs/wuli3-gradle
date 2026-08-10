@@ -2,12 +2,12 @@ package com.kjs.wuli3.rocket.internal.wrapper;
 
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.SystemErrors;
-import com.kjs.wuli3.event.EventEnvelope;
-import com.kjs.wuli3.event.PublishOptions;
+import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.propagation.encoding.ContextEncoder;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
 import com.kjs.wuli3.propagation.store.ContextReader;
+import com.kjs.wuli3.rocket.internal.RocketPublishOptions;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -45,13 +45,9 @@ public final class RocketMessageWrapperEncoder {
      * @param options  请求的远程投递能力
      * @return 与 SDK 无关的线消息
      */
-    public RocketMessageWrapper encode(final EventEnvelope<?> envelope, final PublishOptions options) {
+    public RocketMessageWrapper encode(final EventEnvelope<?> envelope, final RocketPublishOptions options) {
         Objects.requireNonNull(envelope, "envelope");
         Objects.requireNonNull(options, "options");
-        if (!options.isRemote()) {
-            throw new ErrorCodeException(
-                    SystemErrors.ILLEGAL_ARGUMENT, "RocketMQ transport requires the REMOTE channel");
-        }
         RocketMessageWrapperEncoder.validateTopic(envelope.topic(), envelope.eventId());
         RocketMessageWrapperEncoder.validateCapabilities(options);
 
@@ -62,8 +58,8 @@ public final class RocketMessageWrapperEncoder {
                 headers,
                 envelope.eventId(),
                 envelope.eventType(),
-                options.getOrderKey(),
-                options.getDelayTime());
+                options.orderKey(),
+                options.delay());
     }
 
     /**
@@ -82,19 +78,16 @@ public final class RocketMessageWrapperEncoder {
         return headers;
     }
 
-    private static void validateCapabilities(final PublishOptions options) {
-        final Duration delay = options.getDelayTime();
+    private static void validateCapabilities(final RocketPublishOptions options) {
+        final Duration delay = options.delay();
         if (delay == null) {
             return;
         }
-        if (delay.isZero() || delay.isNegative()) {
-            throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT, "RocketMQ delay must be positive");
-        }
-        if (options.isAsync()) {
+        if (options.async()) {
             throw new ErrorCodeException(
                     SystemErrors.UNSUPPORTED_OPERATION, "RocketMQ exact delay does not support async " + "publication");
         }
-        if (options.getOrderKey() != null) {
+        if (options.orderKey() != null) {
             throw new ErrorCodeException(
                     SystemErrors.UNSUPPORTED_OPERATION,
                     "RocketMQ exact delay does not support " + "ordered publication");

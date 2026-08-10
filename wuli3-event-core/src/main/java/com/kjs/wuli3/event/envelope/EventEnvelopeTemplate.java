@@ -1,4 +1,4 @@
-package com.kjs.wuli3.event;
+package com.kjs.wuli3.event.envelope;
 
 import java.time.Instant;
 import java.util.Objects;

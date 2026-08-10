@@ -1,16 +1,12 @@
 package com.kjs.wuli3.web.error;
 
-import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.code.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-/**
- * Resolves the HTTP status that should represent a handled web error.
- */
+/** 解析已处理 Web 错误应返回的 HTTP 状态。 */
 @FunctionalInterface
 public interface WebErrorStatusResolver {
 
-    /**
-     * Return the HTTP status for the current error and external response code.
-     */
+    /** 根据当前异常和对外错误码返回 HTTP 状态。 */
     HttpStatus resolve(Throwable error, ErrorCode responseCode);
 }

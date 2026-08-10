@@ -1,6 +1,5 @@
-package com.kjs.wuli3.json.core;
+package com.kjs.wuli3.core.error.code;
 
-import com.kjs.wuli3.core.error.code.ErrorCode;
 import com.kjs.wuli3.core.error.metadata.ErrorModule;
 import com.kjs.wuli3.core.error.policy.ErrorOrigin;
 import com.kjs.wuli3.core.error.policy.ErrorPolicy;
@@ -9,20 +8,24 @@ import com.kjs.wuli3.core.error.policy.ErrorVisibility;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/** JSON 基础设施错误码。 */
+/** 错误模型自身使用的内部错误码。 */
 @Getter
 @RequiredArgsConstructor
 @ErrorModule(
-        value = "JSON",
+        value = "ERROR_FRAMEWORK",
         policy =
                 @ErrorPolicy(
                         severity = ErrorSeverity.CRITICAL,
                         visibility = ErrorVisibility.INTERNAL,
                         origin = ErrorOrigin.SYSTEM))
-public enum JsonErrors implements ErrorCode {
-    SERIALIZATION_FAILED("JSON序列化失败"),
-    DESERIALIZATION_FAILED("JSON反序列化失败"),
-    ;
+public enum ErrorFrameworkErrors implements ErrorCode {
+    ERROR_CODE_RESOLVE_FAILED("错误代码解释失败"),
+
+    INVALID_ERROR_CODE("无效错误代码"),
+
+    INVALID_ERROR_MODULE("无效错误模块"),
+
+    MODULE_NOT_FOUND("未找到错误模型");
 
     private final String message;
 }

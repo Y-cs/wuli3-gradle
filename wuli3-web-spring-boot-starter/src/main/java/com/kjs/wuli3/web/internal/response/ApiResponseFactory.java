@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.internal.response;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.code.ErrorCodeResolver;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.web.response.ApiResponse;
 import com.kjs.wuli3.web.response.WebResponseProperties;

@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.SystemErrors;
+import com.kjs.wuli3.core.error.code.CommonErrors;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
@@ -252,7 +252,7 @@ class WebConfigurationPropertiesTest {
         void customStatusResolverCanOverrideDefaultStatus() throws Exception {
             mockMvc.perform(get("/boom"))
                     .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"));
+                    .andExpect(jsonPath("$.code").value("COMMON.ILLEGAL_ARGUMENT"));
         }
     }
 
@@ -313,7 +313,7 @@ class WebConfigurationPropertiesTest {
 
         @GetMapping("/boom")
         String boom() {
-            throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT);
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT);
         }
     }
 

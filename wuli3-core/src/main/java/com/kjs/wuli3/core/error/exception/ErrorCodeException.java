@@ -1,13 +1,17 @@
-package com.kjs.wuli3.core.error;
+package com.kjs.wuli3.core.error.exception;
 
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.metadata.ErrorMetadataParser;
+import com.kjs.wuli3.core.error.policy.ErrorOrigin;
+import com.kjs.wuli3.core.error.policy.ErrorSeverity;
+import com.kjs.wuli3.core.error.policy.ErrorVisibility;
+import com.kjs.wuli3.core.error.policy.ResolvedErrorPolicy;
 import java.io.Serial;
 import java.util.Objects;
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Runtime exception carrying a domain {@link ErrorCode} plus the resolved response policy.
- */
+/** 携带错误码和已解析错误策略的运行时异常。 */
 @Getter
 public class ErrorCodeException extends RuntimeException {
 
@@ -17,8 +21,6 @@ public class ErrorCodeException extends RuntimeException {
     private final ErrorCode errorCode;
 
     private ResolvedErrorPolicy resolvedErrorPolicy;
-
-    private transient @Nullable Object detail;
 
     public ErrorCodeException(final ErrorCode errorCode, final String message, final @Nullable Throwable cause) {
         super(Objects.requireNonNull(message, "message"), cause);
@@ -38,13 +40,6 @@ public class ErrorCodeException extends RuntimeException {
         this(errorCode, message, null);
     }
 
-    public ErrorCodeException policy(final ErrorPolicyUpdater errorPolicyUpdater) {
-        Objects.requireNonNull(errorPolicyUpdater, "errorPolicyUpdater");
-        this.resolvedErrorPolicy =
-                Objects.requireNonNull(errorPolicyUpdater.apply(this.resolvedErrorPolicy), "updated error policy");
-        return this;
-    }
-
     public ErrorCodeException visibility(final ErrorVisibility visibility) {
         Objects.requireNonNull(visibility, "visibility");
         this.resolvedErrorPolicy = this.resolvedErrorPolicy.withVisibility(visibility);
@@ -57,13 +52,9 @@ public class ErrorCodeException extends RuntimeException {
         return this;
     }
 
-    public ErrorCodeException detail(final @Nullable Object detail) {
-        this.detail = detail;
+    public ErrorCodeException origin(final ErrorOrigin origin) {
+        Objects.requireNonNull(origin, "origin");
+        this.resolvedErrorPolicy = this.resolvedErrorPolicy.withOrigin(origin);
         return this;
-    }
-
-    @FunctionalInterface
-    public interface ErrorPolicyUpdater {
-        ResolvedErrorPolicy apply(final ResolvedErrorPolicy policy);
     }
 }

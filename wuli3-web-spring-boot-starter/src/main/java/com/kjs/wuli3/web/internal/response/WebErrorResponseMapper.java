@@ -1,8 +1,8 @@
 package com.kjs.wuli3.web.internal.response;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorVisibility;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.policy.ErrorVisibility;
 import com.kjs.wuli3.web.error.WebErrors;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;

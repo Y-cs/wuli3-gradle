@@ -1,13 +1,17 @@
-package com.kjs.wuli3.core.error;
+package com.kjs.wuli3.core.error.metadata;
 
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.code.ErrorFrameworkErrors;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.policy.ErrorPolicy;
+import com.kjs.wuli3.core.error.policy.ErrorSeverity;
+import com.kjs.wuli3.core.error.policy.ResolvedErrorPolicy;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Parses and caches error metadata declared on {@link ErrorCode} enum types and constants.
- */
+/** 解析并缓存错误码枚举及常量上声明的元数据。 */
 public final class ErrorMetadataParser {
 
     private static final ErrorMetadataParser INSTANCE = new ErrorMetadataParser();

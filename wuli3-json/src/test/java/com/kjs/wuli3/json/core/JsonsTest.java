@@ -4,7 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.policy.ErrorOrigin;
+import com.kjs.wuli3.core.error.policy.ErrorSeverity;
+import com.kjs.wuli3.core.error.policy.ErrorVisibility;
+import com.kjs.wuli3.core.error.policy.ResolvedErrorPolicy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -67,9 +71,12 @@ class JsonsTest {
     @Test
     void mapsDeserializeFailureToJsonError() {
         assertThatThrownBy(() -> Jsons.fromJson("{", Sample.class))
-                .isInstanceOfSatisfying(
-                        ErrorCodeException.class,
-                        ex -> assertThat(ex.getErrorCode()).isEqualTo(JsonErrors.DESERIALIZATION_FAILED));
+                .isInstanceOfSatisfying(ErrorCodeException.class, ex -> {
+                    assertThat(ex.getErrorCode()).isEqualTo(JsonErrors.DESERIALIZATION_FAILED);
+                    assertThat(ex.getResolvedErrorPolicy())
+                            .isEqualTo(new ResolvedErrorPolicy(
+                                    ErrorSeverity.CRITICAL, ErrorVisibility.INTERNAL, ErrorOrigin.SYSTEM));
+                });
     }
 
     record Sample(String name, LocalDate date, LocalTime time, LocalDateTime dateTime) {

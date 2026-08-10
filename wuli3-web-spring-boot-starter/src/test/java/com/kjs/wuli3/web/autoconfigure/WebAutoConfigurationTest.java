@@ -12,11 +12,13 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorSeverity;
-import com.kjs.wuli3.core.error.ErrorVisibility;
-import com.kjs.wuli3.core.error.SystemErrors;
+import com.kjs.wuli3.core.error.code.CommonErrors;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.code.SystemErrors;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.policy.ErrorOrigin;
+import com.kjs.wuli3.core.error.policy.ErrorSeverity;
+import com.kjs.wuli3.core.error.policy.ErrorVisibility;
 import com.kjs.wuli3.json.datatype.resource.ResourcePath;
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
@@ -197,7 +199,7 @@ class WebAutoConfigurationTest {
     void nativeResponseStillWrapsErrorByDefault() throws Exception {
         mockMvc.perform(get("/native-default-error").header(RequestIds.HEADER_NAME, "rid-native-default"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.code").value("COMMON.ILLEGAL_ARGUMENT"))
                 .andExpect(jsonPath("$.requestId").value("rid-native-default"));
     }
 
@@ -210,8 +212,8 @@ class WebAutoConfigurationTest {
         mockMvc.perform(get("/native-all-error").header(RequestIds.HEADER_NAME, "rid-native-all"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value(SystemErrors.ILLEGAL_ARGUMENT.getMessage()))
-                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.detail").value(CommonErrors.ILLEGAL_ARGUMENT.getMessage()))
+                .andExpect(jsonPath("$.code").value("COMMON.ILLEGAL_ARGUMENT"))
                 .andExpect(jsonPath("$.requestId").value("rid-native-all"));
     }
 
@@ -259,9 +261,16 @@ class WebAutoConfigurationTest {
     void exceptionIsMapped() throws Exception {
         mockMvc.perform(get("/boom").header(RequestIds.HEADER_NAME, "rid-2"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
-                .andExpect(jsonPath("$.message").value(SystemErrors.ILLEGAL_ARGUMENT.getMessage()))
+                .andExpect(jsonPath("$.code").value("COMMON.ILLEGAL_ARGUMENT"))
+                .andExpect(jsonPath("$.message").value(CommonErrors.ILLEGAL_ARGUMENT.getMessage()))
                 .andExpect(jsonPath("$.requestId").value("rid-2"));
+    }
+
+    @Test
+    void errorOriginControlsHttpStatusIndependentlyOfSeverity() throws Exception {
+        mockMvc.perform(get("/critical-caller")).andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/normal-system")).andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -303,7 +312,7 @@ class WebAutoConfigurationTest {
     void codeOnlyExceptionHidesMessage() throws Exception {
         mockMvc.perform(get("/code-only").header(RequestIds.HEADER_NAME, "rid-3"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("SYSTEM.UNSUPPORTED_OPERATION"))
+                .andExpect(jsonPath("$.code").value("COMMON.UNSUPPORTED_OPERATION"))
                 .andExpect(jsonPath("$.message").value(WebErrors.INTERNAL_ERROR.getMessage()))
                 .andExpect(jsonPath("$.requestId").value("rid-3"));
     }
@@ -311,7 +320,7 @@ class WebAutoConfigurationTest {
     @Test
     void messageOnlyExceptionHidesCode() throws Exception {
         mockMvc.perform(get("/message-only").header(RequestIds.HEADER_NAME, "rid-4"))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value("visible message"))
                 .andExpect(jsonPath("$.requestId").value("rid-4"));
@@ -502,7 +511,7 @@ class WebAutoConfigurationTest {
         @NativeResponse
         @GetMapping("/native-default-error")
         String nativeDefaultError() {
-            throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT);
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT);
         }
 
         @NativeResponse(NativeResponseMode.ALL)
@@ -514,7 +523,7 @@ class WebAutoConfigurationTest {
         @NativeResponse(NativeResponseMode.ALL)
         @GetMapping("/native-all-error")
         String nativeAllError() {
-            throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT);
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT);
         }
 
         @PostMapping(value = "/json-only", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -529,12 +538,22 @@ class WebAutoConfigurationTest {
 
         @GetMapping("/boom")
         String boom() {
-            throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT);
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT);
         }
 
         @GetMapping("/critical")
         String critical() {
-            throw new ErrorCodeException(SystemErrors.INTERNAL_ERROR).severity(ErrorSeverity.CRITICAL);
+            throw new ErrorCodeException(SystemErrors.INTERNAL_ERROR);
+        }
+
+        @GetMapping("/critical-caller")
+        String criticalCaller() {
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT).severity(ErrorSeverity.CRITICAL);
+        }
+
+        @GetMapping("/normal-system")
+        String normalSystem() {
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT).origin(ErrorOrigin.SYSTEM);
         }
 
         @GetMapping("/illegal-argument")
@@ -544,7 +563,7 @@ class WebAutoConfigurationTest {
 
         @GetMapping("/code-only")
         String codeOnly() {
-            throw new ErrorCodeException(SystemErrors.UNSUPPORTED_OPERATION, "hidden message")
+            throw new ErrorCodeException(CommonErrors.UNSUPPORTED_OPERATION, "hidden message")
                     .visibility(ErrorVisibility.CODE_ONLY);
         }
 
@@ -556,7 +575,7 @@ class WebAutoConfigurationTest {
 
         @GetMapping("/internal")
         String internal() {
-            throw new ErrorCodeException(SystemErrors.ILLEGAL_STATE, "hidden message")
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_STATE, "hidden message")
                     .visibility(ErrorVisibility.INTERNAL);
         }
     }

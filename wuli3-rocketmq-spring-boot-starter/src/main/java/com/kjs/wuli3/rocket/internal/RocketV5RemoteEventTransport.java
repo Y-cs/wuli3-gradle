@@ -1,7 +1,7 @@
 package com.kjs.wuli3.rocket.internal;
 
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.SystemErrors;
+import com.kjs.wuli3.core.error.code.CommonErrors;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.error.SendFailedException;
 import com.kjs.wuli3.event.remote.RemoteEventTransport;
@@ -72,12 +72,12 @@ public final class RocketV5RemoteEventTransport implements RemoteEventTransport<
         final Duration delay = wireMessage.delay();
         if (orderKey != null && delay != null) {
             throw new ErrorCodeException(
-                    SystemErrors.UNSUPPORTED_OPERATION,
+                    CommonErrors.UNSUPPORTED_OPERATION,
                     "RocketMQ Java Client does not support ordered delayed " + "messages");
         }
         if (orderKey != null && options.async()) {
             throw new ErrorCodeException(
-                    SystemErrors.UNSUPPORTED_OPERATION, "RocketMQ Java Client does not support async FIFO messages");
+                    CommonErrors.UNSUPPORTED_OPERATION, "RocketMQ Java Client does not support async FIFO messages");
         }
 
         final MessageBuilder builder = this.clientServiceProvider

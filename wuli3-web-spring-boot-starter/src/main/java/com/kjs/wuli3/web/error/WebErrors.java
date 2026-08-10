@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.error;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorModule;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.metadata.ErrorModule;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

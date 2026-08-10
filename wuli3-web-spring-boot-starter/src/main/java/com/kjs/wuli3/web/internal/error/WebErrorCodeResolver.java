@@ -1,12 +1,12 @@
 package com.kjs.wuli3.web.internal.error;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorCodeResolver;
-import com.kjs.wuli3.core.error.ErrorFrameworkErrors;
-import com.kjs.wuli3.core.error.ErrorMetadataParser;
-import com.kjs.wuli3.core.error.ErrorModule;
-import com.kjs.wuli3.core.error.ErrorSeverity;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.code.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.code.ErrorFrameworkErrors;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.metadata.ErrorMetadataParser;
+import com.kjs.wuli3.core.error.metadata.ErrorModule;
+import com.kjs.wuli3.core.error.policy.ErrorSeverity;
 import com.kjs.wuli3.web.error.ApplicationServiceProperties;
 import java.util.Locale;
 import java.util.Optional;

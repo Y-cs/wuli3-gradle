@@ -101,7 +101,7 @@ final class BizErrorAlertNotifier implements ErrorAlertNotifier {
 调用规则：
 
 - 统一异常处理捕获异常并确定响应状态后调用告警通知。
-- 默认只通知 5xx，或严重度为 `CRITICAL`、`FATAL` 的 `ErrorCodeException`。
+- 默认只通知 5xx，或严重度为 `CRITICAL`、`FATAL` 的 `ErrorCodeException`；严重度只影响告警，不参与 HTTP 状态判定。
 - 可同时注册多个 `ErrorAlertNotifier` Bean；调用顺序遵守 Spring `@Order` / `Ordered`。
 - 没有注册 Bean 时不执行任何告警逻辑。
 - 告警实现抛出 `RuntimeException` 时会被 starter 捕获并记录 warn 日志，不会影响原始错误响应。
@@ -221,18 +221,22 @@ Resource download() {
 业务代码推荐抛出 `ErrorCodeException`：
 
 ```java
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+
 throw new ErrorCodeException(UserErrors.USER_NOT_FOUND);
 ```
 
-返回规则：
+对于 `ErrorCodeException`，默认 HTTP 状态由 `ErrorOrigin` 决定，`ErrorSeverity` 只决定告警优先级：
 
 | 条件 | HTTP 状态 | `code` | `message` |
 | --- | --- | --- | --- |
-| `ErrorSeverity.NORMAL` 或 `WARNING` | 400 | 真实业务错误码，除非可见性隐藏 | 异常消息或错误码默认消息，除非可见性隐藏 |
-| `ErrorSeverity.CRITICAL` 或 `FATAL` | 500 | 真实业务错误码，除非可见性隐藏 | 异常消息或错误码默认消息，除非可见性隐藏 |
-| `ErrorVisibility.CODE_ONLY` | 按 severity | 真实业务错误码 | `WEB.INTERNAL_ERROR` 的默认消息 |
-| `ErrorVisibility.MESSAGE_ONLY` | 按 severity | `WEB.INTERNAL_ERROR` | 真实错误消息 |
-| `ErrorVisibility.INTERNAL` | 按 severity | `WEB.INTERNAL_ERROR` | `WEB.INTERNAL_ERROR` 的默认消息 |
+| `ErrorOrigin.CALLER` | 400 | 真实业务错误码，除非可见性隐藏 | 异常消息或错误码默认消息，除非可见性隐藏 |
+| `ErrorOrigin.SYSTEM` | 500 | 真实业务错误码，除非可见性隐藏 | 异常消息或错误码默认消息，除非可见性隐藏 |
+| `ErrorVisibility.CODE_ONLY` | 按 origin | 真实业务错误码 | `WEB.INTERNAL_ERROR` 的默认消息 |
+| `ErrorVisibility.MESSAGE_ONLY` | 按 origin | `WEB.INTERNAL_ERROR` | 真实错误消息 |
+| `ErrorVisibility.INTERNAL` | 按 origin | `WEB.INTERNAL_ERROR` | `WEB.INTERNAL_ERROR` 的默认消息 |
+
+普通业务错误可以使用默认的 `CALLER`。数据库、缓存、消息投递、JSON 序列化等只能由服务端修复的错误，应在错误码的 `@ErrorPolicy` 中声明 `origin = ErrorOrigin.SYSTEM`。应用可以注册 `WebErrorStatusResolver` 覆盖默认 400/500 映射。
 
 错误码格式由 `WebErrorCodeResolver` 生成：
 
@@ -318,6 +322,7 @@ wuli3.web.response.validation-detail-enabled=false
 关闭后，失败响应只返回统一 `message`，`data` 为 `null`。
 
 字段详情只包含稳定的 `field`、`code` 和 `message`，不会回显 rejected value。
+`ErrorCodeException` 不支持附加任意 `detail` 对象；业务需要返回其他结构化明细时，应在应用自己的异常处理器中显式定义响应 DTO 和可见性规则。
 
 ## 未覆盖场景
 

@@ -1,8 +1,8 @@
 package com.kjs.wuli3.web.internal.response;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorSeverity;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.policy.ErrorSeverity;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertContext;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;

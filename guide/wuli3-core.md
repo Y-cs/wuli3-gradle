@@ -4,7 +4,7 @@
 
 `wuli3-core` 是不依赖 Spring 的基础能力模块，面向业务工程、starter 和基础设施模块复用。当前能力包括：
 
-- 错误码模型与错误策略：`com.kjs.wuli3.core.error`
+- 按职责拆分的错误码模型与错误策略：`com.kjs.wuli3.core.error.*`
 - 断言工具：`com.kjs.wuli3.core.assertion`
 - ID 生成抽象：`com.kjs.wuli3.core.id`
 - 时间工具与半开区间：`com.kjs.wuli3.core.time`
@@ -45,19 +45,62 @@ Maven 依赖示例：
 
 ## 3. 错误模型
 
-### 3.1 定义业务错误码
+### 3.1 包职责
+
+错误模型按稳定标识、异常、元数据和策略拆分，`com.kjs.wuli3.core.error` 根包只保留包级说明。
+
+| 包 | 主要类型 | 职责 |
+| --- | --- | --- |
+| `error.code` | `ErrorCode`、`ErrorCodeResolver`、`CommonErrors`、`SystemErrors` | 定义稳定错误标识，并供协议适配层解析对外错误码。 |
+| `error.exception` | `ErrorCodeException` | 在运行时携带错误码和已解析策略。 |
+| `error.metadata` | `ErrorModule`、`ErrorMetadataParser` | 声明并解析枚举错误码的模块元数据。 |
+| `error.policy` | `ErrorPolicy`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility` | 描述责任来源、告警影响和对外可见性。 |
+
+本次拆包会改变原有导入路径。升级时按下表替换：
+
+| 原路径中的类型 | 新包 |
+| --- | --- |
+| `ErrorCode`、`ErrorCodeResolver`、`CommonErrors`、`SystemErrors`、`ErrorFrameworkErrors` | `com.kjs.wuli3.core.error.code` |
+| `ErrorCodeException` | `com.kjs.wuli3.core.error.exception` |
+| `ErrorModule`、`ErrorMetadataParser` | `com.kjs.wuli3.core.error.metadata` |
+| `ErrorPolicy`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility`、`ResolvedErrorPolicy` | `com.kjs.wuli3.core.error.policy` |
+
+`ErrorCodeException.detail(...)` 和回调式 `policy(...)` 已移除。需要覆盖策略时，使用明确的 `origin(...)`、`severity(...)`、`visibility(...)`；结构化响应明细应在具体协议边界定义。
+
+原 `SystemErrors.ILLEGAL_ARGUMENT`、`SystemErrors.ILLEGAL_STATE` 和 `SystemErrors.UNSUPPORTED_OPERATION` 已迁移为 `CommonErrors` 中的同名常量；`SystemErrors` 现在只保留系统级错误。
+
+核心内置错误按责任来源区分：
+
+- `CommonErrors`：非法参数、非法状态、不支持的操作等调用方可以修正的错误，默认来源为 `CALLER`。
+- `SystemErrors`：内部错误、运行配置缺失、未实现功能等需要服务自身修复的错误，默认来源为 `SYSTEM`。
+- 数据不存在通常属于业务领域语义，应定义为 `OrderErrors.ORDER_NOT_FOUND`、`UserErrors.USER_NOT_FOUND` 等业务错误码，不使用无语义的通用错误码。
+
+### 3.2 定义业务错误码
 
 业务错误码应定义为枚举，并实现 `ErrorCode`。错误码枚举必须标注 `@ErrorModule`，否则解析错误元数据时会抛出框架错误。
 
 ```java
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.metadata.ErrorModule;
+import com.kjs.wuli3.core.error.policy.ErrorOrigin;
+import com.kjs.wuli3.core.error.policy.ErrorPolicy;
+import com.kjs.wuli3.core.error.policy.ErrorSeverity;
+import com.kjs.wuli3.core.error.policy.ErrorVisibility;
+
 @Getter
 @RequiredArgsConstructor
-@ErrorModule(value = "ORDER", policy = @ErrorPolicy(visibility = ErrorVisibility.PUBLIC))
+@ErrorModule("ORDER")
 public enum OrderErrors implements ErrorCode {
     ORDER_NOT_FOUND("订单不存在"),
 
     @ErrorPolicy(severity = ErrorSeverity.WARNING, visibility = ErrorVisibility.MESSAGE_ONLY)
-    ORDER_STATUS_INVALID("订单状态不允许当前操作");
+    ORDER_STATUS_INVALID("订单状态不允许当前操作"),
+
+    @ErrorPolicy(
+            severity = ErrorSeverity.CRITICAL,
+            visibility = ErrorVisibility.INTERNAL,
+            origin = ErrorOrigin.SYSTEM)
+    INVENTORY_SERVICE_UNAVAILABLE("库存服务不可用");
 
     private final String message;
 }
@@ -66,16 +109,18 @@ public enum OrderErrors implements ErrorCode {
 约定：
 
 - `@ErrorModule.value` 表示错误所属模块，应使用稳定、可读的模块名。
-- `@ErrorModule.policy` 是模块默认策略。
+- `@ErrorModule.policy` 是模块默认策略；未指定时为 `CALLER`、`NORMAL`、`PUBLIC`。
 - 枚举常量上的 `@ErrorPolicy` 会覆盖模块默认策略。
 - `ErrorCode.getName()` 默认返回枚举常量名。
 - `ErrorCode.getErrorType()` 默认返回枚举声明类型。
 
-### 3.2 抛出错误
+### 3.3 抛出错误
 
-使用 `ErrorCodeException` 携带错误码、消息、策略和可选明细。
+使用 `ErrorCodeException` 携带错误码、消息和已解析策略。
 
 ```java
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+
 throw new ErrorCodeException(OrderErrors.ORDER_NOT_FOUND);
 ```
 
@@ -85,7 +130,7 @@ throw new ErrorCodeException(OrderErrors.ORDER_NOT_FOUND);
 throw new ErrorCodeException(OrderErrors.ORDER_STATUS_INVALID, "订单已完成，不能取消");
 ```
 
-附加策略覆盖：
+仅当同一错误码在个别抛出点具有不同边界语义时，才使用运行时覆盖：
 
 ```java
 throw new ErrorCodeException(OrderErrors.ORDER_STATUS_INVALID)
@@ -93,14 +138,21 @@ throw new ErrorCodeException(OrderErrors.ORDER_STATUS_INVALID)
         .visibility(ErrorVisibility.MESSAGE_ONLY);
 ```
 
-附加明细对象：
+稳定语义应优先声明在 `@ErrorModule` 或枚举常量的 `@ErrorPolicy` 上。
 
-```java
-throw new ErrorCodeException(OrderErrors.ORDER_NOT_FOUND)
-        .detail(Map.of("orderId", orderId));
-```
+### 3.4 责任来源、严重程度与可见性
 
-### 3.3 错误可见性与严重程度
+`ErrorOrigin` 用于表达由谁修正错误，是 Web 适配层确定默认 HTTP 状态的唯一业务语义：
+
+- `CALLER`：调用方通过修正请求、状态或所选能力可以解决，默认映射为 4xx。
+- `SYSTEM`：服务自身或其依赖需要修复，默认映射为 5xx。
+
+`ErrorSeverity` 用于表达告警和处置优先级，不再决定 HTTP 状态：
+
+- `NORMAL`：常规业务或输入错误。
+- `WARNING`：影响局限于当前请求或局部业务，但需要关注。
+- `CRITICAL`：服务功能受影响，需要及时处理。
+- `FATAL`：服务不可恢复或可能造成严重后果，需要立即处理。
 
 `ErrorVisibility` 用于控制错误对外输出边界：
 
@@ -109,18 +161,16 @@ throw new ErrorCodeException(OrderErrors.ORDER_NOT_FOUND)
 - `MESSAGE_ONLY`：只输出消息。
 - `INTERNAL`：内部错误，不应直接对外输出。
 
-`ErrorSeverity` 用于表达错误严重程度：
+例如，JSON 序列化失败、消息发送失败等基础设施错误应声明为 `SYSTEM`；订单不存在、参数不合法等调用方可修正的业务错误保持默认的 `CALLER` 即可。
 
-- `NORMAL`：请求参数、业务规则、资源不存在等常规错误。
-- `WARNING`：需要关注，但影响局限在当前用户或当前请求。
-- `CRITICAL`：系统功能受影响，例如数据库、缓存、消息中间件不可用。
-- `FATAL`：系统不可恢复或继续运行会导致严重后果。
-
-### 3.4 解析错误元数据
+### 3.5 解析错误元数据
 
 `ErrorMetadataParser` 会缓存错误模块和错误策略：
 
 ```java
+import com.kjs.wuli3.core.error.metadata.ErrorMetadataParser;
+import com.kjs.wuli3.core.error.policy.ResolvedErrorPolicy;
+
 final ResolvedErrorPolicy policy =
         ErrorMetadataParser.instance().getErrorPolicy(OrderErrors.ORDER_STATUS_INVALID);
 ```
@@ -132,9 +182,9 @@ final ResolvedErrorPolicy policy =
 `Asserts` 使用延迟抛异常的链式风格。断言方法返回 `AssertException`，当条件不满足时调用 `throwException(...)` 抛出 `ErrorCodeException`。
 
 ```java
-Asserts.notBlank(name).throwException(SystemErrors.ILLEGAL_ARGUMENT, "name 不能为空");
+Asserts.notBlank(name).throwException(CommonErrors.ILLEGAL_ARGUMENT, "name 不能为空");
 Asserts.notNull(order).throwException(OrderErrors.ORDER_NOT_FOUND);
-Asserts.isTrue(amount.signum() > 0).throwException(SystemErrors.ILLEGAL_ARGUMENT, "amount 必须大于 0");
+Asserts.isTrue(amount.signum() > 0).throwException(CommonErrors.ILLEGAL_ARGUMENT, "amount 必须大于 0");
 ```
 
 当前可用断言：
@@ -153,21 +203,21 @@ Asserts.isTrue(amount.signum() > 0).throwException(SystemErrors.ILLEGAL_ARGUMENT
 抛错方式：
 
 ```java
-Asserts.notBlank(name).throwException(SystemErrors.ILLEGAL_ARGUMENT);
-Asserts.notBlank(name).throwException(SystemErrors.ILLEGAL_ARGUMENT, "name 不能为空");
+Asserts.notBlank(name).throwException(CommonErrors.ILLEGAL_ARGUMENT);
+Asserts.notBlank(name).throwException(CommonErrors.ILLEGAL_ARGUMENT, "name 不能为空");
 Asserts.notBlank(name).throwIllegalArgumentException("name 不能为空");
 ```
 
 反转断言：
 
 ```java
-Asserts.isTrue(deleted).reversed().throwException(SystemErrors.ILLEGAL_STATE, "记录已删除");
+Asserts.isTrue(deleted).reversed().throwException(CommonErrors.ILLEGAL_STATE, "记录已删除");
 ```
 
 注意：
 
 - `Asserts` 当前不返回被校验对象，只负责延迟抛异常。
-- `throwIllegalArgumentException(String message)` 会使用 `SystemErrors.ILLEGAL_ARGUMENT`。
+- `throwIllegalArgumentException(String message)` 会使用 `CommonErrors.ILLEGAL_ARGUMENT`。
 - 对集合和 Map 的空判断中，`isEmptyCollection(null)` 与 `isEmptyMap(null)` 视为通过。
 
 ## 5. ID 生成
@@ -321,7 +371,7 @@ final Map<String, Order> orderMap = orders.stream()
         .collect(MoreCollectors.toLinkedMap(Order::id, Function.identity()));
 ```
 
-默认遇到重复 key 会抛出 `ErrorCodeException(SystemErrors.ILLEGAL_STATE)`。如需要自定义合并策略：
+默认遇到重复 key 会抛出 `ErrorCodeException(CommonErrors.ILLEGAL_STATE)`。如需要自定义合并策略：
 
 ```java
 final Map<String, Order> orderMap = orders.stream()
@@ -369,7 +419,7 @@ final List<Order> distinctOrders = orders.stream()
 ./gradlew :wuli3-core:check
 ```
 
-`check` 会执行编译、测试、Checkstyle、Forbidden APIs、Spotless、SpotBugs、JaCoCo 等质量检查。提交前如涉及跨模块行为，建议运行：
+`check` 会执行编译、测试、Checkstyle、Spotless、Forbidden APIs、Error Prone、NullAway、SpotBugs 和 JaCoCo 等质量检查。提交前如涉及跨模块行为，建议运行：
 
 ```bash
 ./gradlew clean check
@@ -381,13 +431,13 @@ final List<Order> distinctOrders = orders.stream()
 
 半开区间 `[startInclusive, endExclusive)` 可以避免相邻区间边界重复。例如 `[2026-07-01, 2026-07-03)` 与 `[2026-07-03, 2026-07-05)` 不重叠，适合按天、按小时分片统计。
 
-### 9.2 什么时候使用 `SystemErrors`？
+### 9.2 什么时候使用 `CommonErrors` 和 `SystemErrors`？
 
-`SystemErrors` 用于通用系统级错误，例如非法参数、非法状态、未实现、不支持操作。业务语义明确的错误应定义自己的 `ErrorCode` 枚举，避免所有业务错误都落到系统错误中。
+`CommonErrors` 用于跨模块复用的调用方错误，例如非法参数、非法状态和不支持的操作；`SystemErrors` 用于内部错误、运行配置缺失和未实现功能等系统错误。数据不存在应优先使用带领域语义的错误码，例如 `OrderErrors.ORDER_NOT_FOUND`。业务语义明确的错误都应定义自己的 `ErrorCode` 枚举，避免所有业务错误都落到通用错误中。
 
-### 9.3 `ErrorCodeException.detail(...)` 会对外输出吗？
+### 9.3 如何返回结构化错误明细？
 
-`detail(...)` 只是在异常对象上附加明细，是否对外输出由适配层结合 `ResolvedErrorPolicy` 决定。业务代码不应假设 detail 一定会进入 API 响应。
+`ErrorCodeException` 不承载任意明细对象。参数校验等由 Web starter 已知的框架异常会在 `ApiResponse.data` 中返回受控的 `ValidationErrorDetails`。业务需要返回其他结构化明细时，应在应用自己的 Web 边界定义响应 DTO 和异常映射规则，并明确其可见性与脱敏策略。
 
 ### 9.4 `Asserts` 为什么不直接返回被校验对象？
 

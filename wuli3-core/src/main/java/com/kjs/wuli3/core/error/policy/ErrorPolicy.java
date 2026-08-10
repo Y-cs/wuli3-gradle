@@ -1,4 +1,4 @@
-package com.kjs.wuli3.core.error;
+package com.kjs.wuli3.core.error.policy;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,9 +7,9 @@ import java.lang.annotation.Target;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * ErrorPolicy
+ * 声明错误码的责任来源、告警严重度和对外可见性。
  *
- * @author GuoYang create on 2026/6/26 18:25
+ * <p>模块默认策略通过 {@code @ErrorModule.policy()} 声明，枚举常量上的注解可覆盖默认值。
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
@@ -19,4 +19,6 @@ public @interface ErrorPolicy {
     ErrorSeverity severity() default ErrorSeverity.NORMAL;
 
     ErrorVisibility visibility() default ErrorVisibility.PUBLIC;
+
+    ErrorOrigin origin() default ErrorOrigin.CALLER;
 }

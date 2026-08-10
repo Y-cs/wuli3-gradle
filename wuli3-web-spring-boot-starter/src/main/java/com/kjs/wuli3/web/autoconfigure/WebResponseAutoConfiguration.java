@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjs.wuli3.core.error.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.code.ErrorCodeResolver;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;

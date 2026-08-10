@@ -1,8 +1,8 @@
 package com.kjs.wuli3.core.assertion;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.SystemErrors;
+import com.kjs.wuli3.core.error.code.CommonErrors;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import java.util.Collection;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
@@ -69,7 +69,7 @@ public final class Asserts {
 
         default void throwIllegalArgumentException(final String message) {
             if (condition()) {
-                throw new ErrorCodeException(SystemErrors.ILLEGAL_ARGUMENT, message);
+                throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT, message);
             }
         }
     }

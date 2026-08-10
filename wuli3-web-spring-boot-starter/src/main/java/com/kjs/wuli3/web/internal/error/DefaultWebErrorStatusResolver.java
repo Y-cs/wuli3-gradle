@@ -1,8 +1,8 @@
 package com.kjs.wuli3.web.internal.error;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorSeverity;
+import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.policy.ErrorOrigin;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
 import com.kjs.wuli3.web.error.WebErrors;
 import jakarta.validation.ConstraintViolationException;
@@ -19,9 +19,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-/**
- * Default HTTP status mapping for Spring MVC and wuli web errors.
- */
+/** Spring MVC 与 wuli 错误的默认 HTTP 状态映射。 */
 public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolver {
 
     @Override
@@ -36,7 +34,7 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
         switch (error) {
             case ErrorCodeException errorCodeException -> {
                 return DefaultWebErrorStatusResolver.status(
-                        errorCodeException.getResolvedErrorPolicy().severity());
+                        errorCodeException.getResolvedErrorPolicy().origin());
             }
             case ErrorResponseException errorResponseException -> {
                 return HttpStatus.valueOf(errorResponseException.getStatusCode().value());
@@ -72,11 +70,8 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
                 || error instanceof ConstraintViolationException;
     }
 
-    private static HttpStatus status(final ErrorSeverity severity) {
-        if (severity == ErrorSeverity.CRITICAL || severity == ErrorSeverity.FATAL) {
-            return HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return HttpStatus.BAD_REQUEST;
+    private static HttpStatus status(final ErrorOrigin origin) {
+        return origin == ErrorOrigin.SYSTEM ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.BAD_REQUEST;
     }
 
     private static @Nullable HttpStatus securityStatus(final Throwable error) {

@@ -2,7 +2,7 @@ package com.kjs.wuli3.web.internal.response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import com.kjs.wuli3.json.core.JsonErrors;
 import com.kjs.wuli3.web.response.ApiResponse;
 import com.kjs.wuli3.web.response.WebResponseProperties;

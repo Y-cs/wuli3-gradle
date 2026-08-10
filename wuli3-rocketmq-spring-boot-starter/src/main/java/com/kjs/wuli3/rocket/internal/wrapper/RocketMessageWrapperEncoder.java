@@ -1,7 +1,7 @@
 package com.kjs.wuli3.rocket.internal.wrapper;
 
-import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.SystemErrors;
+import com.kjs.wuli3.core.error.code.CommonErrors;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.propagation.encoding.ContextEncoder;
@@ -85,11 +85,11 @@ public final class RocketMessageWrapperEncoder {
         }
         if (options.async()) {
             throw new ErrorCodeException(
-                    SystemErrors.UNSUPPORTED_OPERATION, "RocketMQ exact delay does not support async " + "publication");
+                    CommonErrors.UNSUPPORTED_OPERATION, "RocketMQ exact delay does not support async " + "publication");
         }
         if (options.orderKey() != null) {
             throw new ErrorCodeException(
-                    SystemErrors.UNSUPPORTED_OPERATION,
+                    CommonErrors.UNSUPPORTED_OPERATION,
                     "RocketMQ exact delay does not support " + "ordered publication");
         }
     }
@@ -99,7 +99,7 @@ public final class RocketMessageWrapperEncoder {
         if (!RocketMessageWrapperEncoder.TOPIC_PATTERN.matcher(topic).matches()
                 || topic.getBytes(StandardCharsets.UTF_8).length > RocketMessageWrapperEncoder.MAX_TOPIC_BYTES) {
             throw new ErrorCodeException(
-                    SystemErrors.ILLEGAL_ARGUMENT,
+                    CommonErrors.ILLEGAL_ARGUMENT,
                     "Invalid RocketMQ topic for event " + eventId
                             + "; use 1-127 bytes containing only letters, digits, %, -, or _");
         }

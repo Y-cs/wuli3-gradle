@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.error.SendFailedException;
 import com.kjs.wuli3.propagation.encoding.ContextEncoder;

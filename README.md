@@ -15,7 +15,7 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | [`wuli3-context-propagation`](guide/wuli3-context-propagation.md) | 固定上下文、线程存储、异步快照和出站编码。 |
 | [`wuli3-web-spring-boot-starter`](guide/wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应和异常处理。 |
 | [`wuli3-mysql-spring-boot-starter`](guide/wuli3-mysql-spring-boot-starter.md) | MyBatis-Plus 依赖聚合。 |
-| [`wuli3-redis-spring-boot-starter`](guide/wuli3-redis-spring-boot-starter.md) | Spring Data Redis 与 Redisson 依赖聚合。 |
+| [`wuli3-redis-spring-boot-starter`](guide/wuli3-redis-spring-boot-starter.md) | Redis String/JSON/Hash/Set 统一操作与分布式锁。 |
 | [`wuli3-rocketmq-spring-boot-starter`](guide/wuli3-rocketmq-spring-boot-starter.md) | RocketMQ v4/v5 远程事件发送适配。 |
 | [`wuli3-elasticsearch-spring-boot-starter`](guide/wuli3-elasticsearch-spring-boot-starter.md) | Spring Data Elasticsearch 依赖聚合。 |
 | [`wuli3-mongodb-spring-boot-starter`](guide/wuli3-mongodb-spring-boot-starter.md) | Spring Data MongoDB 依赖聚合。 |

@@ -9,4 +9,8 @@ package com.kjs.wuli3.core.id;
 public interface IdGenerator<T> {
 
     T nextId();
+
+    default String nextIdStr(String prefix){
+        return prefix + nextId();
+    }
 }

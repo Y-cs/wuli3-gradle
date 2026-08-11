@@ -25,7 +25,7 @@
 | [wuli3-event-spring-boot-starter](wuli3-event-spring-boot-starter.md) | LOCAL/REMOTE 事件路由和事务提交后发布。 |
 | [wuli3-web-spring-boot-starter](wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应与异常处理。 |
 | [wuli3-mysql-spring-boot-starter](wuli3-mysql-spring-boot-starter.md) | MyBatis-Plus 依赖聚合。 |
-| [wuli3-redis-spring-boot-starter](wuli3-redis-spring-boot-starter.md) | Spring Data Redis 与 Redisson 依赖聚合。 |
+| [wuli3-redis-spring-boot-starter](wuli3-redis-spring-boot-starter.md) | Redis String/JSON/Hash/Set 统一操作与分布式锁。 |
 | [wuli3-rocketmq-spring-boot-starter](wuli3-rocketmq-spring-boot-starter.md) | RocketMQ 远程事件发送适配。 |
 | [wuli3-elasticsearch-spring-boot-starter](wuli3-elasticsearch-spring-boot-starter.md) | Spring Data Elasticsearch 依赖聚合。 |
 | [wuli3-mongodb-spring-boot-starter](wuli3-mongodb-spring-boot-starter.md) | Spring Data MongoDB 依赖聚合。 |

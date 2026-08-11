@@ -27,7 +27,7 @@ dependencies {
         api("com.google.errorprone:error_prone_core:2.50.0")
         api("com.uber.nullaway:nullaway:0.13.7")
         api("com.puppycrawl.tools:checkstyle:13.6.0")
-        api("org.redisson:redisson-spring-boot-starter:4.6.1")
+        api("org.redisson:redisson-spring-boot-starter:3.52.0")
         api("com.google.guava:guava:33.6.0-jre")
         api("cn.hutool:hutool-core:5.8.46")
         api("org.apache.commons:commons-lang3:3.20.0")

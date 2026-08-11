@@ -43,7 +43,7 @@ com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
 - `com.google.errorprone:error_prone_core:2.50.0`
 - `com.uber.nullaway:nullaway:0.13.7`
 - `com.puppycrawl.tools:checkstyle:13.6.0`
-- `org.redisson:redisson-spring-boot-starter:4.6.1`
+- `org.redisson:redisson-spring-boot-starter:3.52.0`
 - `com.google.guava:guava:33.6.0-jre`
 - `cn.hutool:hutool-core:5.8.46`
 - `org.apache.commons:commons-lang3:3.20.0`

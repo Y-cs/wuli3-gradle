@@ -4,10 +4,9 @@ import com.kjs.wuli3.event.EventTransport;
 import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.options.AsyncPublishOptions;
-import org.springframework.core.task.TaskExecutor;
-
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  * 装饰器：当 {@link PublishOptions} 具备 {@link AsyncPublishOptions} 能力且请求异步发布时，

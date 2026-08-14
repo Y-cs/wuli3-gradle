@@ -16,6 +16,7 @@ import com.kjs.wuli3.redis.operation.SetRedisOperations;
 import com.kjs.wuli3.redis.operation.StringRedisOperations;
 import java.time.Duration;
 import java.time.Instant;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 public final class MavenConsumer {
     private MavenConsumer() {}
@@ -26,6 +27,7 @@ public final class MavenConsumer {
                 EventEnvelopeTemplate.of("consumer-events", "consumer.event.v1").wrap(new ConsumerEvent(Instant.now()));
         envelope.eventId();
         EventPublisher.class.getName();
+        RabbitTemplate.class.getName();
         RedisSupport.class.getName();
         RedisMinuteIdGenerator.class.getName();
         StringRedisOperations.class.getName();

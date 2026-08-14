@@ -15,8 +15,8 @@ class ContextEncoderTest {
     @Test
     void standardEncoderWritesInvocationAndAuthenticationContexts() {
         final ContextEncoder encoder = new ContextEncoder(ContextEncoder.standardContextEncoder());
-        final ContextSnapshot snapshot = ContextSnapshot.of(
-                new InvocationContext("10.0.0.8", "request-42"), new AuthContext(7L, "alice"));
+        final ContextSnapshot snapshot =
+                ContextSnapshot.of(new InvocationContext("10.0.0.8", "request-42"), new AuthContext(7L, "alice"));
         final Map<String, String> fields = new LinkedHashMap<>();
 
         encoder.writeTo(snapshot, fields::put);
@@ -39,15 +39,14 @@ class ContextEncoderTest {
     @SuppressWarnings("NullAway")
     void standardEncoderRoundTripsInvocationAndAuthenticationContexts() {
         final ContextEncoder encoder = new ContextEncoder(ContextEncoder.standardContextEncoder());
-        final ContextSnapshot source = ContextSnapshot.of(
-                new InvocationContext("10.0.0.8", "request-42"), new AuthContext(7L, "alice"));
+        final ContextSnapshot source =
+                ContextSnapshot.of(new InvocationContext("10.0.0.8", "request-42"), new AuthContext(7L, "alice"));
         final Map<String, String> fields = new LinkedHashMap<>();
 
         encoder.writeTo(source, fields::put);
         final ContextSnapshot decoded = encoder.readFrom(fields::get);
 
-        assertThat(decoded.get(InvocationContext.class))
-                .contains(new InvocationContext("10.0.0.8", "request-42"));
+        assertThat(decoded.get(InvocationContext.class)).contains(new InvocationContext("10.0.0.8", "request-42"));
         assertThat(decoded.get(AuthContext.class)).contains(new AuthContext(7L, "alice"));
     }
 
@@ -68,8 +67,8 @@ class ContextEncoderTest {
     @Test
     void customEncoderOnlyReadsWritesAndReservesConfiguredFields() {
         final ContextEncoder encoder = new ContextEncoder(List.of(new InvocationContextEncoder()));
-        final ContextSnapshot source = ContextSnapshot.of(
-                new InvocationContext("10.0.0.8", "request-42"), new AuthContext(7L, "alice"));
+        final ContextSnapshot source =
+                ContextSnapshot.of(new InvocationContext("10.0.0.8", "request-42"), new AuthContext(7L, "alice"));
         final Map<String, String> fields = new LinkedHashMap<>();
 
         encoder.writeTo(source, fields::put);
@@ -79,7 +78,6 @@ class ContextEncoderTest {
                         InvocationContextEncoder.REQUEST_ID, "request-42",
                         InvocationContextEncoder.ORIGIN_IP, "10.0.0.8"));
         assertThat(encoder.reservedFieldNames())
-                .containsExactlyInAnyOrder(
-                        InvocationContextEncoder.REQUEST_ID, InvocationContextEncoder.ORIGIN_IP);
+                .containsExactlyInAnyOrder(InvocationContextEncoder.REQUEST_ID, InvocationContextEncoder.ORIGIN_IP);
     }
 }

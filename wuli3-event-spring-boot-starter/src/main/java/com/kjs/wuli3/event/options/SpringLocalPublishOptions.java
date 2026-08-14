@@ -5,6 +5,4 @@ package com.kjs.wuli3.event.options;
  * @author GuoYang create on 2026/8/6 19:02
  */
 public record SpringLocalPublishOptions(boolean async, boolean afterCommit)
-        implements AsyncPublishOptions, TransactionalPublishOptions {
-
-}
+        implements AsyncPublishOptions, TransactionalPublishOptions {}

@@ -3,16 +3,15 @@ package com.kjs.wuli3.redis.id;
 import com.kjs.wuli3.core.id.IdGenerator;
 import com.kjs.wuli3.redis.RedisSupport;
 import com.kjs.wuli3.redis.error.RedisErrors;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.RedisScript;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 
 /** 使用“UTC 分钟时间片 + Redis 分钟内序列”生成趋势递增的 Long ID。 */
 public final class RedisMinuteIdGenerator implements IdGenerator<Long> {

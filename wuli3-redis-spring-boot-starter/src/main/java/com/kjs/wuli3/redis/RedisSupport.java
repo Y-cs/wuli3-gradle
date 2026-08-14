@@ -8,8 +8,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
-import lombok.Getter;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 /** 聚合不同 Redis 数据结构操作，并承载整 key 的通用操作。 */

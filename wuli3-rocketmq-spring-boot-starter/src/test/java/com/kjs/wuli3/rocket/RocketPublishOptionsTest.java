@@ -3,9 +3,8 @@ package com.kjs.wuli3.rocket;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-import java.time.Duration;
-
 import com.kjs.wuli3.rocket.internal.RocketPublishOptions;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 class RocketPublishOptionsTest {

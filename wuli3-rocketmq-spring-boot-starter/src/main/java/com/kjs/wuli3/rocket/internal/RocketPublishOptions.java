@@ -3,17 +3,16 @@ package com.kjs.wuli3.rocket.internal;
 import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.options.AsyncPublishOptions;
 import com.kjs.wuli3.event.options.TransactionalPublishOptions;
-import org.jspecify.annotations.Nullable;
-
 import java.time.Duration;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /** RocketMQ 事件传输支持的不可变发布选项。 */
 public record RocketPublishOptions(
         boolean async,
         boolean afterCommit,
         @Nullable Duration delay,
-        @Nullable String orderKey) implements AsyncPublishOptions, TransactionalPublishOptions , PublishOptions {
+        @Nullable String orderKey) implements AsyncPublishOptions, TransactionalPublishOptions, PublishOptions {
 
     /** 创建同步、立即投递的默认选项。 */
     public RocketPublishOptions() {

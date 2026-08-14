@@ -25,9 +25,8 @@ spring:
 ## 使用边界
 
 - 模块当前只传递 `spring-boot-starter-data-elasticsearch`。
-- `ElasticsearchAutoConfiguration` 不创建任何 Bean。
+- 模块不提供额外的自动配置或 Elasticsearch 封装。
 - 不管理索引生命周期、mapping 迁移、别名切换或集群健康检查。
-- 模块测试不连接真实 Elasticsearch。
 
 ## 验证
 

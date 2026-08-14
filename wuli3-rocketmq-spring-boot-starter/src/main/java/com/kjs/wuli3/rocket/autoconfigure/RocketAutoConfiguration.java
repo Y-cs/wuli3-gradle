@@ -1,14 +1,16 @@
 package com.kjs.wuli3.rocket.autoconfigure;
 
+import com.kjs.wuli3.event.autoconfigure.ConditionalOnMissingRemoteEventTransport;
 import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
-import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import com.kjs.wuli3.propagation.encoding.ContextEncoder;
 import com.kjs.wuli3.propagation.store.ContextReader;
 import com.kjs.wuli3.propagation.store.ContextWriter;
 import com.kjs.wuli3.rocket.internal.RocketContextSupport;
+import com.kjs.wuli3.rocket.internal.RocketPublishOptions;
 import com.kjs.wuli3.rocket.internal.RocketRemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.RocketV5RemoteEventTransport;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
+import java.time.Clock;
 import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.producer.Producer;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -23,8 +25,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.Clock;
 
 /**
  * 自动配置默认的 RocketMQ 远程事件传输实现。
@@ -81,7 +81,7 @@ public class RocketAutoConfiguration {
      * @return 远程传输实现
      */
     @Bean
-    @ConditionalOnMissingBean(RemoteEventTransport.class)
+    @ConditionalOnMissingRemoteEventTransport(optionsType = RocketPublishOptions.class)
     @ConditionalOnBean(RocketMQTemplate.class)
     @ConditionalOnProperty(
             prefix = "wuli3.rocketmq",
@@ -125,7 +125,7 @@ public class RocketAutoConfiguration {
          * @return v5 远程事件传输
          */
         @Bean
-        @ConditionalOnMissingBean(RemoteEventTransport.class)
+        @ConditionalOnMissingRemoteEventTransport(optionsType = RocketPublishOptions.class)
         RocketV5RemoteEventTransport rocketV5RemoteEventTransport(
                 final Producer producer,
                 final ClientServiceProvider clientServiceProvider,

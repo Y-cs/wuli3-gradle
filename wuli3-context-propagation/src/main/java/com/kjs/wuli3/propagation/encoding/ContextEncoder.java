@@ -3,12 +3,11 @@ package com.kjs.wuli3.propagation.encoding;
 import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.context.PropagationContext;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
-import org.jspecify.annotations.Nullable;
-
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 按显式白名单统一编码和解码协议传播上下文。
@@ -85,17 +84,18 @@ public final class ContextEncoder {
         return ContextSnapshot.of(contexts.toArray(Context[]::new));
     }
 
-    private static <C extends PropagationContext> void write(final ContextFieldEncoder<C> encoder,
-            final ContextSnapshot snapshot, final BiConsumer<String, String> fieldWriter) {
-        snapshot.get(encoder.contextType())
-                .ifPresent(context -> encoder.encode(context, fieldWriter));
+    private static <C extends PropagationContext> void write(
+            final ContextFieldEncoder<C> encoder,
+            final ContextSnapshot snapshot,
+            final BiConsumer<String, String> fieldWriter) {
+        snapshot.get(encoder.contextType()).ifPresent(context -> encoder.encode(context, fieldWriter));
     }
 
     @SuppressWarnings("NullAway")
-    private static <C extends PropagationContext> void read(final ContextFieldEncoder<C> encoder,
-            final Function<String, @Nullable String> fieldReader, final Collection<Context> contexts) {
-        encoder.decode(fieldReader)
-                .ifPresent(contexts::add);
+    private static <C extends PropagationContext> void read(
+            final ContextFieldEncoder<C> encoder,
+            final Function<String, @Nullable String> fieldReader,
+            final Collection<Context> contexts) {
+        encoder.decode(fieldReader).ifPresent(contexts::add);
     }
-
 }

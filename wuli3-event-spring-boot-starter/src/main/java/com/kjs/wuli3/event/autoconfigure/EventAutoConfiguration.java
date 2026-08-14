@@ -8,6 +8,7 @@ import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import com.kjs.wuli3.event.transport.AsyncEventTransport;
 import com.kjs.wuli3.event.transport.SpringLocalEventTransport;
 import com.kjs.wuli3.event.transport.TransactionalEventTransport;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -15,8 +16,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
-
-import java.util.List;
 
 /**
  * 自动配置本地和尽力而为的远程事件发布。

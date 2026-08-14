@@ -19,6 +19,7 @@ import com.kjs.wuli3.redis.operation.StringRedisOperations;
 import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 class BomConsumerTest {
     @Test
@@ -29,6 +30,7 @@ class BomConsumerTest {
                 EventEnvelopeTemplate.of("consumer-events", "consumer.event.v1").wrap(new ConsumerEvent(Instant.now()));
         assertNotNull(envelope.eventId());
         assertNotNull(EventPublisher.class);
+        assertNotNull(RabbitTemplate.class);
         assertNotNull(RedisSupport.class);
         assertNotNull(RedisMinuteIdGenerator.class);
         assertNotNull(StringRedisOperations.class);

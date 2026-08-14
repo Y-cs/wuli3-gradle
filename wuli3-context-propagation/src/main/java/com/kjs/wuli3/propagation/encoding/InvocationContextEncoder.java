@@ -1,13 +1,12 @@
 package com.kjs.wuli3.propagation.encoding;
 
 import com.kjs.wuli3.propagation.context.InvocationContext;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 调用元数据的协议字段编解码器。

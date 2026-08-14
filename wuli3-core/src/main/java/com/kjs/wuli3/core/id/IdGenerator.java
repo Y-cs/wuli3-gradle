@@ -10,7 +10,7 @@ public interface IdGenerator<T> {
 
     T nextId();
 
-    default String nextIdStr(String prefix){
+    default String nextIdStr(String prefix) {
         return prefix + nextId();
     }
 }

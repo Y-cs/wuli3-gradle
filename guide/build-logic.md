@@ -64,7 +64,7 @@ plugins {
 wuli3.conventions.bom-coordinates=com.kjs.wuli3:wuli3-dependencies:0.1.0-SNAPSHOT
 wuli3.conventions.java-version=21
 wuli3.conventions.spotless.enabled=true
-wuli3.conventions.palantir-java-format.version=2.94.0
+wuli3.conventions.palantir-java-format.version=2.97.0
 wuli3.conventions.nullaway.annotated-packages=com.example.service
 wuli3.conventions.nullaway.enabled=true
 wuli3.conventions.spotbugs.enabled=true

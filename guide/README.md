@@ -25,6 +25,7 @@
 | [wuli3-event-spring-boot-starter](wuli3-event-spring-boot-starter.md) | LOCAL/REMOTE 事件路由和事务提交后发布。 |
 | [wuli3-aliyun-spring-boot-starter](wuli3-aliyun-spring-boot-starter.md) | AliYun OSS SDK V2 多套命名客户端配置。 |
 | [wuli3-configuration-spring-boot-starter](wuli3-configuration-spring-boot-starter.md) | Jasypt 配置属性加密与解密。 |
+| [wuli3-logging-spring-boot-starter](wuli3-logging-spring-boot-starter.md) | Spring Boot + Logback 日志格式、结构化输出与滚动归档。 |
 | [wuli3-web-spring-boot-starter](wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应与异常处理。 |
 | [wuli3-mysql-spring-boot-starter](wuli3-mysql-spring-boot-starter.md) | MyBatis-Plus 依赖聚合。 |
 | [wuli3-redis-spring-boot-starter](wuli3-redis-spring-boot-starter.md) | Redis String/JSON/Hash/Set 统一操作与分布式锁。 |

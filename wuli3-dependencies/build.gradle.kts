@@ -19,6 +19,7 @@ dependencies {
         api("com.kjs.wuli3:wuli3-context-propagation:${project.version}")
         api("com.kjs.wuli3:wuli3-aliyun-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-configuration-spring-boot-starter:${project.version}")
+        api("com.kjs.wuli3:wuli3-logging-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-web-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-mysql-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-redis-spring-boot-starter:${project.version}")

@@ -15,6 +15,7 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | [`wuli3-context-propagation`](guide/wuli3-context-propagation.md) | 固定上下文、线程存储、异步快照和出站编码。 |
 | [`wuli3-aliyun-spring-boot-starter`](guide/wuli3-aliyun-spring-boot-starter.md) | AliYun OSS SDK V2 多套命名客户端配置。 |
 | [`wuli3-configuration-spring-boot-starter`](guide/wuli3-configuration-spring-boot-starter.md) | Jasypt 配置属性加密与解密。 |
+| [`wuli3-logging-spring-boot-starter`](guide/wuli3-logging-spring-boot-starter.md) | Spring Boot + Logback 日志格式、结构化输出与滚动归档。 |
 | [`wuli3-web-spring-boot-starter`](guide/wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应和异常处理。 |
 | [`wuli3-mysql-spring-boot-starter`](guide/wuli3-mysql-spring-boot-starter.md) | MyBatis-Plus 依赖聚合。 |
 | [`wuli3-redis-spring-boot-starter`](guide/wuli3-redis-spring-boot-starter.md) | Redis String/JSON/Hash/Set 统一操作与分布式锁。 |
@@ -115,3 +116,37 @@ Maven 项目引入：
 - 核心模块不依赖 Spring。
 - 公共时间类型使用 `java.time`。
 - 注释使用中文。
+
+## 注释使用说明
+
+### Java文件头部注释
+- 言简意赅描述清楚文件作用。必选
+- 如果存在特殊需要说明的内容，需明确指出，并且标注“注意:”。非必选
+- 如果该类存在固定用法，或者特殊用法，需标注使用方式。非必选
+- 作者需标注 git username，并标注创建时间。必选
+```java
+/**
+ * {文件作用}
+ * [特殊说明]
+ * [使用方式]
+ * @author {git username} create on {datetime}
+ */
+```
+
+### 方法注释说明
+- 言简意赅的说明方法作用，内容保持简洁。必选
+- 如果存在特殊需要说明的内容，需明确指出，并且标注“注意:”。非必选
+- 需要指出重要的参数，及其作用。非必选
+- 需要指出返回值的含义。非必选
+```java
+/**
+ * {方法作用}
+ * [特殊说明]
+ * @param {参数列表}
+ * @return {返回值}
+ */
+```
+
+### 属性注释说明
+- 言简意赅的说明属性作用，内容保持简洁。必选
+- 如果存在特殊需要说明的内容，需明确指出，并且标注“注意:”。非必选

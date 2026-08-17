@@ -5,6 +5,7 @@ import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.envelope.EventEnvelopeTemplate;
 import com.kjs.wuli3.json.provider.JacksonProvider;
+import com.kjs.wuli3.logging.autoconfigure.LoggingProperties;
 import com.kjs.wuli3.redis.RedisKey;
 import com.kjs.wuli3.redis.RedisSupport;
 import com.kjs.wuli3.redis.id.RedisMinuteIdGenerator;
@@ -28,6 +29,7 @@ public final class MavenConsumer {
         envelope.eventId();
         EventPublisher.class.getName();
         RabbitTemplate.class.getName();
+        LoggingProperties.class.getName();
         RedisSupport.class.getName();
         RedisMinuteIdGenerator.class.getName();
         StringRedisOperations.class.getName();

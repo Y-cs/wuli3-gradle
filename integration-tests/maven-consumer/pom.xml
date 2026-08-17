@@ -32,6 +32,7 @@
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-event-spring-boot-starter</artifactId></dependency>
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-rocketmq-spring-boot-starter</artifactId></dependency>
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-rabbitmq-spring-boot-starter</artifactId></dependency>
+        <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-logging-spring-boot-starter</artifactId></dependency>
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-web-spring-boot-starter</artifactId></dependency>
         <dependency><groupId>com.kjs.wuli3</groupId><artifactId>wuli3-redis-spring-boot-starter</artifactId></dependency>
         <dependency>

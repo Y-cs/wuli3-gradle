@@ -7,6 +7,7 @@ import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.envelope.EventEnvelopeTemplate;
 import com.kjs.wuli3.json.provider.JacksonProvider;
+import com.kjs.wuli3.logging.autoconfigure.LoggingProperties;
 import com.kjs.wuli3.redis.RedisKey;
 import com.kjs.wuli3.redis.RedisSupport;
 import com.kjs.wuli3.redis.id.RedisMinuteIdGenerator;
@@ -31,6 +32,7 @@ class BomConsumerTest {
         assertNotNull(envelope.eventId());
         assertNotNull(EventPublisher.class);
         assertNotNull(RabbitTemplate.class);
+        assertNotNull(LoggingProperties.class);
         assertNotNull(RedisSupport.class);
         assertNotNull(RedisMinuteIdGenerator.class);
         assertNotNull(StringRedisOperations.class);

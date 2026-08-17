@@ -1,7 +1,9 @@
 package com.kjs.wuli3.json.datatype.desensitization;
 
 /**
- * Built-in sensitive-data semantics supported by the project JSON module.
+ * 项目 JSON 模块支持的内置敏感数据语义。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DesensitizationTypes {
     public static final String PHONE = "phone";

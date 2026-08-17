@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
  * 基于 RocketMQ Java Client v5 的远程事件传输实现。
  *
  * <p>应用负责创建并关闭 {@link Producer}；starter 只在选择 v5 客户端时注入该 Producer。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @RequiredArgsConstructor
 public final class RocketV5RemoteEventTransport implements RemoteEventTransport<RocketPublishOptions> {

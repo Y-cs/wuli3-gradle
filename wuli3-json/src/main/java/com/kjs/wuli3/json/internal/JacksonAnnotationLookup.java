@@ -8,7 +8,9 @@ import java.lang.reflect.AnnotatedElement;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Finds Jackson property annotations across writer/property metadata and the underlying Java element.
+ * 从 Jackson 属性元数据及其底层 Java 元素查找属性注解。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JacksonAnnotationLookup {
     private JacksonAnnotationLookup() {}

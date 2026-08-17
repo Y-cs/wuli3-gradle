@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * OssErrorCode
+ * OSS 模块错误码。
  * @author GuoYang create on 2026/8/12 17:38
  */
 @ErrorModule(

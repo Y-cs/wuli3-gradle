@@ -19,6 +19,8 @@ import org.springframework.core.task.VirtualThreadTaskExecutor;
 
 /**
  * 自动配置本地和尽力而为的远程事件发布。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @AutoConfiguration
 public class EventAutoConfiguration {

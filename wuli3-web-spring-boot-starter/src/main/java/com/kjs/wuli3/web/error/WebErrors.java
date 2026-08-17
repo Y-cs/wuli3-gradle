@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Web starter 定义的错误码。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @Getter
 @RequiredArgsConstructor

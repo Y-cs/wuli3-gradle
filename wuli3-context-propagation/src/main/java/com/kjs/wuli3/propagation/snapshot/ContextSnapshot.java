@@ -11,6 +11,8 @@ import java.util.Optional;
  * 可跨异步任务和协议边界传递的不可变上下文快照。
  *
  * <p>快照保存 {@link Context}。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class ContextSnapshot {
 

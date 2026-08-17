@@ -4,7 +4,7 @@ import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import java.io.Serial;
 
 /**
- * SendFailedException 当传输层发送事件失败时抛出
+ * 当传输层发送事件失败时抛出的异常。
  * @author GuoYang create on 2026/8/6 10:31
  */
 public class SendFailedException extends ErrorCodeException {

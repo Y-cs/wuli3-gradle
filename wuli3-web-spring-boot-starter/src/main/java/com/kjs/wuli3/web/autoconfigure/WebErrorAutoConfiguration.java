@@ -10,7 +10,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-/** Configures the web-facing error model. */
+/** Configures the web-facing error model.
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(ApplicationServiceProperties.class)
 public class WebErrorAutoConfiguration {

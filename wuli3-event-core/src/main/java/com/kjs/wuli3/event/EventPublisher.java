@@ -2,7 +2,10 @@ package com.kjs.wuli3.event;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 
-/** 根据发布选项类型将事件信封路由到对应传输实现。 */
+/** 根据发布选项类型将事件信封路由到对应传输实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public interface EventPublisher {
 
     /**

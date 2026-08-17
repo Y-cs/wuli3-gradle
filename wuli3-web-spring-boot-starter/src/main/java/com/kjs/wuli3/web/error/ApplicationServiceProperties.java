@@ -8,6 +8,8 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * Web starter 使用的应用元数据配置。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @Getter
 @Setter

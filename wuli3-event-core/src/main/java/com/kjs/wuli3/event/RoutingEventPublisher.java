@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** 根据具体发布选项类型选择传输实现的事件发布器。 */
+/** 根据具体发布选项类型选择传输实现的事件发布器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class RoutingEventPublisher implements EventPublisher {
 
     private final Map<Class<? extends PublishOptions>, EventTransport<?>> transports = new ConcurrentHashMap<>();

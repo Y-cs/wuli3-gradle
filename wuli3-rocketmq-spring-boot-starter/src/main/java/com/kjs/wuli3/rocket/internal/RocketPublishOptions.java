@@ -7,7 +7,10 @@ import java.time.Duration;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-/** RocketMQ 事件传输支持的不可变发布选项。 */
+/** RocketMQ 事件传输支持的不可变发布选项。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public record RocketPublishOptions(
         boolean async,
         boolean afterCommit,

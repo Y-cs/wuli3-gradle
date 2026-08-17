@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Bean;
  *
  * <p>该配置必须先于 MyBatis-Plus 的 InnerInterceptor 聚合配置执行，确保默认的 BlockAttack
  * 拦截器能被收集进最终的 {@code MybatisPlusInterceptor}。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @AutoConfiguration(before = MybatisPlusInnerInterceptorAutoConfiguration.class)
 @ConditionalOnClass(Interceptor.class)

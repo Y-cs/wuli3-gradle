@@ -4,6 +4,8 @@ package com.kjs.wuli3.core.error.policy;
  * 错误对系统运行和告警处置的影响等级。
  *
  * <p>该等级不决定 HTTP 状态；HTTP 适配层应使用 {@link ErrorOrigin} 判断调用方错误或系统错误。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public enum ErrorSeverity {
     /**

@@ -6,7 +6,11 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
 
-/** Wuli3 日志策略配置；实际早期日志属性由 {@link LoggingEnvironmentPostProcessor} 应用。 */
+/**
+ * Wuli3 日志策略配置；实际早期日志属性由 {@link LoggingEnvironmentPostProcessor} 应用。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = LoggingProperties.PREFIX)

@@ -7,6 +7,8 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * Web 统一响应处理配置。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @Getter
 @Setter

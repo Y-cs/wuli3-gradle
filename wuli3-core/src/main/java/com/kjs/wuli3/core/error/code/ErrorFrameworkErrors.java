@@ -8,7 +8,10 @@ import com.kjs.wuli3.core.error.policy.ErrorVisibility;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/** 错误模型自身使用的内部错误码。 */
+/** 错误模型自身使用的内部错误码。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @Getter
 @RequiredArgsConstructor
 @ErrorModule(

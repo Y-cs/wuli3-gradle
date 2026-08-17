@@ -15,7 +15,9 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
- * Builds field-level validation details only for client-fixable request errors.
+ * 仅为客户端可修正的请求错误构建字段级校验详情。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 final class ValidationErrorDetailsFactory {
 

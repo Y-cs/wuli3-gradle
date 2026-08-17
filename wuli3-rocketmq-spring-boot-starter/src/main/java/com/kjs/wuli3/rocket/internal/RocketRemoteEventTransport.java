@@ -20,6 +20,8 @@ import org.springframework.messaging.support.MessageBuilder;
 
 /**
  * 基于 {@link RocketMQTemplate} 的默认尽力而为远程事件传输实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class RocketRemoteEventTransport implements RemoteEventTransport<RocketPublishOptions> {
 

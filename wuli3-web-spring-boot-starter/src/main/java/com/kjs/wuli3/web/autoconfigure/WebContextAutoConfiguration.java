@@ -25,7 +25,10 @@ import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 
-/** Configures request context capture and propagation. */
+/** Configures request context capture and propagation.
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(WebContextProperties.class)
 public class WebContextAutoConfiguration {

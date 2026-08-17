@@ -10,7 +10,9 @@ import java.util.TimeZone;
 import java.util.stream.Stream;
 
 /**
- * Provides the project-standard Jackson configuration used by infrastructure modules and JSON utilities.
+ * 提供基础设施模块和 JSON 工具使用的项目标准 Jackson 配置。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JacksonProvider {
 
@@ -20,11 +22,12 @@ public final class JacksonProvider {
 
     private JacksonProvider() {}
 
-    /** Creates an independently owned mapper with the project-standard configuration. */
+    /** 创建使用项目标准配置且独立持有的映射器。 */
     public static JsonMapper newJsonMapper() {
         return JsonMapperFactory.standardJsonMapperFactory().create();
     }
 
+    /** 返回项目标准的 Java 时间模块。 */
     public static JavaTimeModule javaTimeModule() {
         return JSON_MAPPER_TIME_ASSEMBLY.javaTimeModule();
     }
@@ -38,26 +41,32 @@ public final class JacksonProvider {
         return JSON_MAPPER_TIME_ASSEMBLY.javaTimeOverrideModule();
     }
 
+    /** 返回项目标准的基础 JSON 映射配置。 */
     public static JsonMapperBaseAssembly getJsonMapperBaseAssembly() {
         return JSON_MAPPER_BASE_ASSEMBLY;
     }
 
+    /** 返回项目标准的时间 JSON 映射配置。 */
     public static JsonMapperTimeAssembly getJsonMapperTimeAssembly() {
         return JSON_MAPPER_TIME_ASSEMBLY;
     }
 
+    /** 返回项目标准的枚举 JSON 映射配置。 */
     public static JsonMapperEnumAssembly getJsonMapperEnumAssembly() {
         return JSON_MAPPER_ENUM_ASSEMBLY;
     }
 
+    /** 返回 JSON 映射器使用的默认区域设置。 */
     public static Locale defaultLocale() {
         return JSON_MAPPER_TIME_ASSEMBLY.defaultLocale();
     }
 
+    /** 返回 JSON 映射器使用的默认时区。 */
     public static TimeZone defaultTimeZone() {
         return JSON_MAPPER_TIME_ASSEMBLY.defaultTimeZone();
     }
 
+    /** 返回需要显式启用的 Jackson 配置项。 */
     public static ConfigFeature[] featuresToEnable() {
         return Stream.of(JSON_MAPPER_BASE_ASSEMBLY, JSON_MAPPER_TIME_ASSEMBLY, JSON_MAPPER_ENUM_ASSEMBLY)
                 .flatMap(JacksonProvider::configEntries)
@@ -66,6 +75,7 @@ public final class JacksonProvider {
                 .toArray(ConfigFeature[]::new);
     }
 
+    /** 返回需要显式禁用的 Jackson 配置项。 */
     public static ConfigFeature[] featuresToDisabled() {
         return Stream.of(JSON_MAPPER_BASE_ASSEMBLY, JSON_MAPPER_TIME_ASSEMBLY, JSON_MAPPER_ENUM_ASSEMBLY)
                 .flatMap(JacksonProvider::configEntries)

@@ -36,6 +36,8 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
  *
  * <p>这个处理器只负责“HTTP/异常到响应”的边界转换：业务错误码的可见性仍由
  * {@link ErrorCodeException} 的错误策略决定，请求链路信息仍从上下文中读取。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @RestControllerAdvice
 public class WebExceptionHandler {
@@ -180,7 +182,7 @@ public class WebExceptionHandler {
         this.alert(error, request, status, responseCode);
         if (NativeResponseSupport.isAll(request)) {
             /*
-             * NativeResponseMode.ALL 表示调用方不想要 ApiResponse 外壳；框架异常仍以 ProblemDetail
+     * NativeResponseMode.ALL 表示调用方不需要 ApiResponse 外壳；框架异常仍以 ProblemDetail
              * 输出，避免直接泄漏 servlet 容器的默认错误页或不稳定结构。
              */
             return WebErrorResponseMapper.nativeProblemDetail(status.value(), message, this.requestId());

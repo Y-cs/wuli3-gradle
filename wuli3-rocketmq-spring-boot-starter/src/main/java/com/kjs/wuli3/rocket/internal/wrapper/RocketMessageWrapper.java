@@ -8,6 +8,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * 由公共编码器生成、与 SDK 无关的 RocketMQ 事件消息。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public record RocketMessageWrapper(
         String topic,

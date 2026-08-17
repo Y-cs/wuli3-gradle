@@ -2,6 +2,8 @@ package com.kjs.wuli3.web.response;
 
 /**
  * 原生响应模式。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public enum NativeResponseMode {
     /**

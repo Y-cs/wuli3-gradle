@@ -9,7 +9,9 @@ import java.util.Objects;
 import org.jspecify.annotations.NullUnmarked;
 
 /**
- * Jackson serializer backing {@link ResourcePath}.
+ * 支持 {@link ResourcePath} 的 Jackson 序列化器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class ResourcePathJsonSerializer extends JsonSerializer<Object> {
     private final ResourcePath resourcePath;

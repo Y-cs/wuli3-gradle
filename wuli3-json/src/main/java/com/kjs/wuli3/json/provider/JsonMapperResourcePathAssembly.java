@@ -7,7 +7,9 @@ import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import java.util.Objects;
 
 /**
- * Adds {@link com.kjs.wuli3.json.datatype.resource.ResourcePath} conversion support.
+ * 添加 {@link com.kjs.wuli3.json.datatype.resource.ResourcePath} 转换能力。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JsonMapperResourcePathAssembly implements JsonMapperAssemblyChain {
 
@@ -22,6 +24,7 @@ public final class JsonMapperResourcePathAssembly implements JsonMapperAssemblyC
         mapperBuilder.addModule(this.resourcePathModule());
     }
 
+    /** 创建资源路径 Jackson 模块。 */
     public Module resourcePathModule() {
         return new ResourcePathModule(resourcePathResolver);
     }

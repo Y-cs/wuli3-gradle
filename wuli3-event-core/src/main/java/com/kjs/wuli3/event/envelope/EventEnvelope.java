@@ -12,6 +12,8 @@ import java.util.Objects;
  * @param eventId    唯一事件标识
  * @param occurredOn 事件创建时间
  * @param payload    事件载荷
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public record EventEnvelope<T>(String topic, String eventType, String eventId, Instant occurredOn, T payload) {
 

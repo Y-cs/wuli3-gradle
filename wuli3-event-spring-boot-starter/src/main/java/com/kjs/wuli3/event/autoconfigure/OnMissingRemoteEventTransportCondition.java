@@ -14,11 +14,11 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
 /**
- * Matches when no registered remote event transport declares the requested options type.
+ * 当已注册的远程事件传输均未声明请求的选项类型时匹配。
  *
- * <p>Raw or otherwise unresolved transport types are treated as matches for the requested type. This
- * conservative behavior preserves the usual auto-configuration back-off semantics when a transport's
- * capabilities cannot be determined without creating its bean.
+ * <p>原始类型或无法解析的传输类型会被视为匹配请求类型。这样可以在不创建 Bean 的情况下无法确定传输能力时，保持自动配置通常的回退语义。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 final class OnMissingRemoteEventTransportCondition extends SpringBootCondition implements ConfigurationCondition {
 

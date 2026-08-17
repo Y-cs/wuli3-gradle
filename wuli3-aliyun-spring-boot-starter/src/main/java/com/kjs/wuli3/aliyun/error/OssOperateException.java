@@ -1,11 +1,10 @@
 package com.kjs.wuli3.aliyun.error;
 
 import com.kjs.wuli3.core.error.exception.ErrorCodeException;
-
 import java.io.Serial;
 
 /**
- * OssOperateException
+ * OSS 操作失败异常。
  * @author GuoYang create on 2026/8/12 17:37
  */
 public class OssOperateException extends ErrorCodeException {

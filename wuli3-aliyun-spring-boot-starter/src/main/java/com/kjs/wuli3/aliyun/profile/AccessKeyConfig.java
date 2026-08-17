@@ -5,7 +5,11 @@ import com.aliyun.sdk.service.oss2.credentials.StaticCredentialsProvider;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Aliyun AccessKey 凭据配置，与 OSS 连接参数隔离。 */
+/**
+ * Aliyun AccessKey 凭据配置，与 OSS 连接参数隔离。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @Getter
 @Setter
 public class AccessKeyConfig {

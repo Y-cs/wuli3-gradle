@@ -9,7 +9,11 @@ import com.kjs.wuli3.core.error.policy.ErrorVisibility;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/** Redis 基础设施错误码。 */
+/**
+ * Redis 基础设施错误码。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @Getter
 @RequiredArgsConstructor
 @ErrorModule(

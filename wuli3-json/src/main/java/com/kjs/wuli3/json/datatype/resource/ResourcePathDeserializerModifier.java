@@ -13,7 +13,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 /**
- * ResourcePathDeserializerModifier
+ * 为标记了 {@link ResourcePath} 的属性安装资源路径反序列化器。
  *
  * @author GuoYang create on 2026/7/9 11:45
  */

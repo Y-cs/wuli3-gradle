@@ -8,7 +8,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
- * JSON tree utilities for code that needs Jackson tree-model access instead of direct value binding.
+ * 面向 Jackson 树模型的 JSON 工具。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JsonTrees {
     private static final JsonNodeFactory NODE_FACTORY = JsonNodeFactory.instance;

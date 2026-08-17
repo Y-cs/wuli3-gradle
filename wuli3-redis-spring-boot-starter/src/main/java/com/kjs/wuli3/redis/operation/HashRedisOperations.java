@@ -11,7 +11,10 @@ import java.util.Optional;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-/** 基于字符串 RedisTemplate 执行 Hash JSON 操作。 */
+/** 基于字符串 RedisTemplate 执行 Hash JSON 操作。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class HashRedisOperations {
 
     private final StringRedisTemplate redisTemplate;

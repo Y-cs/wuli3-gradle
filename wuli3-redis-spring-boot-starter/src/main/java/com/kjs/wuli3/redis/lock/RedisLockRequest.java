@@ -4,7 +4,11 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
-/** 一次分布式锁获取请求的不可变参数。 */
+/**
+ * 一次分布式锁获取请求的不可变参数。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public record RedisLockRequest(String key, Duration waitTime, Optional<Duration> leaseTime) {
 
     private static final Duration MINIMUM_LEASE_TIME = Duration.ofMillis(1);

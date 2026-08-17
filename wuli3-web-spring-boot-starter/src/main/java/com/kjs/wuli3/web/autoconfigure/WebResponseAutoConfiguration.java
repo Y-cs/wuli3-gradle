@@ -17,7 +17,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-/** Configures response wrapping and exception mapping. */
+/** Configures response wrapping and exception mapping.
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @AutoConfiguration(after = {WebContextAutoConfiguration.class, WebErrorAutoConfiguration.class})
 @EnableConfigurationProperties(WebResponseProperties.class)
 public class WebResponseAutoConfiguration {

@@ -13,6 +13,8 @@ import org.springframework.context.ApplicationEventPublisher;
  * <p>作为传输链路末端的叶子实现，不解释 {@link SpringLocalPublishOptions} 携带的异步、
  * 事务等能力语义——这些横切能力由 {@link AsyncEventTransport}、
  * {@link TransactionalEventTransport} 等装饰器在外层处理，本类只负责真正发出事件。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class SpringLocalEventTransport implements EventTransport<SpringLocalPublishOptions> {
 

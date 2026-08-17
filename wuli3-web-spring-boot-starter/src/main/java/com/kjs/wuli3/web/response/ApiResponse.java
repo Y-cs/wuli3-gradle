@@ -7,6 +7,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Web 接口的标准响应包装对象。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public record ApiResponse<T>(
         String code,

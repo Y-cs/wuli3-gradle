@@ -5,7 +5,7 @@ import java.io.Serial;
 import java.util.Objects;
 
 /**
- * ResourcePathModule
+ * 注册资源路径的 Jackson 序列化和反序列化扩展。
  *
  * @author GuoYang create on 2026/7/9 13:39
  */

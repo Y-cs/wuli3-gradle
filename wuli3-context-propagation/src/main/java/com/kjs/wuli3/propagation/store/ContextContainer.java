@@ -13,6 +13,8 @@ import java.util.Optional;
  * 按具体上下文类型保存当前执行上下文的可变容器。
  *
  * <p>该容器不保证线程安全，应由 {@link ContextStore} 或调用方负责线程隔离。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class ContextContainer {
     private final Map<Class<? extends Context>, Context> contexts;

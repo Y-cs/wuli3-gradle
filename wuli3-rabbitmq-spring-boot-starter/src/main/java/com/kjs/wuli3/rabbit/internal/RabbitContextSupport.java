@@ -11,7 +11,10 @@ import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 
-/** 从 RabbitMQ 消息 headers 解码传播上下文，由消费适配器显式恢复。 */
+/** 从 RabbitMQ 消息 headers 解码传播上下文，由消费适配器显式恢复。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class RabbitContextSupport {
 
     private final ContextWriter contextWriter;

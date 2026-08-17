@@ -12,6 +12,8 @@ import java.util.Optional;
  *
  * <p>该实现假定上游网关已经完成身份认证，并按照 wuli3 上下文传播协议写入认证字段。直接接收外部请求或使用其他认证协议的应用，
  * 应提供自己的 {@link AuthContextResolver} Bean 替换本实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class TrustedHttpAuthContextResolver implements AuthContextResolver {
 

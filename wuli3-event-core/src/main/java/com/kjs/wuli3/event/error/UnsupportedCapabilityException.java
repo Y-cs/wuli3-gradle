@@ -4,7 +4,7 @@ import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import java.io.Serial;
 
 /**
- * UnsupportedCapabilityException 当传输实现无法满足请求的发布能力时抛出
+ * 当传输实现无法满足请求的发布能力时抛出的异常。
  * @author GuoYang create on 2026/8/6 10:30
  */
 public class UnsupportedCapabilityException extends ErrorCodeException {

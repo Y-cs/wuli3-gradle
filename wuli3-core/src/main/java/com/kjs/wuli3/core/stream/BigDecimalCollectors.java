@@ -8,24 +8,45 @@ import java.util.stream.Collectors;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * 提供忽略空值的 BigDecimal 求和与汇总收集器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @NullMarked
 public final class BigDecimalCollectors {
 
     private BigDecimalCollectors() {}
 
+    /** 返回忽略空值的 BigDecimal 求和收集器。 */
     public static Collector<BigDecimal, ?, BigDecimal> summing() {
         return Collectors.collectingAndThen(BigDecimalCollectors.summarizing(), BigDecimalSummary::sum);
     }
 
+    /**
+     * 返回按映射结果求和的收集器；映射结果为空时忽略该元素。
+     *
+     * @param mapper 元素到 BigDecimal 的映射函数
+     * @param <T> 输入元素类型
+     * @return BigDecimal 求和收集器
+     */
     public static <T> Collector<T, ?, BigDecimal> summing(
             final Function<? super T, ? extends @Nullable BigDecimal> mapper) {
         return Collectors.collectingAndThen(BigDecimalCollectors.summarizing(mapper), BigDecimalSummary::sum);
     }
 
+    /** 返回忽略空值的 BigDecimal 汇总收集器。 */
     public static Collector<BigDecimal, ?, BigDecimalSummary> summarizing() {
         return BigDecimalCollectors.summarizing(value -> value);
     }
 
+    /**
+     * 返回按映射结果汇总的收集器；汇总包含数量、总和、最小值和最大值。
+     *
+     * @param mapper 元素到 BigDecimal 的映射函数
+     * @param <T> 输入元素类型
+     * @return BigDecimal 汇总收集器
+     */
     public static <T> Collector<T, ?, BigDecimalSummary> summarizing(
             final Function<? super T, ? extends @Nullable BigDecimal> mapper) {
         Objects.requireNonNull(mapper, "mapper");

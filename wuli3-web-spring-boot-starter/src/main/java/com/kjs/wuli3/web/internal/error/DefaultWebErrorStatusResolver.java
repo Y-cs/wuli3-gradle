@@ -19,7 +19,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-/** Spring MVC 与 wuli 错误的默认 HTTP 状态映射。 */
+/** Spring MVC 与 wuli 错误的默认 HTTP 状态映射。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolver {
 
     @Override

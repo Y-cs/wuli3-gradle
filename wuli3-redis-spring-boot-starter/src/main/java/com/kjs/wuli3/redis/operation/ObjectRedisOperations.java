@@ -9,7 +9,10 @@ import java.util.Optional;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-/** 基于 Redis String 执行类型安全的 JSON 对象操作。 */
+/** 基于 Redis String 执行类型安全的 JSON 对象操作。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class ObjectRedisOperations {
 
     private final ValueOperations<String, String> valueOperations;

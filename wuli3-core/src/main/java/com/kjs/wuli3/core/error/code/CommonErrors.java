@@ -4,7 +4,10 @@ import com.kjs.wuli3.core.error.metadata.ErrorModule;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/** 跨模块可复用的通用调用方错误码。 */
+/** 跨模块可复用的通用调用方错误码。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @Getter
 @RequiredArgsConstructor
 @ErrorModule("COMMON")

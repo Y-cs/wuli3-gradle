@@ -17,9 +17,12 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /**
- * Applies project date/time formats and default locale/time zone.
+ * 应用项目日期时间格式、默认区域设置和时区。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JsonMapperTimeAssembly implements JsonMapperAssemblyChain {
+    /** 应用 Java 时间模块、默认区域设置和默认时区。 */
     @Override
     public void assemble(final JsonMapper.Builder mapperBuilder) {
         mapperBuilder
@@ -28,6 +31,7 @@ public final class JsonMapperTimeAssembly implements JsonMapperAssemblyChain {
                 .defaultTimeZone(this.defaultTimeZone());
     }
 
+    /** 创建使用项目日期时间格式的 Java 时间模块。 */
     public JavaTimeModule javaTimeModule() {
         return this.configure(new JavaTimeModule());
     }
@@ -51,10 +55,12 @@ public final class JsonMapperTimeAssembly implements JsonMapperAssemblyChain {
         return module;
     }
 
+    /** 返回项目默认区域设置。 */
     public Locale defaultLocale() {
         return Locale.ROOT;
     }
 
+    /** 返回项目默认时区。 */
     public TimeZone defaultTimeZone() {
         return TimeZone.getTimeZone(DateTimeFormats.DEFAULT_ZONE_ID);
     }

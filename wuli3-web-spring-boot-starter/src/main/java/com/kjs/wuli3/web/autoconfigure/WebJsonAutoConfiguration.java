@@ -17,7 +17,10 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-/** Configures JSON extensions owned by the web starter. */
+/** Configures JSON extensions owned by the web starter.
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(WebJsonResourcePathProperties.class)
 public class WebJsonAutoConfiguration {

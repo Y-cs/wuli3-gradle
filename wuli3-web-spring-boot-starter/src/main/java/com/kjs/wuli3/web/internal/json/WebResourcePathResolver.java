@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.jspecify.annotations.NullMarked;
 
 /**
- * WebResourcePathResolver
+ * 根据 Web 配置在资源路径与公开 URL 之间转换。
  *
  * @author GuoYang create on 2026/7/9 17:08
  */

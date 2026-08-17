@@ -10,7 +10,10 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 
-/** 将公共事件线协议编码为 AMQP 消息。 */
+/** 将公共事件线协议编码为 AMQP 消息。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class RabbitMessageEncoder {
 
     private final @Nullable ContextReader contextReader;

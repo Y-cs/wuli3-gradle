@@ -8,7 +8,9 @@ import com.kjs.wuli3.json.datatype.desensitization.DesensitizationVisibilityPoli
 import java.util.Objects;
 
 /**
- * Adds {@link com.kjs.wuli3.json.datatype.desensitization.Desensitized} JSON output masking support.
+ * 添加 {@link com.kjs.wuli3.json.datatype.desensitization.Desensitized} JSON 输出脱敏能力。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JsonMapperDesensitizationAssembly implements JsonMapperAssemblyChain {
     private final DesensitizationStrategyRegistry registry;
@@ -25,6 +27,7 @@ public final class JsonMapperDesensitizationAssembly implements JsonMapperAssemb
         mapperBuilder.addModule(this.desensitizationModule());
     }
 
+    /** 创建脱敏 Jackson 模块。 */
     public Module desensitizationModule() {
         return new DesensitizationModule(this.registry, this.visibilityPolicy);
     }

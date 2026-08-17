@@ -6,7 +6,9 @@ import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import com.kjs.wuli3.json.provider.JacksonProvider;
 
 /**
- * Project-level JSON utility facade backed by the standard Jackson {@link ObjectMapper}.
+ * 基于标准 Jackson {@link ObjectMapper} 的项目级 JSON 工具入口。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class Jsons {
     private static final ObjectMapper OBJECT_MAPPER = JacksonProvider.newJsonMapper();
@@ -40,7 +42,7 @@ public final class Jsons {
     }
 
     /**
-     * Executes a custom Jackson operation and maps checked failures to the project JSON error model.
+     * 执行自定义 Jackson 操作，并将受检异常映射为项目 JSON 错误模型。
      */
     static <T> T execute(final JsonErrors error, final JsonFunction<T> function) {
         try {

@@ -6,7 +6,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-/** 根据命名配置创建 AliYun OSS SDK V2 客户端。 */
+/**
+ * 根据命名配置创建 AliYun OSS SDK V2 客户端。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(AliYunProperties.class)
 public class AliYunAutoConfiguration {

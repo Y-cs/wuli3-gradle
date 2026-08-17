@@ -12,7 +12,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-/** 基于应用持有的 Redis 客户端配置类型安全的 JSON 操作和分布式锁。 */
+/**
+ * 基于应用持有的 Redis 客户端配置类型安全的 JSON 操作和分布式锁。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @AutoConfiguration(
         afterName = {
             "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",

@@ -9,6 +9,8 @@ import java.util.Optional;
  *
  * <p>默认实现恢复可信内部 HTTP 调用携带的认证字段。直接接收外部请求或使用其他认证协议的应用，
  * 应提供自己的实现，并在返回 {@link AuthContext} 前完成相应的身份认证。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @FunctionalInterface
 public interface AuthContextResolver {

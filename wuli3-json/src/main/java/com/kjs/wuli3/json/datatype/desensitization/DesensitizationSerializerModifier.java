@@ -13,7 +13,9 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Installs property serializers for fields marked by {@link Desensitized}.
+ * 为 {@link Desensitized} 标记的属性安装脱敏序列化器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DesensitizationSerializerModifier extends BeanSerializerModifier {
     @Serial

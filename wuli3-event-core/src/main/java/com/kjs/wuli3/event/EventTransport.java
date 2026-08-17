@@ -2,7 +2,10 @@ package com.kjs.wuli3.event;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 
-/** 通过具体的投递机制发送事件信封。 */
+/** 通过具体的投递机制发送事件信封。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public interface EventTransport<PO extends PublishOptions> {
 
     /**

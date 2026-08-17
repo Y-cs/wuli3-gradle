@@ -20,7 +20,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 
-/** 自动配置默认的 RabbitMQ 远程事件传输实现。 */
+/** 自动配置默认的 RabbitMQ 远程事件传输实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @AutoConfiguration
 @AutoConfigureAfter(name = "org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration")
 @AutoConfigureBefore(EventAutoConfiguration.class)

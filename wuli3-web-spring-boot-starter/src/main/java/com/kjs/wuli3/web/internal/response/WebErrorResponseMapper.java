@@ -10,7 +10,9 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Shared response mapping rules for handled web errors.
+ * Web 错误处理过程共享的响应映射规则。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 final class WebErrorResponseMapper {
 

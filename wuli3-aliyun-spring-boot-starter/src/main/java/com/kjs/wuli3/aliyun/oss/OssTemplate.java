@@ -9,7 +9,11 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-/** 面向单个 OSS 客户端的操作模板，统一转换 SDK 操作异常。 */
+/**
+ * 面向单个 OSS 客户端的操作模板，统一转换 SDK 操作异常。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class OssTemplate implements AutoCloseable {
 
     private final OSSClient client;

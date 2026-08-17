@@ -4,7 +4,11 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
-/** 同时表达 key 值和稳定过期策略的 Redis key。 */
+/**
+ * 同时表达 key 值和稳定过期策略的 Redis key。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public record RedisKey(String value, Optional<Duration> timeToLive) {
 
     private static final Duration MINIMUM_TIME_TO_LIVE = Duration.ofMillis(1);

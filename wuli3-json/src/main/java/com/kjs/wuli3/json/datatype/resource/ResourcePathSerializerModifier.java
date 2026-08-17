@@ -9,7 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 /**
- * ResourcePathSerializerModifier
+ * 为标记了 {@link ResourcePath} 的属性安装资源路径序列化器。
  *
  * @author GuoYang create on 2026/7/9 10:02
  */

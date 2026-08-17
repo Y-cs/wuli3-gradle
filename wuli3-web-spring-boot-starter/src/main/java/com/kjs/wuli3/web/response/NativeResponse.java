@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
  * 标记接口返回值需要跳过统一响应包装。
  *
  * <p>可标注在 Controller 类或方法上；方法级配置优先于类级配置。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -2,7 +2,10 @@ package com.kjs.wuli3.event;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 
-/** 将固定选项类型的发布请求委托给单个传输实现。 */
+/** 将固定选项类型的发布请求委托给单个传输实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public abstract class AbstractChannelEventPublisher<PO extends PublishOptions> implements EventPublisher {
 
     private final EventTransport<PO> eventTransport;

@@ -5,6 +5,8 @@ package com.kjs.wuli3.propagation.context;
  *
  * @param originIp 调用来源的 IP 地址
  * @param requestId 用于关联调用链路的请求标识
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public record InvocationContext(String originIp, String requestId) implements PropagationContext {
 

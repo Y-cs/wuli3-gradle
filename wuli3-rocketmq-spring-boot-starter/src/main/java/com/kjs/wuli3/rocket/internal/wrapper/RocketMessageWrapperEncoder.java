@@ -18,6 +18,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * 在不依赖任一 RocketMQ Producer SDK 的前提下编码公共事件线协议。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class RocketMessageWrapperEncoder {
 

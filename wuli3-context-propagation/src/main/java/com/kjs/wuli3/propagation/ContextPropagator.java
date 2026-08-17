@@ -5,7 +5,10 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
-/** 捕获当前调用上下文，并在后续执行中临时恢复它。 */
+/** 捕获当前调用上下文，并在后续执行中临时恢复它。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public interface ContextPropagator {
 
     /**

@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.Map;
 
 /**
- * Applies baseline lenient JSON binding behavior shared by project mappers.
+ * 为项目映射器应用共享的宽松 JSON 绑定基础配置。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JsonMapperBaseAssembly implements JsonMapperAssemblyChain {
 

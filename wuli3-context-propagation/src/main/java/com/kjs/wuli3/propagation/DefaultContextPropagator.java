@@ -8,6 +8,8 @@ import java.util.Objects;
 
 /**
  * 基于 {@link ContextReader} 和 {@link ContextWriter} 捕获和恢复调用上下文的默认实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DefaultContextPropagator implements ContextPropagator {
 

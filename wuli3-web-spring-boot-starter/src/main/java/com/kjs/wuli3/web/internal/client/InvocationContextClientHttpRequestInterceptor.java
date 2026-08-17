@@ -14,6 +14,8 @@ import org.springframework.http.client.ClientHttpResponse;
  * 将当前调用链上下文写入 HTTP 出站请求。
  *
  * <p>该拦截器只写入调用链上下文，不会通过 HTTP 自动传播认证上下文。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class InvocationContextClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 

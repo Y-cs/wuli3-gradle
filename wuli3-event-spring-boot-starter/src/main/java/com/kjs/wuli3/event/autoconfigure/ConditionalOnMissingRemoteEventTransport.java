@@ -9,7 +9,9 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Conditional;
 
 /**
- * Only enables a default remote event transport when no known transport supports the requested options type.
+ * 仅在已知传输实现均不支持请求的选项类型时启用默认远程事件传输。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -18,9 +20,9 @@ import org.springframework.context.annotation.Conditional;
 public @interface ConditionalOnMissingRemoteEventTransport {
 
     /**
-     * The concrete publish options type handled by the default transport.
+     * 默认传输实现处理的具体发布选项类型。
      *
-     * @return supported publish options type
+     * @return 支持的发布选项类型
      */
     Class<? extends PublishOptions> optionsType();
 }

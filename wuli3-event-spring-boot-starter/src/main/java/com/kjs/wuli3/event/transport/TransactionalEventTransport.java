@@ -19,6 +19,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * 由它先在当前事务线程完成注册，再在提交后回调中决定是否异步分派。
  *
  * @param <O> 委托传输实现所支持的发布选项类型
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class TransactionalEventTransport<O extends PublishOptions> implements EventTransport<O> {
 

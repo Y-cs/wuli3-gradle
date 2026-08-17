@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.Objects;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-/** 聚合不同 Redis 数据结构操作，并承载整 key 的通用操作。 */
+/** 聚合不同 Redis 数据结构操作，并承载整 key 的通用操作。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class RedisSupport {
 
     private final StringRedisTemplate redisTemplate;

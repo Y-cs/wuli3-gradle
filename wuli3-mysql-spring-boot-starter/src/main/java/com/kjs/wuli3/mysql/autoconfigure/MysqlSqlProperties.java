@@ -5,7 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/** SQL 观测配置。默认关闭，避免改变应用的日志量和敏感数据边界。 */
+/**
+ * SQL 观测配置。默认关闭，避免改变应用的日志量和敏感数据边界。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "wuli3.mysql.sql")

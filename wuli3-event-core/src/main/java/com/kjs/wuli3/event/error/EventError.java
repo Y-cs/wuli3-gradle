@@ -9,7 +9,10 @@ import com.kjs.wuli3.core.error.policy.ErrorVisibility;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-/** 事件模块错误码。 */
+/** 事件模块错误码。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @RequiredArgsConstructor
 @Getter
 @ErrorModule("EVENT")

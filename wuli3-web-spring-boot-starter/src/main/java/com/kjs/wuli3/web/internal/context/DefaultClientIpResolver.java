@@ -10,7 +10,9 @@ import java.util.Locale;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Default client IP resolver that only trusts forwarding headers from configured proxy networks.
+ * 仅信任来自已配置代理网段转发头的默认客户端 IP 解析器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DefaultClientIpResolver implements ClientIpResolver {
 

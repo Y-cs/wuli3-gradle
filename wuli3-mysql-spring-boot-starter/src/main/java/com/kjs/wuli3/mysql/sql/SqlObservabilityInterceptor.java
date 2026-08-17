@@ -32,7 +32,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>普通查询、游标查询和更新直接从 {@link MappedStatement} 读取 SQL；批处理则在
  * {@code flushStatements} 真正提交 JDBC 批次后读取 {@link BatchResult}。所有观测逻辑都是
- * best-effort，日志格式化或告警失败不能改变原始数据库调用结果。
+ * 采用尽力而为策略，日志格式化或告警失败不能改变原始数据库调用结果。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @Slf4j
 @SuppressWarnings("StringConcatToTextBlock")

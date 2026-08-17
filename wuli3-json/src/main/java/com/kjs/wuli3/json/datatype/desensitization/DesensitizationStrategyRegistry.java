@@ -9,7 +9,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Resolves desensitization strategies by their stable semantic key.
+ * 按稳定语义键解析脱敏策略。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DesensitizationStrategyRegistry {
     private final Map<String, DesensitizationStrategy> strategies;

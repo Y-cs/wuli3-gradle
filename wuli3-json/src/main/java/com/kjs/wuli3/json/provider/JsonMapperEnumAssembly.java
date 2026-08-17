@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.util.Map;
 
 /**
- * Applies project enum binding behavior.
+ * 应用项目级枚举绑定行为。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JsonMapperEnumAssembly implements JsonMapperAssemblyChain {
 

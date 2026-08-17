@@ -11,7 +11,10 @@ import org.jspecify.annotations.Nullable;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
-/** 明确定义竞争和中断语义的 Redisson 锁执行器。 */
+/** 明确定义竞争和中断语义的 Redisson 锁执行器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class RedissonRedisLockExecutor implements RedisLockExecutor {
 
     private final RedissonClient redissonClient;

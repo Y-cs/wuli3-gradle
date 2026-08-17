@@ -12,7 +12,9 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Formats external web error codes as SERVICE.MODULE.ERROR_NAME.
+ * 将对外 Web 错误码格式化为 SERVICE.MODULE.ERROR_NAME。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public class WebErrorCodeResolver implements ErrorCodeResolver {
 

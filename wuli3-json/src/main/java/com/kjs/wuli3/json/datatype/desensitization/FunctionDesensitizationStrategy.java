@@ -4,7 +4,9 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * Function-backed strategy used by built-in and lightweight custom desensitization rules.
+ * 供内置规则和轻量自定义规则使用的函数式脱敏策略。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 final class FunctionDesensitizationStrategy implements DesensitizationStrategy {
     private final Function<String, String> function;

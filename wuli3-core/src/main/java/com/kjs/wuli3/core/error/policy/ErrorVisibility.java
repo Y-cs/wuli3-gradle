@@ -1,6 +1,9 @@
 package com.kjs.wuli3.core.error.policy;
 
-/** 定义错误码和错误消息的对外暴露范围。 */
+/** 定义错误码和错误消息的对外暴露范围。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public enum ErrorVisibility {
 
     /** 对外输出错误码和错误消息。 */

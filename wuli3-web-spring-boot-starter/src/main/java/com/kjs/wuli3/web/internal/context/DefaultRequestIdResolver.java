@@ -8,7 +8,9 @@ import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Default request id resolver with bounded external input.
+ * 对外部输入设置长度和字符限制的默认请求 ID 解析器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DefaultRequestIdResolver implements RequestIdResolver {
 

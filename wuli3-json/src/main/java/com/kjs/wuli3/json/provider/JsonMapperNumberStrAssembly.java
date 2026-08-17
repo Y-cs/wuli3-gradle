@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 /**
- * Serializes Java numbers as JSON strings for clients that cannot safely handle numeric precision.
+ * 将 Java 数字序列化为 JSON 字符串，避免客户端处理数值精度时发生丢失。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class JsonMapperNumberStrAssembly implements JsonMapperAssemblyChain {
 

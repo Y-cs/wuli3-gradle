@@ -16,6 +16,11 @@ import java.util.Objects;
 import org.slf4j.MDC;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * 在 Servlet 请求期间建立并清理 Wuli3 调用上下文。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class ContextFilter extends OncePerRequestFilter {
 
     private final ContextWriter contextWriter;
@@ -24,6 +29,7 @@ public final class ContextFilter extends OncePerRequestFilter {
     private final ClientIpResolver clientIpResolver;
     private final WebContextProperties contextProperties;
 
+    /** 创建使用指定上下文解析器的过滤器。 */
     public ContextFilter(
             final ContextWriter contextWriter,
             final AuthContextResolver authContextResolver,
@@ -37,6 +43,11 @@ public final class ContextFilter extends OncePerRequestFilter {
         this.contextProperties = Objects.requireNonNull(contextProperties, "contextProperties");
     }
 
+    /**
+     * 写入请求上下文、认证上下文和 MDC，并在请求结束后清理所有线程状态。
+     *
+     * <p>注意：无论过滤器链是否抛出异常，线程上下文都会在 finally 中清理。
+     */
     @Override
     protected void doFilterInternal(
             final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)

@@ -6,11 +6,13 @@ import java.time.format.ResolverStyle;
 import java.util.Locale;
 
 /**
- * Stable date and time formats shared by APIs and infrastructure code.
+ * API 和基础设施共享的稳定日期与时间格式。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DateTimeFormats {
 
-    /** Default time zone for Wuli applications. */
+    /** Wuli 应用的默认时区。 */
     public static final ZoneId DEFAULT_ZONE_ID = ZoneId.of("Asia/Shanghai");
 
     public static final String DATE_PATTERN = "uuuu-MM-dd";

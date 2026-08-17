@@ -7,7 +7,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 
-/** 定义一个传播上下文的协议字段读写契约。 */
+/** 定义一个传播上下文的协议字段读写契约。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public interface ContextFieldEncoder<C extends PropagationContext> {
 
     /**

@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** 解析并缓存错误码枚举及常量上声明的元数据。 */
+/** 解析并缓存错误码枚举及常量上声明的元数据。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class ErrorMetadataParser {
 
     private static final ErrorMetadataParser INSTANCE = new ErrorMetadataParser();
@@ -21,10 +24,12 @@ public final class ErrorMetadataParser {
 
     private ErrorMetadataParser() {}
 
+    /** 返回进程级共享的错误元数据解析器。 */
     public static ErrorMetadataParser instance() {
         return INSTANCE;
     }
 
+    /** 解析错误码所属模块并缓存结果。 */
     public ErrorModule getErrorModule(final ErrorCode errorCode) {
         final Class<?> errorType = ErrorMetadataParser.enumValue(errorCode).getDeclaringClass();
         return this.moduleCache.computeIfAbsent(errorType, type -> {
@@ -39,6 +44,7 @@ public final class ErrorMetadataParser {
         });
     }
 
+    /** 解析错误码生效的错误策略并缓存结果。 */
     public ResolvedErrorPolicy getErrorPolicy(final ErrorCode errorCode) {
         ErrorMetadataParser.enumValue(errorCode);
         return this.policyCache.computeIfAbsent(errorCode, code -> {

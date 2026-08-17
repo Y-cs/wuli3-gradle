@@ -5,7 +5,9 @@ import java.io.Serial;
 import java.util.Objects;
 
 /**
- * Jackson module that applies project desensitization annotations during serialization.
+ * 在序列化阶段应用项目脱敏注解的 Jackson 模块。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @SuppressWarnings("this-escape")
 public final class DesensitizationModule extends SimpleModule {

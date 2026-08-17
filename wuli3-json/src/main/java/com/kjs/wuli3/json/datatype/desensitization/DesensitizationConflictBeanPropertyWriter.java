@@ -9,7 +9,9 @@ import java.util.Objects;
 import org.jspecify.annotations.NullUnmarked;
 
 /**
- * Fails serialization for ambiguous property-level transformation combinations.
+ * 属性同时声明冲突的转换规则时终止序列化。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 final class DesensitizationConflictBeanPropertyWriter extends BeanPropertyWriter {
     @Serial

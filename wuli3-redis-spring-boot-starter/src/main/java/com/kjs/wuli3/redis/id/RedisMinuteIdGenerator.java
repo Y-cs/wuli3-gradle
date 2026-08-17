@@ -13,7 +13,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
 
-/** 使用“UTC 分钟时间片 + Redis 分钟内序列”生成趋势递增的 Long ID。 */
+/** 使用“UTC 分钟时间片 + Redis 分钟内序列”生成趋势递增的 Long ID。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class RedisMinuteIdGenerator implements IdGenerator<Long> {
 
     public static final Duration DEFAULT_COUNTER_TTL = Duration.ofHours(1);

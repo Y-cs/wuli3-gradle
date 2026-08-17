@@ -5,7 +5,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/** 为固定主题和事件类型创建标识一致的事件信封。 */
+/** 为固定主题和事件类型创建标识一致的事件信封。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class EventEnvelopeTemplate {
 
     private final String topic;

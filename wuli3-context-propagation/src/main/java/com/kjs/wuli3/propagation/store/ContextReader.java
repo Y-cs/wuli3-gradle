@@ -4,7 +4,10 @@ import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
 import java.util.Optional;
 
-/** 提供当前调用上下文的只读访问。 */
+/** 提供当前调用上下文的只读访问。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public interface ContextReader {
 
     /**

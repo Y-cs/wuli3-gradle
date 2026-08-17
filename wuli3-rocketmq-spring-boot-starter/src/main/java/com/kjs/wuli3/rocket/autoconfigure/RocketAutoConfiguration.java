@@ -28,6 +28,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 自动配置默认的 RocketMQ 远程事件传输实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @AutoConfiguration
 @AutoConfigureAfter(name = "org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration")

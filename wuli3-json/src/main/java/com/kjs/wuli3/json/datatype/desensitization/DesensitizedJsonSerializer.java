@@ -9,7 +9,9 @@ import java.util.Objects;
 import org.jspecify.annotations.NullUnmarked;
 
 /**
- * Jackson serializer backing {@link Desensitized}.
+ * 实现 {@link Desensitized} 语义的 Jackson 序列化器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DesensitizedJsonSerializer extends JsonSerializer<Object> {
     private final Desensitized annotation;

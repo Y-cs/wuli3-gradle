@@ -25,6 +25,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 /**
  * 将普通返回值统一包装成 {@link ApiResponse}。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @RestControllerAdvice
 public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {

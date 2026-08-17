@@ -5,6 +5,8 @@ package com.kjs.wuli3.propagation.context;
  *
  * @param userId 已认证用户的唯一标识
  * @param username 已认证用户的用户名
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public record AuthContext(Long userId, String username) implements PropagationContext {
 

@@ -8,7 +8,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-/** AliYun OSS SDK V2 的多套命名配置。 */
+/**
+ * AliYun OSS SDK V2 的多套命名配置。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "wuli3.aliyun")

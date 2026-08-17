@@ -10,6 +10,8 @@ import org.jspecify.annotations.NullMarked;
  * 声明错误码的责任来源、告警严重度和对外可见性。
  *
  * <p>模块默认策略通过 {@code @ErrorModule.policy()} 声明，枚举常量上的注解可覆盖默认值。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.util.Objects;
 
 /**
- * Jackson deserializer backing {@link ResourcePath}.
+ * 支持 {@link ResourcePath} 的 Jackson 反序列化器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class ResourcePathJsonDeserializer extends JsonDeserializer<String> {
     private final ResourcePathResolver resolver;

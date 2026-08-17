@@ -9,7 +9,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-/** 管理多套命名 OSS 操作模板，负责创建、查找和关闭模板。 */
+/**
+ * 管理多套命名 OSS 操作模板，负责创建、查找和关闭模板。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class OssClientManager implements AutoCloseable {
 
     private final String defaultProfile;

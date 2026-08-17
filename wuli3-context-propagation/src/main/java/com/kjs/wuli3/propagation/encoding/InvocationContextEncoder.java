@@ -10,6 +10,8 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * 调用元数据的协议字段编解码器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class InvocationContextEncoder implements ContextFieldEncoder<InvocationContext> {
 

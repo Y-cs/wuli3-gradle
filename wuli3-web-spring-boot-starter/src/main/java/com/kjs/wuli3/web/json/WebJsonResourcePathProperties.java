@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * WebJsonResourcePathProperties
+ * Web 资源路径类型与域名映射配置。
  *
  * @author GuoYang create on 2026/7/9 17:11
  */

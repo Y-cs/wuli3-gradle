@@ -5,7 +5,10 @@ import com.kjs.wuli3.propagation.store.ContextReader;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
-/** 提供当前调用中认证上下文的便捷只读访问。 */
+/** 提供当前调用中认证上下文的便捷只读访问。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 @RequiredArgsConstructor
 public class AuthContextAccessor {
 

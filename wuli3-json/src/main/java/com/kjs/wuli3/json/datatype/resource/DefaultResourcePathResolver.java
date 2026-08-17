@@ -1,7 +1,9 @@
 package com.kjs.wuli3.json.datatype.resource;
 
 /**
- * Default resource resolver that preserves values unchanged.
+ * 保持资源值不变的默认资源解析器。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DefaultResourcePathResolver implements ResourcePathResolver {
     public static final String DEFAULT_TYPE = "default";

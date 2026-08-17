@@ -4,7 +4,10 @@ import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.options.AsyncPublishOptions;
 import com.kjs.wuli3.event.options.TransactionalPublishOptions;
 
-/** RabbitMQ 事件传输支持的不可变发布选项。 */
+/** RabbitMQ 事件传输支持的不可变发布选项。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public record RabbitPublishOptions(boolean async, boolean afterCommit)
         implements AsyncPublishOptions, TransactionalPublishOptions, PublishOptions {
 

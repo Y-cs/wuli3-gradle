@@ -11,7 +11,10 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.task.TaskExecutor;
 
-/** 基于 {@link RabbitTemplate} 的默认尽力而为远程事件传输实现。 */
+/** 基于 {@link RabbitTemplate} 的默认尽力而为远程事件传输实现。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class RabbitRemoteEventTransport implements RemoteEventTransport<RabbitPublishOptions> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitRemoteEventTransport.class);

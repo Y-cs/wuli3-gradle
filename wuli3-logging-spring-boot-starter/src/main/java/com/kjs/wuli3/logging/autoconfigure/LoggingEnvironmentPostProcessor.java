@@ -12,7 +12,11 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.StringUtils;
 
-/** 在 Spring Boot 初始化 Logback 前写入可覆盖的 Wuli3 默认日志属性。 */
+/**
+ * 在 Spring Boot 初始化 Logback 前写入可覆盖的 Wuli3 默认日志属性。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
+ */
 public final class LoggingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
     static final String DEFAULTS_PROPERTY_SOURCE = "wuli3LoggingDefaults";

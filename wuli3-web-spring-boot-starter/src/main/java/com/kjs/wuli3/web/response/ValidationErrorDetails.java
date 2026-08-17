@@ -4,7 +4,9 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Structured validation details returned in unified error responses.
+ * 统一错误响应中的结构化校验错误详情。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public record ValidationErrorDetails(List<Item> errors) {
 

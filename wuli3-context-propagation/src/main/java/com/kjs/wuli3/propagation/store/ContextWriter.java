@@ -6,6 +6,8 @@ import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
 
 /**
  * 提供当前调用上下文的可变访问。
+ *
+ * @author GuoYang create on 2026/8/17 11:53
  */
 public interface ContextWriter {
 

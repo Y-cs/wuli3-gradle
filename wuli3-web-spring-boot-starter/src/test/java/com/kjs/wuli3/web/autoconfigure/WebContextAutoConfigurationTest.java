@@ -3,6 +3,7 @@ package com.kjs.wuli3.web.autoconfigure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.internal.auth.TrustedHttpAuthContextResolver;
 import java.util.Optional;
@@ -25,7 +26,8 @@ class WebContextAutoConfigurationTest {
 
     @Test
     void customAuthContextResolverReplacesDefault() {
-        final AuthContextResolver customResolver = request -> Optional.of(new AuthContext(42L, "alice"));
+        final AuthContextResolver customResolver =
+                request -> Optional.of(new AuthContext(PrincipalType.CUSTOMER, "42", "alice"));
 
         this.contextRunner
                 .withBean(AuthContextResolver.class, () -> customResolver)

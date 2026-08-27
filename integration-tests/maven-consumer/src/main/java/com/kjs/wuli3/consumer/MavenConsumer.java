@@ -1,11 +1,16 @@
 package com.kjs.wuli3.consumer;
 
+import com.kjs.wuli3.audit.AuditLogRecorder;
 import com.kjs.wuli3.core.id.UuidStringIdGenerator;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.envelope.EventEnvelopeTemplate;
 import com.kjs.wuli3.json.provider.JacksonProvider;
 import com.kjs.wuli3.logging.autoconfigure.LoggingProperties;
+import com.kjs.wuli3.opentelemetry.autoconfigure.Wuli3OpenTelemetryAutoConfiguration;
+import com.kjs.wuli3.opentelemetry.metrics.MetricRecorder;
+import com.kjs.wuli3.opentelemetry.trace.TraceContextAccessor;
+import com.kjs.wuli3.opentelemetry.trace.TraceMdc;
 import com.kjs.wuli3.redis.RedisKey;
 import com.kjs.wuli3.redis.RedisSupport;
 import com.kjs.wuli3.redis.id.RedisMinuteIdGenerator;
@@ -15,6 +20,7 @@ import com.kjs.wuli3.redis.operation.HashRedisOperations;
 import com.kjs.wuli3.redis.operation.ObjectRedisOperations;
 import com.kjs.wuli3.redis.operation.SetRedisOperations;
 import com.kjs.wuli3.redis.operation.StringRedisOperations;
+import io.opentelemetry.api.common.Attributes;
 import java.time.Duration;
 import java.time.Instant;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -30,6 +36,12 @@ public final class MavenConsumer {
         EventPublisher.class.getName();
         RabbitTemplate.class.getName();
         LoggingProperties.class.getName();
+        AuditLogRecorder.class.getName();
+        Wuli3OpenTelemetryAutoConfiguration.class.getName();
+        MetricRecorder.class.getName();
+        TraceContextAccessor.class.getName();
+        Attributes.class.getName();
+        TraceMdc.TRACE_ID.length();
         RedisSupport.class.getName();
         RedisMinuteIdGenerator.class.getName();
         StringRedisOperations.class.getName();

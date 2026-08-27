@@ -2,12 +2,17 @@ package com.kjs.wuli3.consumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.kjs.wuli3.audit.AuditLogRecorder;
 import com.kjs.wuli3.core.id.UuidStringIdGenerator;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.envelope.EventEnvelopeTemplate;
 import com.kjs.wuli3.json.provider.JacksonProvider;
 import com.kjs.wuli3.logging.autoconfigure.LoggingProperties;
+import com.kjs.wuli3.opentelemetry.autoconfigure.Wuli3OpenTelemetryAutoConfiguration;
+import com.kjs.wuli3.opentelemetry.metrics.MetricRecorder;
+import com.kjs.wuli3.opentelemetry.trace.TraceContextAccessor;
+import com.kjs.wuli3.opentelemetry.trace.TraceMdc;
 import com.kjs.wuli3.redis.RedisKey;
 import com.kjs.wuli3.redis.RedisSupport;
 import com.kjs.wuli3.redis.id.RedisMinuteIdGenerator;
@@ -17,6 +22,7 @@ import com.kjs.wuli3.redis.operation.HashRedisOperations;
 import com.kjs.wuli3.redis.operation.ObjectRedisOperations;
 import com.kjs.wuli3.redis.operation.SetRedisOperations;
 import com.kjs.wuli3.redis.operation.StringRedisOperations;
+import io.opentelemetry.api.common.Attributes;
 import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
@@ -33,6 +39,12 @@ class BomConsumerTest {
         assertNotNull(EventPublisher.class);
         assertNotNull(RabbitTemplate.class);
         assertNotNull(LoggingProperties.class);
+        assertNotNull(AuditLogRecorder.class);
+        assertNotNull(Wuli3OpenTelemetryAutoConfiguration.class);
+        assertNotNull(MetricRecorder.class);
+        assertNotNull(TraceContextAccessor.class);
+        assertNotNull(Attributes.class);
+        assertNotNull(TraceMdc.TRACE_ID);
         assertNotNull(RedisSupport.class);
         assertNotNull(RedisMinuteIdGenerator.class);
         assertNotNull(StringRedisOperations.class);

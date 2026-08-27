@@ -18,7 +18,7 @@ class WebContextSecurityTest {
                 .doesNotContain("headers", "parameters", "queryString", "requestUrl", "remoteAddr");
         assertThat(AuthContext.class.getRecordComponents())
                 .extracting(RecordComponent::getName)
-                .containsExactlyInAnyOrder("userId", "username")
+                .containsExactlyInAnyOrder("principalType", "principalId", "principalName")
                 .doesNotContain("headers", "parameters", "queryString", "requestUrl", "remoteAddr");
         assertThat(ErrorAlertContext.class.getRecordComponents())
                 .extracting(RecordComponent::getName)

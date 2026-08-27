@@ -13,6 +13,7 @@ import com.kjs.wuli3.core.error.code.CommonErrors;
 import com.kjs.wuli3.core.error.exception.ErrorCodeException;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.RequestIds;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
@@ -279,7 +280,7 @@ class WebConfigurationPropertiesTest {
         @Bean
         @Primary
         AuthContextResolver testSecurityContextResolver() {
-            return request -> java.util.Optional.of(new AuthContext(1L, "tester"));
+            return request -> java.util.Optional.of(new AuthContext(PrincipalType.CUSTOMER, "1", "tester"));
         }
     }
 

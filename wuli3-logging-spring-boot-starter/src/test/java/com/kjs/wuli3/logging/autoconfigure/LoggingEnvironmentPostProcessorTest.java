@@ -24,6 +24,8 @@ class LoggingEnvironmentPostProcessorTest {
         this.processor.postProcessEnvironment(environment, new SpringApplication(Object.class));
 
         assertThat(environment.getProperty("logging.pattern.console")).contains("app=orders");
+        assertThat(environment.getProperty("logging.pattern.console"))
+                .contains("requestId=%X{requestId}", "traceId=%X{trace_id}", "spanId=%X{span_id}");
         assertThat(environment.getProperty("logging.pattern.file")).contains("app=orders");
         assertThat(Objects.requireNonNull(environment
                                 .getPropertySources()

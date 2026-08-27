@@ -1,6 +1,7 @@
 package com.kjs.wuli3.propagation.accessor;
 
 import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.store.ContextReader;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -24,20 +25,29 @@ public class AuthContextAccessor {
     }
 
     /**
-     * 获取当前认证用户的唯一标识。
+     * 获取当前认证主体的类型。
      *
-     * @return 当前用户 ID；未设置认证上下文时为空
+     * @return 当前主体类型；未设置认证上下文时为空
      */
-    public Optional<Long> userId() {
-        return this.current().map(AuthContext::userId);
+    public Optional<PrincipalType> principalType() {
+        return this.current().map(AuthContext::principalType);
     }
 
     /**
-     * 获取当前认证用户的用户名。
+     * 获取当前认证主体的唯一标识。
      *
-     * @return 当前用户名；未设置认证上下文时为空
+     * @return 当前主体 ID；未设置认证上下文时为空
      */
-    public Optional<String> username() {
-        return this.current().map(AuthContext::username);
+    public Optional<String> principalId() {
+        return this.current().map(AuthContext::principalId);
+    }
+
+    /**
+     * 获取当前认证主体的显示名称。
+     *
+     * @return 当前主体名称；未设置认证上下文时为空
+     */
+    public Optional<String> principalName() {
+        return this.current().map(AuthContext::principalName);
     }
 }

@@ -27,6 +27,8 @@ include(
     "wuli3-aliyun-spring-boot-starter",
     "wuli3-configuration-spring-boot-starter",
     "wuli3-logging-spring-boot-starter",
+    "wuli3-audit-log-spring-boot-starter",
+    "wuli3-opentelemetry-spring-boot-starter",
     "wuli3-web-spring-boot-starter",
     "wuli3-mysql-spring-boot-starter",
     "wuli3-redis-spring-boot-starter",

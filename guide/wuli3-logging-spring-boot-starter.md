@@ -14,13 +14,15 @@ dependencies {
 
 ## 默认文本格式
 
-默认只输出控制台日志，格式包含时间、级别、线程、应用名、`requestId`、Logger、消息和异常堆栈：
+默认只输出控制台日志，格式包含时间、级别、线程、应用名、`requestId`、可选的 `traceId/spanId`、Logger、消息和异常堆栈：
 
 ```text
-2026-08-14T10:20:30.123+08:00 INFO  [http-nio-8080-exec-1] app=orders requestId=rid-1 c.k.example.OrderService - created
+2026-08-14T10:20:30.123+08:00 INFO  [http-nio-8080-exec-1] app=orders requestId=rid-1 traceId=abc spanId=def c.k.example.OrderService - created
 ```
 
-Web starter 的请求过滤器会将 `requestId` 放入 MDC；没有 Web 请求上下文时该字段为空，不会生成新的 ID。
+Web starter 的请求过滤器会将 `requestId` 放入 MDC；OpenTelemetry Java Agent 的 Logback MDC instrumentation
+写入 `trace_id` 和 `span_id`，默认日志格式将它们输出为 `traceId` 和 `spanId`。未安装 Agent 或当前没有有效
+Span 时字段为空，日志 starter 不会自行生成这些标识。
 
 ## 结构化日志
 
@@ -58,8 +60,8 @@ wuli3:
 wuli3:
   logging:
     pattern:
-      console: "%d{ISO8601} %-5level requestId=%X{requestId} %logger{36} - %msg%n%wEx"
-      file: "%d{ISO8601} %-5level requestId=%X{requestId} %logger{36} - %msg%n%wEx"
+      console: "%d{ISO8601} %-5level requestId=%X{requestId} traceId=%X{trace_id} spanId=%X{span_id} %logger{36} - %msg%n%wEx"
+      file: "%d{ISO8601} %-5level requestId=%X{requestId} traceId=%X{trace_id} spanId=%X{span_id} %logger{36} - %msg%n%wEx"
 ```
 
 如果设置了 `logging.config` 指向自定义 Logback 配置文件，starter 不再注入任何默认日志属性。

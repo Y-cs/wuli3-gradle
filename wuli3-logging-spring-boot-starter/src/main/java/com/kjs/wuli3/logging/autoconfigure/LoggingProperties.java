@@ -19,10 +19,10 @@ public class LoggingProperties {
     /** 配置前缀。 */
     public static final String PREFIX = "wuli3.logging";
 
-    /** 统一文本日志格式，保留 requestId 以便和 Web 上下文关联。 */
+    /** 统一文本日志格式，同时保留请求标识和可选的追踪关联字段。 */
     public static final String DEFAULT_TEXT_PATTERN =
             "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level [%thread] app=${spring.application.name:application} "
-                    + "requestId=%X{requestId} %logger{36} - %msg%n%wEx";
+                    + "requestId=%X{requestId} traceId=%X{trace_id} spanId=%X{span_id} %logger{36} - %msg%n%wEx";
 
     /** 默认日志文件名；仅在 file.enabled=true 且应用未配置 logging.file.* 时使用。 */
     public static final String DEFAULT_FILE_NAME = "logs/${spring.application.name:application}.log";

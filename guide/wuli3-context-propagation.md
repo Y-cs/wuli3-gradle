@@ -22,7 +22,7 @@ dependencies {
 - `ContextReader` / `ContextWriter`：分别暴露读取与修改当前上下文的能力，依赖方只注入所需一侧。
 - `ContextPropagator`：在快照操作能力之上包装异步任务。
 - `InvocationContext`：请求标识和来源地址。
-- `AuthContext`：可信内部链路可传播的认证元数据。
+- `AuthContext`：可信内部链路可传播的认证主体快照，由 `principalType`、`principalId` 和 `principalName` 组成。
 - `ContextFieldEncoder`：一个固定 `PropagationContext` 与协议字段之间的双向映射。
 - `ContextEncoder`：按显式白名单组合多个 `ContextFieldEncoder`，统一读取、写入和保留字段计算。
 
@@ -35,7 +35,10 @@ dependencies {
 两个固定编码器定义稳定字段契约：
 
 - `InvocationContextEncoder` 写入 `X-Request-Id` 和 `X-Origin-Ip`。
-- `AuthContextEncoder` 写入 `X-User-Id` 和 `X-Username`。
+- `AuthContextEncoder` 写入 `X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`。
+
+认证主体的三个字段必须同时存在且非空白，`X-Principal-Type` 必须是 `CUSTOMER`、`ADMIN` 或 `SYSTEM`。
+解码遇到缺失或非法字段时会整体拒绝该认证上下文，不会恢复部分身份信息。
 
 `ContextEncoder.standardContextEncoder()` 当前返回上述两个编码器，因此会同时读写调用标识和认证信息。协议适配器若只允许传播调用标识，应显式构造白名单：
 
@@ -61,7 +64,7 @@ encoder.writeTo(contextReader.capture(), headers::set);
 ```java
 final ContextStore contextStore = new ContextStore();
 contextStore.put(new InvocationContext("10.0.0.1", "rid-1"));
-contextStore.put(new AuthContext(42L, "alice"));
+contextStore.put(new AuthContext(PrincipalType.CUSTOMER, "42", "alice"));
 ```
 
 业务代码不要直接依赖 `ContextStore`，优先使用 accessor：
@@ -72,8 +75,8 @@ final AuthContextAccessor authAccessor = new AuthContextAccessor(contextStore);
 
 final String requestId = invocationAccessor.requestId()
         .orElse("");
-final Long userId = authAccessor.userId()
-        .orElse(0L);
+final String principalId = authAccessor.principalId()
+        .orElse("");
 ```
 
 在异步任务中传播当前上下文：

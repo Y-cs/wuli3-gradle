@@ -16,6 +16,8 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | [`wuli3-aliyun-spring-boot-starter`](guide/wuli3-aliyun-spring-boot-starter.md) | AliYun OSS SDK V2 多套命名客户端配置。 |
 | [`wuli3-configuration-spring-boot-starter`](guide/wuli3-configuration-spring-boot-starter.md) | Jasypt 配置属性加密与解密。 |
 | [`wuli3-logging-spring-boot-starter`](guide/wuli3-logging-spring-boot-starter.md) | Spring Boot + Logback 日志格式、结构化输出与滚动归档。 |
+| [`wuli3-audit-log-spring-boot-starter`](guide/wuli3-audit-log-spring-boot-starter.md) | 审计协议、上下文补全、写入/查询 Transport 与存储端口。 |
+| [`wuli3-opentelemetry-spring-boot-starter`](guide/wuli3-opentelemetry-spring-boot-starter.md) | OpenTelemetry Java Agent 适配、Trace 上下文访问与业务指标记录。 |
 | [`wuli3-web-spring-boot-starter`](guide/wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应和异常处理。 |
 | [`wuli3-mysql-spring-boot-starter`](guide/wuli3-mysql-spring-boot-starter.md) | MyBatis-Plus 依赖聚合。 |
 | [`wuli3-redis-spring-boot-starter`](guide/wuli3-redis-spring-boot-starter.md) | Redis String/JSON/Hash/Set 统一操作与分布式锁。 |

@@ -6,6 +6,7 @@ import com.kjs.wuli3.propagation.ContextScope;
 import com.kjs.wuli3.propagation.DefaultContextPropagator;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.Context;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
 import java.util.concurrent.Callable;
 import org.junit.jupiter.api.Test;
@@ -16,14 +17,14 @@ class ContextStoreTest {
     void captureExcludesLocalContextAndRestorePreservesPreviousLocalState() {
         final ContextStore store = new ContextStore();
         store.put(new LocalContext("source"));
-        store.put(new AuthContext(7L, "alice"));
+        store.put(new AuthContext(PrincipalType.CUSTOMER, "7", "alice"));
         final ContextSnapshot snapshot = store.capture();
 
         store.clear();
         store.put(new LocalContext("target"));
         final ContextScope scope = store.restore(snapshot);
         try {
-            assertThat(store.get(AuthContext.class)).contains(new AuthContext(7L, "alice"));
+            assertThat(store.get(AuthContext.class)).contains(new AuthContext(PrincipalType.CUSTOMER, "7", "alice"));
             assertThat(store.get(LocalContext.class)).isEmpty();
         } finally {
             scope.close();
@@ -36,36 +37,38 @@ class ContextStoreTest {
     @Test
     void nestedRestoreScopesReturnToEachPreviousContext() {
         final ContextStore store = new ContextStore();
-        store.put(new AuthContext(1L, "first"));
+        store.put(new AuthContext(PrincipalType.CUSTOMER, "1", "first"));
 
-        final ContextScope outerScope = store.restore(ContextSnapshot.of(new AuthContext(2L, "second")));
+        final ContextScope outerScope =
+                store.restore(ContextSnapshot.of(new AuthContext(PrincipalType.ADMIN, "2", "second")));
         try {
-            assertThat(store.get(AuthContext.class)).contains(new AuthContext(2L, "second"));
-            final ContextScope innerScope = store.restore(ContextSnapshot.of(new AuthContext(3L, "third")));
+            assertThat(store.get(AuthContext.class)).contains(new AuthContext(PrincipalType.ADMIN, "2", "second"));
+            final ContextScope innerScope =
+                    store.restore(ContextSnapshot.of(new AuthContext(PrincipalType.SYSTEM, "3", "third")));
             try {
-                assertThat(store.get(AuthContext.class)).contains(new AuthContext(3L, "third"));
+                assertThat(store.get(AuthContext.class)).contains(new AuthContext(PrincipalType.SYSTEM, "3", "third"));
             } finally {
                 innerScope.close();
             }
-            assertThat(store.get(AuthContext.class)).contains(new AuthContext(2L, "second"));
+            assertThat(store.get(AuthContext.class)).contains(new AuthContext(PrincipalType.ADMIN, "2", "second"));
         } finally {
             outerScope.close();
         }
 
-        assertThat(store.get(AuthContext.class)).contains(new AuthContext(1L, "first"));
+        assertThat(store.get(AuthContext.class)).contains(new AuthContext(PrincipalType.CUSTOMER, "1", "first"));
     }
 
     @Test
     void wrappedCallableUsesCapturedContextAndRestoresCallerContext() throws Exception {
         final ContextStore store = new ContextStore();
         final DefaultContextPropagator propagator = new DefaultContextPropagator(store);
-        store.put(new AuthContext(1L, "captured"));
-        final Callable<Long> wrapped = propagator.wrap(
-                () -> store.get(AuthContext.class).map(AuthContext::userId).orElseThrow());
-        store.put(new AuthContext(2L, "caller"));
+        store.put(new AuthContext(PrincipalType.CUSTOMER, "1", "captured"));
+        final Callable<String> wrapped = propagator.wrap(
+                () -> store.get(AuthContext.class).map(AuthContext::principalId).orElseThrow());
+        store.put(new AuthContext(PrincipalType.CUSTOMER, "2", "caller"));
 
-        assertThat(wrapped.call()).isEqualTo(1L);
-        assertThat(store.get(AuthContext.class)).contains(new AuthContext(2L, "caller"));
+        assertThat(wrapped.call()).isEqualTo("1");
+        assertThat(store.get(AuthContext.class)).contains(new AuthContext(PrincipalType.CUSTOMER, "2", "caller"));
     }
 
     private record LocalContext(String value) implements Context {

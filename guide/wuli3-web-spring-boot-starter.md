@@ -28,13 +28,16 @@ wuli3.web.context.client-ip-header-priority=X-Forwarded-For,X-Real-IP,Forwarded
 ```
 
 只有直接 peer 命中 `trusted-proxy-cidrs` 时才读取转发头；列表为空时忽略所有转发头。默认的
-`TrustedHttpAuthContextResolver` 从可信内部 HTTP 请求的 `X-User-Id` 和 `X-Username` 恢复 `AuthContext`，
+`TrustedHttpAuthContextResolver` 从可信内部 HTTP 请求的 `X-Principal-Type`、`X-Principal-Id` 和
+`X-Principal-Name` 恢复 `AuthContext`。三个字段必须完整、非空白，且主体类型必须是 `CUSTOMER`、`ADMIN` 或
+`SYSTEM`；否则会整体拒绝该认证上下文。
 适用于统一网关完成身份认证、业务服务只恢复认证上下文的微服务架构。直接接收外部请求或使用 token、session、
 安全框架 principal 等其他认证来源的应用，应提供自己的 `AuthContextResolver` Bean 替换默认实现。
 
 Boot 管理的 `RestClient.Builder` 和 `RestTemplateBuilder` 会自动安装出站拦截器。当前拦截器使用
-`ContextEncoder.standardContextEncoder()`，会重建并传播 `X-Request-Id`、`X-Origin-Ip`、`X-User-Id` 和
-`X-Username`；现有自动配置没有提供缩小该 HTTP 白名单的扩展点，因此出站目标必须是可信内部服务。
+`ContextEncoder.standardContextEncoder()`，会重建并传播 `X-Request-Id`、`X-Origin-Ip`、
+`X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`；现有自动配置没有提供缩小该 HTTP 白名单的
+扩展点，因此出站目标必须是可信内部服务。
 
 应用可以通过 Bean 替换以下默认 SPI：
 

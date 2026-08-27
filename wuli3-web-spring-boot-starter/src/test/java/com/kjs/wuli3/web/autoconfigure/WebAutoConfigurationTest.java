@@ -24,6 +24,7 @@ import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.RequestIds;
@@ -167,8 +168,9 @@ class WebAutoConfigurationTest {
     void customSecurityResolverIsUsed() throws Exception {
         mockMvc.perform(get("/security"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.userId").value(42))
-                .andExpect(jsonPath("$.data.username").value("alice"));
+                .andExpect(jsonPath("$.data.principalType").value("CUSTOMER"))
+                .andExpect(jsonPath("$.data.principalId").value("42"))
+                .andExpect(jsonPath("$.data.principalName").value("alice"));
     }
 
     @Test
@@ -350,7 +352,7 @@ class WebAutoConfigurationTest {
         @Bean
         @Primary
         AuthContextResolver testSecurityContextResolver() {
-            return request -> java.util.Optional.of(new AuthContext(42L, "alice"));
+            return request -> java.util.Optional.of(new AuthContext(PrincipalType.CUSTOMER, "42", "alice"));
         }
 
         @Bean
@@ -473,8 +475,9 @@ class WebAutoConfigurationTest {
         @GetMapping("/security")
         SecurityView security() {
             return new SecurityView(
-                    authContextAccessor.userId().orElse(-1L),
-                    authContextAccessor.username().orElse(""));
+                    authContextAccessor.principalType().orElse(PrincipalType.SYSTEM),
+                    authContextAccessor.principalId().orElse(""),
+                    authContextAccessor.principalName().orElse(""));
         }
 
         @GetMapping("/wrapped")
@@ -582,7 +585,7 @@ class WebAutoConfigurationTest {
 
     record ContextView(String requestId) {}
 
-    record SecurityView(Long userId, String username) {}
+    record SecurityView(PrincipalType principalType, String principalId, String principalName) {}
 
     record ResourceView(
             @ResourcePath(type = TestResourcePathResolver.TYPE)

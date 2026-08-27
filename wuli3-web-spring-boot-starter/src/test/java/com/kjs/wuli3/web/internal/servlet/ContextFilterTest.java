@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.WebContextProperties;
@@ -34,14 +35,15 @@ class ContextFilterTest {
     @Test
     void storesAuthenticationContextWhenApplicationProvidesResolver() throws Exception {
         final ContextStore contextStore = new ContextStore();
-        final AuthContextResolver authContextResolver = request -> Optional.of(new AuthContext(7L, "alice"));
+        final AuthContextResolver authContextResolver =
+                request -> Optional.of(new AuthContext(PrincipalType.CUSTOMER, "7", "alice"));
         final ContextFilter filter = ContextFilterTest.filter(contextStore, authContextResolver);
 
         filter.doFilter(
                 new MockHttpServletRequest("GET", "/orders"), new MockHttpServletResponse(), (request, response) -> {
                     assertThat(contextStore.get(AuthContext.class))
-                            .map(AuthContext::userId)
-                            .contains(7L);
+                            .map(AuthContext::principalId)
+                            .contains("7");
                 });
 
         assertThat(contextStore.get(AuthContext.class)).isEmpty();

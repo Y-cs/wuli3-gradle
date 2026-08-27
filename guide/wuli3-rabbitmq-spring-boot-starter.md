@@ -49,7 +49,8 @@ eventPublisher.publish(options, envelope);
 
 编码器读取可选的 `ContextReader`，并通过 `ContextEncoder` 按显式白名单将传播字段写入 AMQP headers。`EventEnvelope` 不承载传输 header，其 JSON body 只包含事件语义字段。
 
-默认自动配置使用 `ContextEncoder.standardContextEncoder()`，当前会传播 `X-Request-Id`、`X-Origin-Ip`、`X-User-Id` 和 `X-Username`。因此该 starter 应只用于允许传播认证信息的可信消息边界。
+默认自动配置使用 `ContextEncoder.standardContextEncoder()`，当前会传播 `X-Request-Id`、`X-Origin-Ip`、
+`X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`。因此该 starter 应只用于允许传播认证信息的可信消息边界。
 
 若边界只允许传播调用标识，可显式覆盖 `ContextEncoder` Bean。同一个 `ContextEncoder` Bean 同时决定出站字段和入站可恢复字段。
 

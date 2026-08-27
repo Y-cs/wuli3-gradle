@@ -1,6 +1,7 @@
 package com.kjs.wuli3.propagation.encoding;
 
 import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -15,8 +16,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class AuthContextEncoder implements ContextFieldEncoder<AuthContext> {
 
-    public static final String USER_ID = "X-User-Id";
-    public static final String USERNAME = "X-Username";
+    public static final String PRINCIPAL_TYPE = "X-Principal-Type";
+    public static final String PRINCIPAL_ID = "X-Principal-Id";
+    public static final String PRINCIPAL_NAME = "X-Principal-Name";
 
     @Override
     public Class<AuthContext> contextType() {
@@ -25,28 +27,33 @@ public final class AuthContextEncoder implements ContextFieldEncoder<AuthContext
 
     @Override
     public Set<String> fieldNames() {
-        return Set.of(AuthContextEncoder.USER_ID, AuthContextEncoder.USERNAME);
+        return Set.of(
+                AuthContextEncoder.PRINCIPAL_TYPE, AuthContextEncoder.PRINCIPAL_ID, AuthContextEncoder.PRINCIPAL_NAME);
     }
 
     @Override
     public void encode(final AuthContext context, final BiConsumer<String, String> fieldWriter) {
         final AuthContext actualContext = Objects.requireNonNull(context, "context");
         final BiConsumer<String, String> actualFieldWriter = Objects.requireNonNull(fieldWriter, "fieldWriter");
-        actualFieldWriter.accept(AuthContextEncoder.USER_ID, String.valueOf(actualContext.userId()));
-        actualFieldWriter.accept(AuthContextEncoder.USERNAME, actualContext.username());
+        actualFieldWriter.accept(
+                AuthContextEncoder.PRINCIPAL_TYPE, actualContext.principalType().name());
+        actualFieldWriter.accept(AuthContextEncoder.PRINCIPAL_ID, actualContext.principalId());
+        actualFieldWriter.accept(AuthContextEncoder.PRINCIPAL_NAME, actualContext.principalName());
     }
 
     @Override
+    @SuppressWarnings("NullAway")
     public Optional<AuthContext> decode(final Function<String, @Nullable String> fieldReader) {
         Objects.requireNonNull(fieldReader, "fieldReader");
-        final @Nullable String userIdStr = fieldReader.apply(AuthContextEncoder.USER_ID);
-        final @Nullable String username = fieldReader.apply(AuthContextEncoder.USERNAME);
-        if (userIdStr == null || username == null) {
+        final @Nullable String principalType = fieldReader.apply(AuthContextEncoder.PRINCIPAL_TYPE);
+        final @Nullable String principalId = fieldReader.apply(AuthContextEncoder.PRINCIPAL_ID);
+        final @Nullable String principalName = fieldReader.apply(AuthContextEncoder.PRINCIPAL_NAME);
+        if (principalType == null || principalId == null || principalName == null) {
             return Optional.empty();
         }
         try {
-            return Optional.of(new AuthContext(Long.parseLong(userIdStr), username));
-        } catch (NumberFormatException ignored) {
+            return Optional.of(new AuthContext(PrincipalType.valueOf(principalType), principalId, principalName));
+        } catch (IllegalArgumentException ignored) {
             return Optional.empty();
         }
     }

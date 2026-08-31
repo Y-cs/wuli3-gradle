@@ -1,7 +1,7 @@
 package com.kjs.wuli3.core.stream;
 
-import com.kjs.wuli3.core.error.code.CommonErrors;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.builtin.CommonErrors;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 

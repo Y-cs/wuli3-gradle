@@ -1,4 +1,4 @@
-package com.kjs.wuli3.core.error.policy;
+package com.kjs.wuli3.core.error;
 
 /**
  * 错误对系统运行和告警处置的影响等级。

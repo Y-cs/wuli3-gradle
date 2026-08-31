@@ -1,4 +1,4 @@
-package com.kjs.wuli3.core.error.policy;
+package com.kjs.wuli3.core.error;
 
 /** 定义错误码和错误消息的对外暴露范围。
  *

@@ -12,20 +12,21 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.kjs.wuli3.core.error.code.CommonErrors;
-import com.kjs.wuli3.core.error.code.ErrorCode;
-import com.kjs.wuli3.core.error.code.SystemErrors;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
-import com.kjs.wuli3.core.error.policy.ErrorOrigin;
-import com.kjs.wuli3.core.error.policy.ErrorSeverity;
-import com.kjs.wuli3.core.error.policy.ErrorVisibility;
+import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.builtin.CommonErrors;
+import com.kjs.wuli3.core.error.builtin.SystemErrors;
+import com.kjs.wuli3.core.error.model.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorOrigin;
+import com.kjs.wuli3.core.error.model.ErrorSeverity;
+import com.kjs.wuli3.core.error.model.ErrorVisibility;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.json.datatype.resource.ResourcePath;
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
+import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.PrincipalType;
-import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.RequestIds;
 import com.kjs.wuli3.web.error.ErrorAlertContext;
@@ -110,7 +111,7 @@ class WebAutoConfigurationTest {
                 .containsKey("wuli3InvocationContextRestClientCustomizer");
         assertThat(applicationContext.getBeansOfType(RestTemplateCustomizer.class))
                 .containsKey("wuli3InvocationContextRestTemplateCustomizer");
-        assertThat(RequestIds.HEADER_NAME).isEqualTo(InvocationContextEncoder.REQUEST_ID);
+        assertThat(RequestIds.HEADER_NAME).isEqualTo(InvocationContextCodec.REQUEST_ID);
     }
 
     @Test
@@ -288,7 +289,7 @@ class WebAutoConfigurationTest {
         assertThat(errorAlertNotifier.error()).isInstanceOf(ErrorCodeException.class);
         assertThat(errorAlertNotifier.requestUri()).isEqualTo("/critical");
         assertThat(errorAlertNotifier.status()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(errorAlertNotifier.responseCode()).isEqualTo(WebErrors.INTERNAL_ERROR);
+        assertThat(errorAlertNotifier.responseCode()).isEqualTo(SystemErrors.INTERNAL_ERROR);
     }
 
     @Test
@@ -308,6 +309,25 @@ class WebAutoConfigurationTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value(WebErrors.INTERNAL_ERROR.getMessage()));
+    }
+
+    /** 验证公开的远程错误保留完整字符串错误码、消息和请求标识。 */
+    @Test
+    void propagatedErrorPreservesQualifiedCodeAndPolicy() throws Exception {
+        mockMvc.perform(get("/propagated-error").header(RequestIds.HEADER_NAME, "rid-remote"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("GROUP.PERMISSION.DENIED"))
+                .andExpect(jsonPath("$.message").value("denied"))
+                .andExpect(jsonPath("$.requestId").value("rid-remote"));
+    }
+
+    /** 验证远程错误保留传播协议中的错误码和消息（已在提供方过滤）。 */
+    @Test
+    void propagatedInternalErrorHidesCodeAndMessage() throws Exception {
+        mockMvc.perform(get("/propagated-internal-error"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("GROUP.SYSTEM.INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.message").value("provider details"));
     }
 
     @Test
@@ -551,12 +571,12 @@ class WebAutoConfigurationTest {
 
         @GetMapping("/critical-caller")
         String criticalCaller() {
-            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT).severity(ErrorSeverity.CRITICAL);
+            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT);
         }
 
         @GetMapping("/normal-system")
         String normalSystem() {
-            throw new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT).origin(ErrorOrigin.SYSTEM);
+            throw new ErrorCodeException(SystemErrors.INTERNAL_ERROR);
         }
 
         @GetMapping("/illegal-argument")
@@ -564,22 +584,40 @@ class WebAutoConfigurationTest {
             throw new IllegalArgumentException("programming error");
         }
 
+        /** 构造允许对外展示的远程调用方错误。 */
+        @GetMapping("/propagated-error")
+        String propagatedError() {
+            throw new ErrorCodeException(new ErrorCodeCarrier(
+                    "GROUP.PERMISSION.DENIED", "denied", ErrorOrigin.CALLER, ErrorSeverity.NORMAL, "group"));
+        }
+
+        /** 构造必须隐藏实现详情的远程系统错误。 */
+        @GetMapping("/propagated-internal-error")
+        String propagatedInternalError() {
+            throw new ErrorCodeException(new ErrorCodeCarrier(
+                    "GROUP.SYSTEM.INTERNAL_ERROR",
+                    "provider details",
+                    ErrorOrigin.SERVER,
+                    ErrorSeverity.CRITICAL,
+                    "group"));
+        }
+
         @GetMapping("/code-only")
         String codeOnly() {
             throw new ErrorCodeException(CommonErrors.UNSUPPORTED_OPERATION, "hidden message")
-                    .visibility(ErrorVisibility.CODE_ONLY);
+                    .withVisibility(ErrorVisibility.CODE_ONLY);
         }
 
         @GetMapping("/message-only")
         String messageOnly() {
             throw new ErrorCodeException(SystemErrors.NOT_IMPLEMENTED, "visible message")
-                    .visibility(ErrorVisibility.MESSAGE_ONLY);
+                    .withVisibility(ErrorVisibility.MESSAGE_ONLY);
         }
 
         @GetMapping("/internal")
         String internal() {
             throw new ErrorCodeException(CommonErrors.ILLEGAL_STATE, "hidden message")
-                    .visibility(ErrorVisibility.INTERNAL);
+                    .withVisibility(ErrorVisibility.INTERNAL);
         }
     }
 

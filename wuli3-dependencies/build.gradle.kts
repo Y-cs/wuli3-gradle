@@ -29,6 +29,7 @@ dependencies {
         api("com.kjs.wuli3:wuli3-rabbitmq-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-elasticsearch-spring-boot-starter:${project.version}")
         api("com.kjs.wuli3:wuli3-mongodb-spring-boot-starter:${project.version}")
+        api("com.kjs.wuli3:wuli3-dubbo-spring-boot-starter:${project.version}")
         api("org.jspecify:jspecify:1.0.0")
         api("com.google.errorprone:error_prone_core:2.50.0")
         api("com.uber.nullaway:nullaway:0.13.7")
@@ -48,6 +49,8 @@ dependencies {
         api("org.assertj:assertj-core:3.27.3")
         api("org.apache.rocketmq:rocketmq-spring-boot-starter:2.3.4")
         api("org.apache.rocketmq:rocketmq-client-java:5.2.0")
+        api("org.apache.dubbo:dubbo-spring-boot-starter:3.3.6")
+        api("org.apache.dubbo:dubbo-registry-nacos:3.3.6")
     }
 }
 

@@ -1,9 +1,16 @@
 package com.kjs.wuli3.core.error;
 
+import com.kjs.wuli3.core.error.model.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorOrigin;
+import com.kjs.wuli3.core.error.model.ErrorSeverity;
+import com.kjs.wuli3.core.error.model.ErrorVisibility;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.core.error.resolver.ErrorMetadataResolver;
+
 import java.io.Serial;
 import java.util.Objects;
 import java.util.Optional;
+
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
@@ -62,13 +69,6 @@ public class ErrorCodeException extends RuntimeException {
     }
 
     /**
-     * 获取运行时覆盖的输出可见性。
-     */
-    public Optional<ErrorVisibility> getOutputVisibility() {
-        return Optional.ofNullable(this.outputVisibility);
-    }
-
-    /**
      * 获取错误责任归属。
      */
     public ErrorOrigin getOrigin() {
@@ -92,12 +92,12 @@ public class ErrorCodeException extends RuntimeException {
 
     /** 判断是否为远程传播错误。 */
     public boolean isRemoteError() {
-        return this.errorCode instanceof ErrorPropagationProtocol;
+        return this.errorCode instanceof ErrorCodeCarrier;
     }
 
     /** 获取传播协议数据（如果是远程错误）。 */
-    public Optional<ErrorPropagationProtocol> asRemoteError() {
-        if (this.errorCode instanceof ErrorPropagationProtocol protocol) {
+    public Optional<ErrorCodeCarrier> asRemoteError() {
+        if (this.errorCode instanceof ErrorCodeCarrier protocol) {
             return Optional.of(protocol);
         }
         return Optional.empty();

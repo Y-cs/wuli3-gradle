@@ -1,6 +1,6 @@
 package com.kjs.wuli3.aliyun.error;
 
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import java.io.Serial;
 
 /**

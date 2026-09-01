@@ -7,10 +7,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.error.SendFailedException;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
 import java.time.Duration;
 import java.time.Instant;
@@ -83,7 +83,7 @@ class RocketRemoteEventTransportTest {
 
     private static RocketRemoteEventTransport transport(final RocketMQTemplate template) {
         return new RocketRemoteEventTransport(
-                template, new RocketMessageWrapperEncoder(null, new ContextEncoder(List.of())));
+                template, new RocketMessageWrapperEncoder(null, new ContextPropagator(List.of())));
     }
 
     private static EventEnvelope<String> envelope() {

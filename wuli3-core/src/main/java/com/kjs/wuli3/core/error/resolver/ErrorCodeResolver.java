@@ -1,6 +1,6 @@
 package com.kjs.wuli3.core.error.resolver;
 
-import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorCode;
 
 /** 将错误标识转换为适配层对外暴露的错误码字符串。
  *

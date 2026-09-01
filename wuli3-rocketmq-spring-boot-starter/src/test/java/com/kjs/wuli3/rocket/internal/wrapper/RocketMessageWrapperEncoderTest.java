@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.propagation.context.InvocationContext;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.rocket.internal.RocketPublishOptions;
 import java.nio.charset.StandardCharsets;
@@ -17,11 +17,11 @@ class RocketMessageWrapperEncoderTest {
     void storesPropagationHeadersOutsideTheSerializedEnvelope() {
         final ContextStore contextStore = new ContextStore();
         contextStore.put(new InvocationContext("10.0.0.8", "request-42"));
-        final ContextEncoder contextEncoder = new ContextEncoder(ContextEncoder.standardContextEncoder());
+        final ContextPropagator contextPropagator = new ContextPropagator(ContextPropagator.standardContextEncoder());
         final EventEnvelope<String> envelope =
                 new EventEnvelope<>("orders", "order.paid.v1", "event-1", Instant.EPOCH, "payload");
 
-        final RocketMessageWrapper wrapper = new RocketMessageWrapperEncoder(contextStore, contextEncoder)
+        final RocketMessageWrapper wrapper = new RocketMessageWrapperEncoder(contextStore, contextPropagator)
                 .encode(envelope, new RocketPublishOptions());
         final String body = new String(wrapper.body(), StandardCharsets.UTF_8);
 

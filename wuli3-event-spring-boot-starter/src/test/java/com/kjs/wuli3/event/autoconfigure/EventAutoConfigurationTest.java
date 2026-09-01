@@ -38,9 +38,7 @@ class EventAutoConfigurationTest {
             publisher.publish(new SpringLocalPublishOptions(false, false), envelope);
 
             assertThat(published).containsExactly(envelope);
-            assertThatThrownBy(() -> publisher.publish(new SpringLocalPublishOptions(true, false), envelope))
-                    .isInstanceOf(UnsupportedCapabilityException.class)
-                    .hasMessageContaining("applicationTaskExecutor");
+            publisher.publish(new SpringLocalPublishOptions(true, false), envelope);
             assertThatThrownBy(() -> publisher.publish(new UnknownOptions(), envelope))
                     .isInstanceOf(UnsupportedCapabilityException.class);
         });

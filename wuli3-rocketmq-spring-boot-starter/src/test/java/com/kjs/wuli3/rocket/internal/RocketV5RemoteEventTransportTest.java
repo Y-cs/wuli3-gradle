@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.error.SendFailedException;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.rocket.internal.wrapper.RocketMessageWrapperEncoder;
 import java.time.Clock;
 import java.time.Duration;
@@ -68,7 +68,7 @@ class RocketV5RemoteEventTransportTest {
         final RocketV5RemoteEventTransport transport = new RocketV5RemoteEventTransport(
                 producer,
                 clientServiceProvider,
-                new RocketMessageWrapperEncoder(null, new ContextEncoder(List.of())),
+                new RocketMessageWrapperEncoder(null, new ContextPropagator(List.of())),
                 clock);
 
         transport.send(
@@ -114,7 +114,7 @@ class RocketV5RemoteEventTransportTest {
         return new RocketV5RemoteEventTransport(
                 producer,
                 clientServiceProvider,
-                new RocketMessageWrapperEncoder(null, new ContextEncoder(List.of())),
+                new RocketMessageWrapperEncoder(null, new ContextPropagator(List.of())),
                 Clock.systemUTC());
     }
 

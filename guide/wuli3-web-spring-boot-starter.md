@@ -35,9 +35,9 @@ wuli3.web.context.client-ip-header-priority=X-Forwarded-For,X-Real-IP,Forwarded
 安全框架 principal 等其他认证来源的应用，应提供自己的 `AuthContextResolver` Bean 替换默认实现。
 
 Boot 管理的 `RestClient.Builder` 和 `RestTemplateBuilder` 会自动安装出站拦截器。当前拦截器使用
-`ContextEncoder.standardContextEncoder()`，会重建并传播 `X-Request-Id`、`X-Origin-Ip`、
-`X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`；现有自动配置没有提供缩小该 HTTP 白名单的
-扩展点，因此出站目标必须是可信内部服务。
+`ContextPropagator.standardContextEncoder()`（包含 `InvocationContextCodec` 和 `AuthContextCodec`），
+会传播 `X-Request-Id`、`X-Origin-Ip`、`X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`；
+现有自动配置没有提供缩小该 HTTP 白名单的扩展点，因此出站目标必须是可信内部服务。
 
 应用可以通过 Bean 替换以下默认 SPI：
 
@@ -224,7 +224,7 @@ Resource download() {
 业务代码推荐抛出 `ErrorCodeException`：
 
 ```java
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 
 throw new ErrorCodeException(UserErrors.USER_NOT_FOUND);
 ```
@@ -234,12 +234,36 @@ throw new ErrorCodeException(UserErrors.USER_NOT_FOUND);
 | 条件 | HTTP 状态 | `code` | `message` |
 | --- | --- | --- | --- |
 | `ErrorOrigin.CALLER` | 400 | 真实业务错误码，除非可见性隐藏 | 异常消息或错误码默认消息，除非可见性隐藏 |
-| `ErrorOrigin.SYSTEM` | 500 | 真实业务错误码，除非可见性隐藏 | 异常消息或错误码默认消息，除非可见性隐藏 |
+| `ErrorOrigin.SERVER` | 500 | 真实业务错误码，除非可见性隐藏 | 异常消息或错误码默认消息，除非可见性隐藏 |
+| `ErrorVisibility.PUBLIC`（默认） | 按 origin | 真实业务错误码 | 真实错误消息 |
 | `ErrorVisibility.CODE_ONLY` | 按 origin | 真实业务错误码 | `WEB.INTERNAL_ERROR` 的默认消息 |
 | `ErrorVisibility.MESSAGE_ONLY` | 按 origin | `WEB.INTERNAL_ERROR` | 真实错误消息 |
 | `ErrorVisibility.INTERNAL` | 按 origin | `WEB.INTERNAL_ERROR` | `WEB.INTERNAL_ERROR` 的默认消息 |
 
-普通业务错误可以使用默认的 `CALLER`。数据库、缓存、消息投递、JSON 序列化等只能由服务端修复的错误，应在错误码的 `@ErrorPolicy` 中声明 `origin = ErrorOrigin.SYSTEM`。应用可以注册 `WebErrorStatusResolver` 覆盖默认 400/500 映射。
+### 错误元数据系统
+
+wuli3-core 错误模型使用 `@ErrorMetadata` 注解声明错误的语义属性：
+
+- **ErrorOrigin**（责任归属）：`CALLER`（调用方可修正）或 `SERVER`（服务端问题）
+  - 决定 HTTP 状态码：CALLER → 400，SERVER → 500
+  - 对于跨服务传播的错误（`ErrorCodeCarrier`），origin 会被保留，确保责任归属一致性
+
+- **ErrorSeverity**（严重程度）：`NORMAL`、`WARNING`、`CRITICAL`、`FATAL`
+  - 只影响告警：CRITICAL 和 FATAL 级别的错误会触发告警通知，即使是 4xx 状态
+  - 不影响 HTTP 状态码判定
+
+- **ErrorVisibility**（边界可见性）：控制错误信息在 HTTP 边界的暴露范围
+  - `PUBLIC`：错误码和消息都对外输出（默认）
+  - `CODE_ONLY`：只输出错误码，消息替换为通用内部错误消息
+  - `MESSAGE_ONLY`：只输出消息，错误码替换为通用 INTERNAL_ERROR
+  - `INTERNAL`：错误码和消息都隐藏，完全使用通用内部错误
+
+可见性策略优先级：运行时覆盖（`withVisibility()`）> 字段级 `@ErrorMetadata` > 类级 `@ErrorMetadata` > 模块默认
+
+Web 层的 `WebErrorResponseMapper` 是可见性过滤的单一真实来源（Single Source of Truth），
+确保所有错误响应都经过统一的边界过滤，防止敏感内部信息泄露。
+
+普通业务错误可以使用默认的 `CALLER`。数据库、缓存、消息投递、JSON 序列化等只能由服务端修复的错误，应在错误码类型或常量的 `@ErrorMetadata` 中声明 `origin = ErrorOrigin.SERVER`。应用可以注册 `WebErrorStatusResolver` 覆盖默认 400/500 映射。
 
 错误码格式由 `WebErrorCodeResolver` 生成：
 
@@ -248,6 +272,15 @@ SERVICE_CODE.ERROR_MODULE.ERROR_NAME
 ```
 
 `SERVICE_CODE` 来自 `application.service.service-code`，未配置时省略。
+
+Dubbo 等协议适配层接收到跨边界传播的错误时会抛出携带 `ErrorCodeCarrier` 的 `ErrorCodeException`。`ErrorCodeCarrier` 是 `ErrorCode` 的远程实现，携带 core 定义的稳定字符串错误码、**已经过提供方可见性过滤的消息**、来源和严重程度，不需要在消费端伪造业务枚举。Web starter 会沿用现有 `ErrorCodeException` 链路：
+
+- `ErrorOrigin.CALLER` 默认返回 400，`ErrorOrigin.SERVER` 默认返回 500（origin 在传播时保留）
+- `ErrorCodeCarrier` 始终使用 `PUBLIC` visibility，因为它携带的消息已经是提供方过滤后的结果
+- `ErrorSeverity.CRITICAL` 和 `FATAL` 仍会触发错误告警（severity 在传播时保留）
+- 消费方不需要依赖提供方的业务错误枚举，远程完整错误码也不会被替换为 Dubbo 自己的错误码
+
+`ErrorCodeException` 是项目唯一错误异常。协议适配层只负责把传播载荷放入它，普通业务代码仍应声明枚举 `ErrorCode` 并抛出 `ErrorCodeException`。
 
 ## 框架异常
 
@@ -268,6 +301,7 @@ SERVICE_CODE.ERROR_MODULE.ERROR_NAME
 | `ResponseStatusException` | 异常指定状态 | 按状态映射 | 消息使用异常消息。 |
 | `ErrorResponseException` | 异常指定状态 | 按状态映射 | `NativeResponseMode.ALL` 下返回异常自带 body。 |
 | `HttpMessageNotWritableException` | 500 | `WEB.INTERNAL_ERROR` | 响应写出失败，不暴露内部细节。 |
+| `ErrorCodeException`（传播错误） | 按传播错误的 `ErrorOrigin` | 按当前 Web 边界可见性策略 | 协议适配层接收的跨边界传播错误。 |
 | 其他 `Exception` | 500 | `WEB.INTERNAL_ERROR` | 未分类异常。 |
 
 状态到错误码的收敛规则：

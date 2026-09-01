@@ -6,9 +6,9 @@ import com.kjs.wuli3.propagation.ContextScope;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.context.PrincipalType;
-import com.kjs.wuli3.propagation.encoding.AuthContextEncoder;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
-import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
+import com.kjs.wuli3.propagation.codec.AuthContextCodec;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
+import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -20,13 +20,13 @@ class RocketContextSupportTest {
         final ContextStore contextStore = new ContextStore();
         contextStore.put(new InvocationContext("127.0.0.1", "previous"));
         final RocketContextSupport support =
-                new RocketContextSupport(contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder()));
-        final RocketContextSupport.RocketContextPropagator propagator = support.restoreFrom(Map.of(
-                InvocationContextEncoder.REQUEST_ID, "request-42",
-                InvocationContextEncoder.ORIGIN_IP, "10.0.0.8",
-                AuthContextEncoder.PRINCIPAL_TYPE, "CUSTOMER",
-                AuthContextEncoder.PRINCIPAL_ID, "7",
-                AuthContextEncoder.PRINCIPAL_NAME, "alice"));
+                new RocketContextSupport(contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
+        final RocketContextSupport.RocketContextProxy propagator = support.restoreFrom(Map.of(
+                InvocationContextCodec.REQUEST_ID, "request-42",
+                InvocationContextCodec.ORIGIN_IP, "10.0.0.8",
+                AuthContextCodec.PRINCIPAL_TYPE, "CUSTOMER",
+                AuthContextCodec.PRINCIPAL_ID, "7",
+                AuthContextCodec.PRINCIPAL_NAME, "alice"));
 
         assertThat(propagator.capture().get(AuthContext.class))
                 .contains(new AuthContext(PrincipalType.CUSTOMER, "7", "alice"));

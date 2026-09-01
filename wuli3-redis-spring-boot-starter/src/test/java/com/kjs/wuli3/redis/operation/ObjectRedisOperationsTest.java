@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.redis.RedisKey;
 import java.time.Duration;

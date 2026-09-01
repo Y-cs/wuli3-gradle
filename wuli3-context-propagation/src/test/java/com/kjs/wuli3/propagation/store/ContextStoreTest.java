@@ -3,7 +3,7 @@ package com.kjs.wuli3.propagation.store;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.propagation.ContextScope;
-import com.kjs.wuli3.propagation.DefaultContextPropagator;
+import com.kjs.wuli3.propagation.DefaultContextProxy;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.context.PrincipalType;
@@ -61,7 +61,7 @@ class ContextStoreTest {
     @Test
     void wrappedCallableUsesCapturedContextAndRestoresCallerContext() throws Exception {
         final ContextStore store = new ContextStore();
-        final DefaultContextPropagator propagator = new DefaultContextPropagator(store);
+        final DefaultContextProxy propagator = new DefaultContextProxy(store);
         store.put(new AuthContext(PrincipalType.CUSTOMER, "1", "captured"));
         final Callable<String> wrapped = propagator.wrap(
                 () -> store.get(AuthContext.class).map(AuthContext::principalId).orElseThrow());

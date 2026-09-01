@@ -12,7 +12,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.error.SendFailedException;
 import com.kjs.wuli3.propagation.context.InvocationContext;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ class RabbitRemoteEventTransportTest {
         contextStore.put(new InvocationContext("10.0.0.8", "request-42"));
         final RabbitRemoteEventTransport transport = new RabbitRemoteEventTransport(
                 template,
-                new RabbitMessageEncoder(contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder())),
+                new RabbitMessageEncoder(contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder())),
                 executor);
 
         transport.send(new RabbitPublishOptions().withAsync(), RabbitRemoteEventTransportTest.envelope());
@@ -84,7 +84,7 @@ class RabbitRemoteEventTransportTest {
             throw new IllegalStateException("rejected");
         };
         final RabbitRemoteEventTransport transport = new RabbitRemoteEventTransport(
-                template, new RabbitMessageEncoder(null, new ContextEncoder(List.of())), rejectingExecutor);
+                template, new RabbitMessageEncoder(null, new ContextPropagator(List.of())), rejectingExecutor);
 
         assertThatThrownBy(() -> transport.send(
                         new RabbitPublishOptions().withAsync(), RabbitRemoteEventTransportTest.envelope()))
@@ -95,7 +95,7 @@ class RabbitRemoteEventTransportTest {
 
     private static RabbitRemoteEventTransport transport(final RabbitTemplate template) {
         return new RabbitRemoteEventTransport(
-                template, new RabbitMessageEncoder(null, new ContextEncoder(List.of())), new SyncTaskExecutor());
+                template, new RabbitMessageEncoder(null, new ContextPropagator(List.of())), new SyncTaskExecutor());
     }
 
     private static EventEnvelope<String> envelope() {

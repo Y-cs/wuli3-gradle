@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.propagation.context.InvocationContext;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -19,11 +19,11 @@ class RabbitMessageEncoderTest {
     void storesPropagationHeadersOutsideTheSerializedEnvelope() {
         final ContextStore contextStore = new ContextStore();
         contextStore.put(new InvocationContext("10.0.0.8", "request-42"));
-        final ContextEncoder contextEncoder = new ContextEncoder(ContextEncoder.standardContextEncoder());
+        final ContextPropagator contextPropagator = new ContextPropagator(ContextPropagator.standardContextEncoder());
         final EventEnvelope<String> envelope =
                 new EventEnvelope<>("orders", "order.paid.v1", "event-1", Instant.EPOCH, "payload");
 
-        final Message message = new RabbitMessageEncoder(contextStore, contextEncoder).encode(envelope);
+        final Message message = new RabbitMessageEncoder(contextStore, contextPropagator).encode(envelope);
         final String body = new String(message.getBody(), StandardCharsets.UTF_8);
         final MessageProperties properties = message.getMessageProperties();
 
@@ -42,7 +42,7 @@ class RabbitMessageEncoderTest {
         final EventEnvelope<String> envelope =
                 new EventEnvelope<>("orders", "order.paid.v1", "event-1", Instant.EPOCH, "payload");
 
-        final Message message = new RabbitMessageEncoder(null, new ContextEncoder(List.of())).encode(envelope);
+        final Message message = new RabbitMessageEncoder(null, new ContextPropagator(List.of())).encode(envelope);
 
         assertThat(message.getMessageProperties().getHeaders()).isEmpty();
     }

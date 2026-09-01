@@ -1,13 +1,13 @@
 package com.kjs.wuli3.core.error.resolver;
 
-import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorMetadata;
-import com.kjs.wuli3.core.error.ErrorModule;
-import com.kjs.wuli3.core.error.ErrorOrigin;
-import com.kjs.wuli3.core.error.ErrorPropagationProtocol;
-import com.kjs.wuli3.core.error.ErrorSeverity;
-import com.kjs.wuli3.core.error.ErrorVisibility;
+import com.kjs.wuli3.core.error.model.ErrorMetadata;
+import com.kjs.wuli3.core.error.model.ErrorModule;
+import com.kjs.wuli3.core.error.model.ErrorOrigin;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
+import com.kjs.wuli3.core.error.model.ErrorSeverity;
+import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import com.kjs.wuli3.core.error.builtin.ErrorFrameworkErrors;
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -40,7 +40,7 @@ public final class ErrorMetadataResolver {
     /**
      * 解析本地枚举错误码所属模块并缓存结果。
      *
-     * @throws ErrorCodeException 如果传入非枚举错误码（如 {@link ErrorPropagationProtocol}）
+     * @throws ErrorCodeException 如果传入非枚举错误码（如 {@link ErrorCodeCarrier}）
      */
     public ErrorModule getErrorModule(final ErrorCode errorCode) {
         final Class<?> errorType = ErrorMetadataResolver.enumValue(errorCode).getDeclaringClass();
@@ -66,7 +66,7 @@ public final class ErrorMetadataResolver {
      * 解析错误的责任归属并缓存结果。
      */
     public ErrorOrigin getOrigin(final ErrorCode errorCode) {
-        if (errorCode instanceof ErrorPropagationProtocol protocol) {
+        if (errorCode instanceof ErrorCodeCarrier protocol) {
             return protocol.origin();
         }
         // 校验必须为枚举类型
@@ -86,7 +86,7 @@ public final class ErrorMetadataResolver {
      * 解析错误的严重程度并缓存结果。
      */
     public ErrorSeverity getSeverity(final ErrorCode errorCode) {
-        if (errorCode instanceof ErrorPropagationProtocol protocol) {
+        if (errorCode instanceof ErrorCodeCarrier protocol) {
             return protocol.severity();
         }
         // 校验必须为枚举类型
@@ -108,7 +108,7 @@ public final class ErrorMetadataResolver {
      * <p>查找顺序：字段级注解 → 类级注解 → 模块级注解（默认 PUBLIC）。
      */
     public ErrorVisibility getVisibility(final ErrorCode errorCode) {
-        if (errorCode instanceof ErrorPropagationProtocol) {
+        if (errorCode instanceof ErrorCodeCarrier) {
             return ErrorVisibility.PUBLIC;
         }
         final Enum<?> errorEnum = ErrorMetadataResolver.enumValue(errorCode);

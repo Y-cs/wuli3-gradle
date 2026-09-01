@@ -29,6 +29,7 @@
 | [wuli3-audit-log-spring-boot-starter](wuli3-audit-log-spring-boot-starter.md) | 审计协议、上下文补全、写入/查询 Transport 与存储端口。 |
 | [wuli3-opentelemetry-spring-boot-starter](wuli3-opentelemetry-spring-boot-starter.md) | OpenTelemetry Java Agent 适配、Trace 上下文访问与业务指标记录。 |
 | [wuli3-web-spring-boot-starter](wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应与异常处理。 |
+| [wuli3-dubbo-spring-boot-starter](wuli3-dubbo-spring-boot-starter.md) | Dubbo 调用上下文与协议无关错误传播。 |
 | [wuli3-mysql-spring-boot-starter](wuli3-mysql-spring-boot-starter.md) | MyBatis-Plus 依赖聚合。 |
 | [wuli3-redis-spring-boot-starter](wuli3-redis-spring-boot-starter.md) | Redis String/JSON/Hash/Set 统一操作与分布式锁。 |
 | [wuli3-rocketmq-spring-boot-starter](wuli3-rocketmq-spring-boot-starter.md) | RocketMQ 远程事件发送适配。 |

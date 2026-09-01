@@ -1,6 +1,6 @@
 package com.kjs.wuli3.core.assertion;
 
-import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.builtin.CommonErrors;
 import java.util.Collection;

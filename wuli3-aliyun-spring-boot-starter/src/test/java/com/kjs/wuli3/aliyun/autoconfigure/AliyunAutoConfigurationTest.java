@@ -3,7 +3,7 @@ package com.kjs.wuli3.aliyun.autoconfigure;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.aliyun.oss.OssClientManager;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;

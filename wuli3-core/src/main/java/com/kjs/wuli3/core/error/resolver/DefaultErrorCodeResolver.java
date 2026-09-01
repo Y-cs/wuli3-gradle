@@ -1,9 +1,9 @@
 package com.kjs.wuli3.core.error.resolver;
 
-import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
-import com.kjs.wuli3.core.error.ErrorModule;
-import com.kjs.wuli3.core.error.ErrorPropagationProtocol;
+import com.kjs.wuli3.core.error.model.ErrorModule;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.core.error.builtin.ErrorFrameworkErrors;
 import java.util.Locale;
 import java.util.Objects;
@@ -38,7 +38,7 @@ public final class DefaultErrorCodeResolver implements ErrorCodeResolver {
     @Override
     public String resolve(final ErrorCode errorCode) {
         Objects.requireNonNull(errorCode, "errorCode");
-        if (errorCode instanceof ErrorPropagationProtocol protocol) {
+        if (errorCode instanceof ErrorCodeCarrier protocol) {
             return protocol.code();
         }
         if (!(errorCode instanceof Enum<?> errorEnum)) {

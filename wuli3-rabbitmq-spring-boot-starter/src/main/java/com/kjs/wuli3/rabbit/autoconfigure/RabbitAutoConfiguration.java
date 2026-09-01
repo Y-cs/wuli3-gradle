@@ -2,7 +2,7 @@ package com.kjs.wuli3.rabbit.autoconfigure;
 
 import com.kjs.wuli3.event.autoconfigure.ConditionalOnMissingRemoteEventTransport;
 import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextReader;
 import com.kjs.wuli3.propagation.store.ContextWriter;
 import com.kjs.wuli3.rabbit.internal.RabbitContextSupport;
@@ -32,37 +32,37 @@ public class RabbitAutoConfiguration {
     /** 创建默认传播调用标识和可信认证信息的上下文编码器。 */
     @Bean
     @ConditionalOnMissingBean
-    ContextEncoder rabbitMqContextEncoder() {
-        return new ContextEncoder(ContextEncoder.standardContextEncoder());
+    ContextPropagator rabbitMqContextEncoder() {
+        return new ContextPropagator(ContextPropagator.standardContextEncoder());
     }
 
     /**
      * 创建消费端上下文解码支持；消费适配器自行决定何时恢复和关闭上下文作用域。
      *
      * @param contextWriter  上下文写入器
-     * @param contextEncoder 上下文字段编码器
+     * @param contextPropagator 上下文字段编码器
      * @return RabbitMQ 上下文支持
      */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnBean(ContextWriter.class)
     RabbitContextSupport rabbitMqContextSupport(
-            final ContextWriter contextWriter, final ContextEncoder contextEncoder) {
-        return new RabbitContextSupport(contextWriter, contextEncoder);
+            final ContextWriter contextWriter, final ContextPropagator contextPropagator) {
+        return new RabbitContextSupport(contextWriter, contextPropagator);
     }
 
     /**
      * 创建将事件和传播上下文编码为 AMQP 消息的编码器。
      *
      * @param contextReaders 可选的当前上下文读取器
-     * @param contextEncoder 上下文字段编码器
+     * @param contextPropagator 上下文字段编码器
      * @return 事件编码器
      */
     @Bean
     @ConditionalOnMissingBean
     RabbitMessageEncoder rabbitMqEventMessageEncoder(
-            final ObjectProvider<ContextReader> contextReaders, final ContextEncoder contextEncoder) {
-        return new RabbitMessageEncoder(contextReaders.getIfUnique(), contextEncoder);
+            final ObjectProvider<ContextReader> contextReaders, final ContextPropagator contextPropagator) {
+        return new RabbitMessageEncoder(contextReaders.getIfUnique(), contextPropagator);
     }
 
     /**

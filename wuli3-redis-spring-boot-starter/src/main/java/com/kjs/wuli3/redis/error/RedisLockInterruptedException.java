@@ -1,6 +1,6 @@
 package com.kjs.wuli3.redis.error;
 
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import java.io.Serial;
 
 /** 等待 Redis 锁的线程被中断并恢复中断标记后抛出的异常。

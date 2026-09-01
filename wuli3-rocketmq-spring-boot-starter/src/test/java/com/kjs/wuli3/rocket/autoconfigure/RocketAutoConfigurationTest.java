@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.remote.RemoteEventTransport;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.rocket.internal.RocketContextSupport;
 import com.kjs.wuli3.rocket.internal.RocketPublishOptions;
@@ -54,7 +55,7 @@ class RocketAutoConfigurationTest {
                 .withBean(
                         RocketMessageWrapperEncoder.class,
                         () -> new RocketMessageWrapperEncoder(
-                                null, new com.kjs.wuli3.propagation.encoding.ContextEncoder(java.util.List.of())))
+                                null, new ContextPropagator(java.util.List.of())))
                 .run(context -> {
                     assertThat(context).hasSingleBean(RemoteEventTransport.class);
                     assertThat(context).doesNotHaveBean(RocketRemoteEventTransport.class);

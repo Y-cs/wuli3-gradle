@@ -3,7 +3,7 @@ package com.kjs.wuli3.aliyun.oss;
 import com.kjs.wuli3.aliyun.autoconfigure.AliYunProperties;
 import com.kjs.wuli3.aliyun.error.OssErrorCode;
 import com.kjs.wuli3.aliyun.profile.OssConfig;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;

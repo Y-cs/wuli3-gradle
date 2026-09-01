@@ -12,6 +12,29 @@ import org.jspecify.annotations.Nullable;
 /**
  * 仅信任来自已配置代理网段转发头的默认客户端 IP 解析器。
  *
+ * <p><strong>安全策略：可信代理网段验证</strong></p>
+ * <p>本实现通过 CIDR 白名单验证直接连接的 peer 地址，只有当 {@code request.getRemoteAddr()} 命中
+ * {@code trusted-proxy-cidrs} 配置的网段时，才会读取转发头（如 {@code X-Forwarded-For}、{@code X-Real-IP}）。
+ * 这防止了恶意客户端通过伪造转发头绕过 IP 限制或污染日志。
+ *
+ * <h2>转发头链验证</h2>
+ * <p>对于 {@code X-Forwarded-For} 等链式转发头，本实现会从右向左遍历 IP 链，直到找到第一个不在可信网段内的 IP：
+ * <ul>
+ *   <li>遍历从最右侧（最接近当前服务的代理）开始</li>
+ *   <li>跳过所有可信代理 IP</li>
+ *   <li>返回第一个不可信 IP（即真实客户端或第一个外部代理）</li>
+ *   <li>如果整个链都是可信代理，返回链头（最左侧）IP</li>
+ * </ul>
+ *
+ * <h2>标准 Forwarded 头支持</h2>
+ * <p>支持 RFC 7239 {@code Forwarded} 头格式：{@code for=<ip>;proto=<protocol>}，会解析 {@code for} 参数并应用相同的链验证逻辑。
+ *
+ * <h2>配置示例</h2>
+ * <pre>
+ * wuli3.web.context.trusted-proxy-cidrs=10.0.0.0/8,192.168.0.0/16
+ * wuli3.web.context.client-ip-header-priority=X-Forwarded-For,X-Real-IP,Forwarded
+ * </pre>
+ *
  * @author GuoYang create on 2026/8/17 11:53
  */
 public final class DefaultClientIpResolver implements ClientIpResolver {

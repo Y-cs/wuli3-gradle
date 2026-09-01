@@ -47,32 +47,32 @@ Maven 依赖示例：
 
 ### 3.1 包职责
 
-错误模型按稳定标识、异常、元数据和策略拆分，`com.kjs.wuli3.core.error` 根包只保留包级说明。
+核心错误模型位于 `com.kjs.wuli3.core.error` 根包；内置错误码、编解码和解析器按功能划分到子包。
 
 | 包 | 主要类型 | 职责 |
 | --- | --- | --- |
-| `error.code` | `ErrorCode`、`ErrorCodeResolver`、`CommonErrors`、`SystemErrors` | 定义稳定错误标识，并供协议适配层解析对外错误码。 |
-| `error.exception` | `ErrorCodeException` | 在运行时携带错误码和已解析策略。 |
-| `error.metadata` | `ErrorModule`、`ErrorMetadataParser` | 声明并解析枚举错误码的模块元数据。 |
-| `error.policy` | `ErrorPolicy`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility` | 描述责任来源、告警影响和对外可见性。 |
+| `error` | `ErrorCode`、`ErrorCodeException`、`ErrorMetadata`、`ErrorModule`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility`、`ErrorCodeCarrier` | 稳定的核心错误模型和公共语义。 |
+| `error.builtin` | `CommonErrors`、`SystemErrors`、`ErrorFrameworkErrors` | 提供框架内置错误码。 |
+| `error.codec` | `ErrorCodeCarrierCodec`、`DefaultErrorCodeCarrierCodec`、`ErrorCodePropagator` | 在本地异常、传播协议和传输字段之间编解码。 |
+| `error.resolver` | `ErrorCodeResolver`、`DefaultErrorCodeResolver`、`ErrorMetadataResolver` | 解析稳定错误码字符串及声明式元数据。 |
 
 本次拆包会改变原有导入路径。升级时按下表替换：
 
 | 原路径中的类型 | 新包 |
 | --- | --- |
-| `ErrorCode`、`ErrorCodeResolver`、`CommonErrors`、`SystemErrors`、`ErrorFrameworkErrors` | `com.kjs.wuli3.core.error.code` |
-| `ErrorCodeException` | `com.kjs.wuli3.core.error.exception` |
-| `ErrorModule`、`ErrorMetadataParser` | `com.kjs.wuli3.core.error.metadata` |
-| `ErrorPolicy`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility`、`ResolvedErrorPolicy` | `com.kjs.wuli3.core.error.policy` |
+| `ErrorCode`、`ErrorCodeException`、`ErrorMetadata`、`ErrorModule`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility`、`ErrorCodeCarrier` | `com.kjs.wuli3.core.error` |
+| `CommonErrors`、`SystemErrors`、`ErrorFrameworkErrors` | `com.kjs.wuli3.core.error.builtin` |
+| `ErrorCodeCarrierCodec`、`DefaultErrorCodeCarrierCodec`、`ErrorCodePropagator` | `com.kjs.wuli3.core.error.codec` |
+| `ErrorCodeResolver`、`DefaultErrorCodeResolver`、`ErrorMetadataResolver` | `com.kjs.wuli3.core.error.resolver` |
 
-`ErrorCodeException.detail(...)` 和回调式 `policy(...)` 已移除。需要覆盖策略时，使用明确的 `origin(...)`、`severity(...)`、`visibility(...)`；结构化响应明细应在具体协议边界定义。
+错误来源和严重程度属于错误码固有元数据，通过 `@ErrorMetadata` 声明；可见性属于边界输出策略，通过 `withVisibility(...)` 或 `ErrorCodeCarrierCodec` 参数指定。结构化响应明细应在具体协议边界定义。
 
 原 `SystemErrors.ILLEGAL_ARGUMENT`、`SystemErrors.ILLEGAL_STATE` 和 `SystemErrors.UNSUPPORTED_OPERATION` 已迁移为 `CommonErrors` 中的同名常量；`SystemErrors` 现在只保留系统级错误。
 
 核心内置错误按责任来源区分：
 
 - `CommonErrors`：非法参数、非法状态、不支持的操作等调用方可以修正的错误，默认来源为 `CALLER`。
-- `SystemErrors`：内部错误、运行配置缺失、未实现功能等需要服务自身修复的错误，默认来源为 `SYSTEM`。
+- `SystemErrors`：内部错误、运行配置缺失、未实现功能等需要服务自身修复的错误，默认来源为 `SERVER`。
 - 数据不存在通常属于业务领域语义，应定义为 `OrderErrors.ORDER_NOT_FOUND`、`UserErrors.USER_NOT_FOUND` 等业务错误码，不使用无语义的通用错误码。
 
 ### 3.2 定义业务错误码
@@ -80,26 +80,23 @@ Maven 依赖示例：
 业务错误码应定义为枚举，并实现 `ErrorCode`。错误码枚举必须标注 `@ErrorModule`，否则解析错误元数据时会抛出框架错误。
 
 ```java
-import com.kjs.wuli3.core.error.code.ErrorCode;
-import com.kjs.wuli3.core.error.metadata.ErrorModule;
-import com.kjs.wuli3.core.error.policy.ErrorOrigin;
-import com.kjs.wuli3.core.error.policy.ErrorPolicy;
-import com.kjs.wuli3.core.error.policy.ErrorSeverity;
-import com.kjs.wuli3.core.error.policy.ErrorVisibility;
+import com.kjs.wuli3.core.error.ErrorCode;
+import com.kjs.wuli3.core.error.ErrorModule;
+import com.kjs.wuli3.core.error.ErrorMetadata;
+import com.kjs.wuli3.core.error.ErrorOrigin;
+import com.kjs.wuli3.core.error.ErrorSeverity;
+import com.kjs.wuli3.core.error.ErrorVisibility;
 
 @Getter
 @RequiredArgsConstructor
-@ErrorModule("ORDER")
+@ErrorModule(value = "ORDER", metadata = @ErrorMetadata(origin = ErrorOrigin.CALLER, severity = ErrorSeverity.NORMAL))
 public enum OrderErrors implements ErrorCode {
     ORDER_NOT_FOUND("订单不存在"),
 
-    @ErrorPolicy(severity = ErrorSeverity.WARNING, visibility = ErrorVisibility.MESSAGE_ONLY)
+    @ErrorMetadata(severity = ErrorSeverity.WARNING)
     ORDER_STATUS_INVALID("订单状态不允许当前操作"),
 
-    @ErrorPolicy(
-            severity = ErrorSeverity.CRITICAL,
-            visibility = ErrorVisibility.INTERNAL,
-            origin = ErrorOrigin.SYSTEM)
+    @ErrorMetadata(severity = ErrorSeverity.CRITICAL, origin = ErrorOrigin.SERVER)
     INVENTORY_SERVICE_UNAVAILABLE("库存服务不可用");
 
     private final String message;
@@ -109,17 +106,15 @@ public enum OrderErrors implements ErrorCode {
 约定：
 
 - `@ErrorModule.value` 表示错误所属模块，应使用稳定、可读的模块名。
-- `@ErrorModule.policy` 是模块默认策略；未指定时为 `CALLER`、`NORMAL`、`PUBLIC`。
-- 枚举常量上的 `@ErrorPolicy` 会覆盖模块默认策略。
-- `ErrorCode.getName()` 默认返回枚举常量名。
-- `ErrorCode.getErrorType()` 默认返回枚举声明类型。
+- `@ErrorModule.metadata` 是模块默认元数据；枚举常量上的 `@ErrorMetadata` 会覆盖对应字段。
+- 本地枚举的常量名和声明类型只由元数据解析器在解析枚举时读取；传播错误直接携带完整字符串错误码。
 
 ### 3.3 抛出错误
 
-使用 `ErrorCodeException` 携带错误码、消息和已解析策略。
+使用 `ErrorCodeException` 携带错误码和消息。
 
 ```java
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 
 throw new ErrorCodeException(OrderErrors.ORDER_NOT_FOUND);
 ```
@@ -130,22 +125,21 @@ throw new ErrorCodeException(OrderErrors.ORDER_NOT_FOUND);
 throw new ErrorCodeException(OrderErrors.ORDER_STATUS_INVALID, "订单已完成，不能取消");
 ```
 
-仅当同一错误码在个别抛出点具有不同边界语义时，才使用运行时覆盖：
+仅当同一错误码在个别抛出点需要不同输出策略时，才使用运行时覆盖：
 
 ```java
 throw new ErrorCodeException(OrderErrors.ORDER_STATUS_INVALID)
-        .severity(ErrorSeverity.WARNING)
-        .visibility(ErrorVisibility.MESSAGE_ONLY);
+        .withVisibility(ErrorVisibility.MESSAGE_ONLY);
 ```
 
-稳定语义应优先声明在 `@ErrorModule` 或枚举常量的 `@ErrorPolicy` 上。
+责任来源和严重程度应优先声明在 `@ErrorMetadata` 上；`ErrorVisibility` 由适配层按边界决定。
 
 ### 3.4 责任来源、严重程度与可见性
 
 `ErrorOrigin` 用于表达由谁修正错误，是 Web 适配层确定默认 HTTP 状态的唯一业务语义：
 
 - `CALLER`：调用方通过修正请求、状态或所选能力可以解决，默认映射为 4xx。
-- `SYSTEM`：服务自身或其依赖需要修复，默认映射为 5xx。
+- `SERVER`：服务自身或其依赖需要修复，默认映射为 5xx。
 
 `ErrorSeverity` 用于表达告警和处置优先级，不再决定 HTTP 状态：
 
@@ -161,25 +155,55 @@ throw new ErrorCodeException(OrderErrors.ORDER_STATUS_INVALID)
 - `MESSAGE_ONLY`：只输出消息。
 - `INTERNAL`：内部错误，不应直接对外输出。
 
-例如，JSON 序列化失败、消息发送失败等基础设施错误应声明为 `SYSTEM`；订单不存在、参数不合法等调用方可修正的业务错误保持默认的 `CALLER` 即可。
+例如，JSON 序列化失败、消息发送失败等基础设施错误应声明为 `SERVER`；订单不存在、参数不合法等调用方可修正的业务错误保持默认的 `CALLER` 即可。
 
 ### 3.5 解析错误元数据
 
-`ErrorMetadataParser` 会缓存错误模块和错误策略：
+`ErrorMetadataResolver` 会缓存错误模块和固有元数据：
 
 ```java
-import com.kjs.wuli3.core.error.metadata.ErrorMetadataParser;
-import com.kjs.wuli3.core.error.policy.ResolvedErrorPolicy;
-
-final ResolvedErrorPolicy policy =
-        ErrorMetadataParser.instance().getErrorPolicy(OrderErrors.ORDER_STATUS_INVALID);
+import com.kjs.wuli3.core.error.resolver.ErrorMetadataResolver;
+final ErrorOrigin origin = ErrorMetadataResolver.instance().getOrigin(OrderErrors.ORDER_STATUS_INVALID);
+final ErrorSeverity severity = ErrorMetadataResolver.instance().getSeverity(OrderErrors.ORDER_STATUS_INVALID);
 ```
 
 正常业务代码通常不需要直接调用解析器，适配层或响应转换层可以使用它读取策略。
 
+### 3.6 本地声明与错误传播
+
+错误模型明确区分本地声明和跨边界传播态：
+
+- `ErrorCode` 是统一错误标识契约。本地错误通常由带 `@ErrorModule` 的业务枚举实现，远程错误由 `ErrorCodeCarrier` 实现。
+- `ErrorCodeException` 是项目唯一错误异常，可持有本地枚举或远程传播值。
+- `ErrorCodeCarrier` 是可跨进程传播的 `ErrorCode` 实现，包含稳定字符串错误码、消息、来源、严重程度和来源服务。
+
+协议适配层使用 `DefaultErrorCodeCarrierCodec` 将 `ErrorCodeException` 序列化为 `ErrorCodeCarrier`：
+
+| 输入 | 映射结果 |
+| --- | --- |
+| `ErrorCodeException`（本地枚举） | 保留完整字符串错误码、消息、来源和严重程度。 |
+| `ErrorCodeException`（远程传播值） | 保留已有完整码和最初来源，支持多跳调用。 |
+| 其他异常 | 由具体协议边界先包装为 `SystemErrors.INTERNAL_ERROR`，再按 `INTERNAL` 序列化，不暴露原始类型和消息。 |
+
+`ErrorCodePropagator` 使用字段读写函数在传播协议和字符串字段之间转换：
+
+```java
+final ErrorPropagationEncoder encoder = new ErrorPropagationEncoder();
+encoder.writeTo(protocol, fieldWriter);
+final Optional<ErrorPropagationProtocol> decoded = encoder.readFrom(fieldReader);
+```
+
+HTTP、Dubbo 等协议统一使用 `X-Wuli3-Error-Code`、`X-Wuli3-Error-Message`、
+`X-Wuli3-Error-Origin`、`X-Wuli3-Error-Severity` 和 `X-Wuli3-Error-Source-Service`。
+适配层只提供 `BiConsumer<String, String>` 写入函数和允许返回空值的字段读取函数，不重复实现字段校验和枚举解析。
+
+该兜底规则只应由 Dubbo、HTTP、消息消费等外部协议边界使用，不是全局异常转换规则。启动配置校验、纯 Java API 契约和编程错误仍应保留合适的 JDK 异常；可预期的业务失败应显式抛出 `ErrorCodeException`；数据库、缓存、消息 SDK 等基础设施异常应在对应适配器中包装为模块自己的系统错误。
+
+这种拆分保证服务间不需要共享所有业务错误枚举。例如提供方的 `GroupErrors.PERMISSION_DENIED` 可以映射为 `GROUP.PERMISSION_DENIED` 后传播，消费方将其作为 `ErrorCodeException` 携带的 `ErrorCodeCarrier` 接收，不需要把 `GroupErrors` 放进自己的 classpath。
+
 ## 4. 断言工具
 
-`Asserts` 使用延迟抛异常的链式风格。断言方法返回 `AssertException`，当条件不满足时调用 `throwException(...)` 抛出 `ErrorCodeException`。
+`Asserts` 使用延迟抛异常的链式风格。断言方法返回 `AssertCondition`，当条件不满足时调用 `throwException(...)` 抛出 `ErrorCodeException`。
 
 ```java
 Asserts.notBlank(name).throwException(CommonErrors.ILLEGAL_ARGUMENT, "name 不能为空");

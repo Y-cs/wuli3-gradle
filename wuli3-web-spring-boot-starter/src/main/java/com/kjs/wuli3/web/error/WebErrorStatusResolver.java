@@ -1,6 +1,6 @@
 package com.kjs.wuli3.web.error;
 
-import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 /** 解析已处理 Web 错误应返回的 HTTP 状态。

@@ -1,10 +1,10 @@
 package com.kjs.wuli3.rocket.internal.wrapper;
 
-import com.kjs.wuli3.core.error.code.CommonErrors;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.builtin.CommonErrors;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.json.core.Jsons;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
 import com.kjs.wuli3.propagation.store.ContextReader;
 import com.kjs.wuli3.rocket.internal.RocketPublishOptions;
@@ -26,18 +26,18 @@ public final class RocketMessageWrapperEncoder {
     private static final int MAX_TOPIC_BYTES = 127;
     private static final Pattern TOPIC_PATTERN = Pattern.compile("[%a-zA-Z0-9_-]+");
     private final @Nullable ContextReader contextReader;
-    private final ContextEncoder contextEncoder;
+    private final ContextPropagator contextPropagator;
 
     /**
      * 使用当前上下文重建保留传播头信息的编码器。
      *
      * @param contextReader  可选的当前上下文读取器
-     * @param contextEncoder 上下文字段编码器
+     * @param contextPropagator 上下文字段编码器
      */
     public RocketMessageWrapperEncoder(
-            final @Nullable ContextReader contextReader, final ContextEncoder contextEncoder) {
+            final @Nullable ContextReader contextReader, final ContextPropagator contextPropagator) {
         this.contextReader = contextReader;
-        this.contextEncoder = Objects.requireNonNull(contextEncoder, "contextEncoder");
+        this.contextPropagator = Objects.requireNonNull(contextPropagator, "contextEncoder");
     }
 
     /**
@@ -76,7 +76,7 @@ public final class RocketMessageWrapperEncoder {
         }
         // 获取当前上下文并添加传播头
         final ContextSnapshot snapshot = this.contextReader.capture();
-        this.contextEncoder.writeTo(snapshot, headers::put);
+        this.contextPropagator.inject(snapshot, headers::put);
         return headers;
     }
 

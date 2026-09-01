@@ -1,11 +1,10 @@
 package com.kjs.wuli3.json.core;
 
-import com.kjs.wuli3.core.error.code.ErrorCode;
-import com.kjs.wuli3.core.error.metadata.ErrorModule;
-import com.kjs.wuli3.core.error.policy.ErrorOrigin;
-import com.kjs.wuli3.core.error.policy.ErrorPolicy;
-import com.kjs.wuli3.core.error.policy.ErrorSeverity;
-import com.kjs.wuli3.core.error.policy.ErrorVisibility;
+import com.kjs.wuli3.core.error.model.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorMetadata;
+import com.kjs.wuli3.core.error.model.ErrorModule;
+import com.kjs.wuli3.core.error.model.ErrorOrigin;
+import com.kjs.wuli3.core.error.model.ErrorSeverity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,13 +15,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@ErrorModule(
-        value = "JSON",
-        policy =
-                @ErrorPolicy(
-                        severity = ErrorSeverity.CRITICAL,
-                        visibility = ErrorVisibility.INTERNAL,
-                        origin = ErrorOrigin.SYSTEM))
+@ErrorModule(name = "JSON", defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.SERVER, severity = ErrorSeverity.CRITICAL))
 public enum JsonErrors implements ErrorCode {
     SERIALIZATION_FAILED("JSON序列化失败"),
     DESERIALIZATION_FAILED("JSON反序列化失败"),

@@ -1,6 +1,6 @@
 package com.kjs.wuli3.web.error;
 
-import com.kjs.wuli3.core.error.code.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorCode;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 

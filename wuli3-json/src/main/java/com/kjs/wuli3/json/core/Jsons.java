@@ -2,7 +2,7 @@ package com.kjs.wuli3.json.core;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.json.provider.JacksonProvider;
 
 /**

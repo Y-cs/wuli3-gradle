@@ -2,7 +2,7 @@ package com.kjs.wuli3.web.autoconfigure;
 
 import com.kjs.wuli3.propagation.accessor.AuthContextAccessor;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextReader;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.propagation.store.ContextWriter;
@@ -11,10 +11,10 @@ import com.kjs.wuli3.web.context.ClientIpResolver;
 import com.kjs.wuli3.web.context.RequestIdResolver;
 import com.kjs.wuli3.web.context.WebContextProperties;
 import com.kjs.wuli3.web.internal.auth.TrustedHttpAuthContextResolver;
-import com.kjs.wuli3.web.internal.client.InvocationContextClientHttpRequestInterceptor;
+import com.kjs.wuli3.web.internal.interceptor.ContextPropagationInterceptor;
 import com.kjs.wuli3.web.internal.context.DefaultClientIpResolver;
 import com.kjs.wuli3.web.internal.context.DefaultRequestIdResolver;
-import com.kjs.wuli3.web.internal.servlet.ContextFilter;
+import com.kjs.wuli3.web.internal.filter.ContextFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -41,8 +41,8 @@ public class WebContextAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    ContextEncoder contextEncoder() {
-        return new ContextEncoder(ContextEncoder.standardContextEncoder());
+    ContextPropagator contextPropagator() {
+        return new ContextPropagator(ContextPropagator.standardContextEncoder());
     }
 
     @Bean
@@ -65,17 +65,17 @@ public class WebContextAutoConfiguration {
 
     @Bean
     RestClientCustomizer wuli3InvocationContextRestClientCustomizer(
-            final ContextReader contextReader, final ContextEncoder contextEncoder) {
-        final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(contextReader, contextEncoder);
+            final ContextReader contextReader, final ContextPropagator contextPropagator) {
+        final ContextPropagationInterceptor interceptor =
+                new ContextPropagationInterceptor(contextReader, contextPropagator);
         return builder -> builder.requestInterceptor(interceptor);
     }
 
     @Bean
     RestTemplateCustomizer wuli3InvocationContextRestTemplateCustomizer(
-            final ContextReader contextReader, final ContextEncoder contextEncoder) {
-        final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(contextReader, contextEncoder);
+            final ContextReader contextReader, final ContextPropagator contextPropagator) {
+        final ContextPropagationInterceptor interceptor =
+                new ContextPropagationInterceptor(contextReader, contextPropagator);
         return restTemplate -> restTemplate.getInterceptors().add(interceptor);
     }
 

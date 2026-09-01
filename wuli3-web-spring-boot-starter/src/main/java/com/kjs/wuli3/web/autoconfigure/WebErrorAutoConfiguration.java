@@ -1,9 +1,9 @@
 package com.kjs.wuli3.web.autoconfigure;
 
-import com.kjs.wuli3.core.error.code.ErrorCodeResolver;
-import com.kjs.wuli3.web.error.ApplicationServiceProperties;
+import com.kjs.wuli3.core.error.resolver.ErrorCodeResolver;
+import com.kjs.wuli3.web.config.ApplicationServiceProperties;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
-import com.kjs.wuli3.web.internal.error.DefaultWebErrorStatusResolver;
+import com.kjs.wuli3.web.internal.handler.DefaultWebErrorStatusResolver;
 import com.kjs.wuli3.web.internal.error.WebErrorCodeResolver;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

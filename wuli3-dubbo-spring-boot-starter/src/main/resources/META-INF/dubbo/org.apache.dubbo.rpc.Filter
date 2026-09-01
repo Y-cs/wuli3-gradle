@@ -1,0 +1,4 @@
+dubboContextConsumerFilter=com.kjs.wuli3.dubbo.context.DubboContextConsumerFilter
+dubboContextProviderFilter=com.kjs.wuli3.dubbo.context.DubboContextProviderFilter
+dubboErrorConsumerFilter=com.kjs.wuli3.dubbo.error.DubboErrorConsumerFilter
+dubboErrorProviderFilter=com.kjs.wuli3.dubbo.error.DubboErrorProviderFilter

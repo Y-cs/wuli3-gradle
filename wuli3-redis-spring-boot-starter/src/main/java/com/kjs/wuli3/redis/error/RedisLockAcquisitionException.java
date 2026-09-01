@@ -1,6 +1,6 @@
 package com.kjs.wuli3.redis.error;
 
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import java.io.Serial;
 
 /** 在等待时间内无法获取必需的 Redis 锁时抛出的异常。

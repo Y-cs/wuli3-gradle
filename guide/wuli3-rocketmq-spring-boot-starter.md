@@ -89,7 +89,7 @@ eventPublisher.publish(options, envelope);
 
 ## 上下文传播
 
-Encoder 读取可选的 `ContextReader`，并通过 `ContextEncoder` 按显式白名单把传播字段写入 `RocketMessageWrapper.headers`。`EventEnvelope` 不承载传输 header，其 JSON body 只包含事件语义字段。
+Encoder 读取可选的 `ContextReader`，并通过 `ContextPropagator` 按显式白名单把传播字段写入 `RocketMessageWrapper.headers`。`EventEnvelope` 不承载传输 header，其 JSON body 只包含事件语义字段。
 
 默认自动配置使用 `ContextEncoder.standardContextEncoder()`，当前会传播 `X-Request-Id`、`X-Origin-Ip`、
 `X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`。因此该 starter 应只用于允许传播认证信息的可信消息边界。
@@ -103,9 +103,9 @@ ContextEncoder rocketMqContextEncoder() {
 }
 ```
 
-同一个 `ContextEncoder` Bean 同时决定 `RocketMessageWrapperEncoder` 的出站字段和 `RocketContextSupport` 的入站字段。缩小白名单后，入站恢复也只会接受对应字段。
+同一个 `ContextPropagator` Bean 同时决定 `RocketMessageWrapperEncoder` 的出站字段和 `RocketContextSupport` 的入站字段。缩小白名单后，入站恢复也只会接受对应字段。
 
-消费适配器需要先得到已解码的 `ContextPropagator`，再显式恢复作用域：
+消费适配器需要先得到已解码的 `ContextProxy`，再显式恢复作用域：
 
 ```java
 final ContextPropagator propagator = rocketMqContextSupport.restoreFrom(messageExt.getProperties());
@@ -114,7 +114,7 @@ try (ContextScope ignored = propagator.restore(propagator.capture())) {
 }
 ```
 
-`restoreFrom` 只解码字段编码器识别出的上下文并返回 `ContextPropagator`，不会自动注册或包裹 RocketMQ Listener。实际 Listener 仍应根据消息来源、线程模型、重试和死信策略决定调用时机。非法认证字段由 `AuthContextEncoder` 忽略，避免消费适配器承担解析细节。
+`restoreFrom` 只解码字段编码器识别出的上下文并返回 `ContextProxy`，不会自动注册或包裹 RocketMQ Listener。实际 Listener 仍应根据消息来源、线程模型、重试和死信策略决定调用时机。非法认证字段由 `AuthContextCodec` 忽略，避免消费适配器承担解析细节。
 
 ## 投递边界
 

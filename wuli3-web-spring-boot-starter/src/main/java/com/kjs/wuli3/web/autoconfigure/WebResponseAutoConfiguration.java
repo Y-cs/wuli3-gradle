@@ -1,13 +1,13 @@
 package com.kjs.wuli3.web.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjs.wuli3.core.error.code.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.resolver.ErrorCodeResolver;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
-import com.kjs.wuli3.web.internal.response.ApiResponseBodyAdvice;
-import com.kjs.wuli3.web.internal.response.ApiResponseFactory;
-import com.kjs.wuli3.web.internal.response.WebExceptionHandler;
+import com.kjs.wuli3.web.internal.advice.ApiResponseBodyAdvice;
+import com.kjs.wuli3.web.internal.advice.ApiResponseFactory;
+import com.kjs.wuli3.web.internal.handler.WebExceptionHandler;
 import com.kjs.wuli3.web.response.WebResponseProperties;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;

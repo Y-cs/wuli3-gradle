@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.response;
 
-import com.kjs.wuli3.core.error.code.ErrorCode;
-import com.kjs.wuli3.core.error.code.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.model.ErrorCode;
+import com.kjs.wuli3.core.error.resolver.ErrorCodeResolver;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 

@@ -123,7 +123,7 @@
 当前工作区执行 `rtk ./gradlew check`：
 
 - 事件 core、Spring 事件 starter 和 RocketMQ starter 的独立 `check` 已通过。
-- 仓库级门禁仍被 `wuli3-context-propagation` 的格式问题和 `ContextEncoder` 星号导入的 Checkstyle 错误阻断。
+- 仓库级门禁仍被 `wuli3-context-propagation` 的格式问题和 `ContextPropagator` 星号导入的 Checkstyle 错误阻断。
 - 未跟踪的 Web 测试仍属于独立工作区改动，本次事件重构未修改它。
 
 此前对纯 `HEAD` 快照执行同一检查时，Web 的 39 个测试全部因 `slf4j-simple` 与 Logback 冲突而无法启动 Spring 上下文。根因位于：
@@ -174,7 +174,7 @@ RemoteEventEnvelope -> RemoteEventPublisher -> RemoteEventMessageTransport
 | 反向代理客户端 IP | 仅有全局信任开关 | 场景不完整，缺可信 CIDR 和多跳代理模型 |
 | 线程池上下文传播 | 有 capture/restore/wrap | 机制完整，缺 Spring `TaskDecorator` 等业务适配 |
 | HTTP client/Feign/Dubbo 出站传播 | 核心接口已预留 | 没有 starter 适配，业务需自行实现 |
-| RPC/MQ 入站上下文恢复 | 有 `readFrom` | 生命周期不安全，可能残留旧认证上下文 |
+| RPC/MQ 入站上下文恢复 | 有 `extract` | 生命周期不安全，可能残留旧认证上下文 |
 | Spring 本地事件 | 通过信封发布 | 不符合 Spring 类型分派习惯，应直接发布业务事件 |
 | RocketMQ 同步、异步、顺序、精确延迟 | 已实现能力校验和发送分支 | 适合非关键、尽力而为通知 |
 | 事务提交后远程发送 | 显式 `afterCommit()` | DB 提交后发送失败不可恢复，不适合订单/支付等可靠集成事件 |

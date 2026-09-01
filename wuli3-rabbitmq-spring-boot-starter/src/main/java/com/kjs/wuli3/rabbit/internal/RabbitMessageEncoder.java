@@ -2,7 +2,7 @@ package com.kjs.wuli3.rabbit.internal;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.json.core.Jsons;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
 import com.kjs.wuli3.propagation.store.ContextReader;
 import java.util.Objects;
@@ -17,17 +17,17 @@ import org.springframework.amqp.core.MessageProperties;
 public final class RabbitMessageEncoder {
 
     private final @Nullable ContextReader contextReader;
-    private final ContextEncoder contextEncoder;
+    private final ContextPropagator contextPropagator;
 
     /**
      * 使用当前上下文重建保留传播头信息的编码器。
      *
      * @param contextReader  可选的当前上下文读取器
-     * @param contextEncoder 上下文字段编码器
+     * @param contextPropagator 上下文字段编码器
      */
-    public RabbitMessageEncoder(final @Nullable ContextReader contextReader, final ContextEncoder contextEncoder) {
+    public RabbitMessageEncoder(final @Nullable ContextReader contextReader, final ContextPropagator contextPropagator) {
         this.contextReader = contextReader;
-        this.contextEncoder = Objects.requireNonNull(contextEncoder, "contextEncoder");
+        this.contextPropagator = Objects.requireNonNull(contextPropagator, "contextEncoder");
     }
 
     /**
@@ -51,6 +51,6 @@ public final class RabbitMessageEncoder {
             return;
         }
         final ContextSnapshot snapshot = this.contextReader.capture();
-        this.contextEncoder.writeTo(snapshot, messageProperties::setHeader);
+        this.contextPropagator.inject(snapshot, messageProperties::setHeader);
     }
 }

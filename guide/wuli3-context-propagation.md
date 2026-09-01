@@ -20,11 +20,11 @@ dependencies {
 - `ContextSnapshot`：只包含 `PropagationContext` 的不可变快照，是异步和出站协议共同使用的传递值。
 - `ContextStore`：基于当前线程保存完整上下文，并实现读取、修改、捕获和恢复能力。
 - `ContextReader` / `ContextWriter`：分别暴露读取与修改当前上下文的能力，依赖方只注入所需一侧。
-- `ContextPropagator`：在快照操作能力之上包装异步任务。
+- `ContextProxy`：在快照操作能力之上包装异步任务。
 - `InvocationContext`：请求标识和来源地址。
 - `AuthContext`：可信内部链路可传播的认证主体快照，由 `principalType`、`principalId` 和 `principalName` 组成。
-- `ContextFieldEncoder`：一个固定 `PropagationContext` 与协议字段之间的双向映射。
-- `ContextEncoder`：按显式白名单组合多个 `ContextFieldEncoder`，统一读取、写入和保留字段计算。
+- `ContextFieldCodec`：一个固定 `PropagationContext` 与协议字段之间的双向映射。
+- `ContextPropagator`：按显式白名单组合多个 `ContextFieldCodec`，统一读取、写入和保留字段计算。
 
 上下文不提供任意 key/value 扩展袋。出现租户、区域或灰度等真实需求时，应新增受控的值对象和明确的传播契约。
 
@@ -34,8 +34,8 @@ dependencies {
 
 两个固定编码器定义稳定字段契约：
 
-- `InvocationContextEncoder` 写入 `X-Request-Id` 和 `X-Origin-Ip`。
-- `AuthContextEncoder` 写入 `X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`。
+- `InvocationContextCodec` 写入 `X-Request-Id` 和 `X-Origin-Ip`。
+- `AuthContextCodec` 写入 `X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`。
 
 认证主体的三个字段必须同时存在且非空白，`X-Principal-Type` 必须是 `CUSTOMER`、`ADMIN` 或 `SYSTEM`。
 解码遇到缺失或非法字段时会整体拒绝该认证上下文，不会恢复部分身份信息。
@@ -47,7 +47,7 @@ final ContextEncoder invocationOnly =
         new ContextEncoder(List.of(new InvocationContextEncoder()));
 ```
 
-协议适配器使用 `ContextEncoder` 声明白名单，而不是逐一判断上下文类型：
+协议适配器使用 `ContextPropagator` 声明白名单，而不是逐一判断上下文类型：
 
 ```java
 final ContextEncoder encoder = new ContextEncoder(ContextEncoder.standardContextEncoder());

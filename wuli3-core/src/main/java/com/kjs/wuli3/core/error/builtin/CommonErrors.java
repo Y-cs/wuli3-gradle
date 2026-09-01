@@ -1,10 +1,10 @@
 package com.kjs.wuli3.core.error.builtin;
 
-import com.kjs.wuli3.core.error.ErrorCode;
-import com.kjs.wuli3.core.error.ErrorMetadata;
-import com.kjs.wuli3.core.error.ErrorModule;
-import com.kjs.wuli3.core.error.ErrorOrigin;
-import com.kjs.wuli3.core.error.ErrorSeverity;
+import com.kjs.wuli3.core.error.model.ErrorCode;
+import com.kjs.wuli3.core.error.model.ErrorMetadata;
+import com.kjs.wuli3.core.error.model.ErrorModule;
+import com.kjs.wuli3.core.error.model.ErrorOrigin;
+import com.kjs.wuli3.core.error.model.ErrorSeverity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

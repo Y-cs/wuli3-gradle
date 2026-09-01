@@ -1,6 +1,6 @@
 package com.kjs.wuli3.redis.id;
 
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.redis.error.RedisErrors;
 import java.io.Serial;
 

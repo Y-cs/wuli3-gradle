@@ -5,12 +5,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.kjs.wuli3.propagation.codec.AuthContextCodec;
+import com.kjs.wuli3.propagation.codec.ContextPropagator;
+import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
 import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.context.PrincipalType;
-import com.kjs.wuli3.propagation.encoding.AuthContextEncoder;
-import com.kjs.wuli3.propagation.encoding.ContextEncoder;
-import com.kjs.wuli3.propagation.encoding.InvocationContextEncoder;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
@@ -29,13 +29,13 @@ class InvocationContextClientHttpRequestInterceptorTest {
         contextStore.put(new AuthContext(PrincipalType.CUSTOMER, "7", "alice"));
         final InvocationContextClientHttpRequestInterceptor interceptor =
                 new InvocationContextClientHttpRequestInterceptor(
-                        contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder()));
+                        contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
         final HttpHeaders headers = new HttpHeaders();
-        headers.set(InvocationContextEncoder.REQUEST_ID, "forged-request");
-        headers.set(InvocationContextEncoder.ORIGIN_IP, "203.0.113.8");
-        headers.set(AuthContextEncoder.PRINCIPAL_TYPE, "ADMIN");
-        headers.set(AuthContextEncoder.PRINCIPAL_ID, "99");
-        headers.set(AuthContextEncoder.PRINCIPAL_NAME, "mallory");
+        headers.set(InvocationContextCodec.REQUEST_ID, "forged-request");
+        headers.set(InvocationContextCodec.ORIGIN_IP, "203.0.113.8");
+        headers.set(AuthContextCodec.PRINCIPAL_TYPE, "ADMIN");
+        headers.set(AuthContextCodec.PRINCIPAL_ID, "99");
+        headers.set(AuthContextCodec.PRINCIPAL_NAME, "mallory");
         final HttpRequest request = mock(HttpRequest.class);
         final ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
         final ClientHttpResponse response = mock(ClientHttpResponse.class);
@@ -47,11 +47,11 @@ class InvocationContextClientHttpRequestInterceptorTest {
 
         assertThat(interceptor.intercept(request, body, execution)).isSameAs(response);
 
-        assertThat(headers.getFirst(InvocationContextEncoder.REQUEST_ID)).isEqualTo("request-42");
-        assertThat(headers.getFirst(InvocationContextEncoder.ORIGIN_IP)).isEqualTo("10.0.0.8");
-        assertThat(headers.getFirst(AuthContextEncoder.PRINCIPAL_TYPE)).isEqualTo("CUSTOMER");
-        assertThat(headers.getFirst(AuthContextEncoder.PRINCIPAL_ID)).isEqualTo("7");
-        assertThat(headers.getFirst(AuthContextEncoder.PRINCIPAL_NAME)).isEqualTo("alice");
+        assertThat(headers.getFirst(InvocationContextCodec.REQUEST_ID)).isEqualTo("request-42");
+        assertThat(headers.getFirst(InvocationContextCodec.ORIGIN_IP)).isEqualTo("10.0.0.8");
+        assertThat(headers.getFirst(AuthContextCodec.PRINCIPAL_TYPE)).isEqualTo("CUSTOMER");
+        assertThat(headers.getFirst(AuthContextCodec.PRINCIPAL_ID)).isEqualTo("7");
+        assertThat(headers.getFirst(AuthContextCodec.PRINCIPAL_NAME)).isEqualTo("alice");
         verify(execution).execute(request, body);
     }
 
@@ -60,13 +60,13 @@ class InvocationContextClientHttpRequestInterceptorTest {
         final ContextStore contextStore = new ContextStore();
         final InvocationContextClientHttpRequestInterceptor interceptor =
                 new InvocationContextClientHttpRequestInterceptor(
-                        contextStore, new ContextEncoder(ContextEncoder.standardContextEncoder()));
+                        contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
         final HttpHeaders headers = new HttpHeaders();
-        headers.set(InvocationContextEncoder.REQUEST_ID, "forged-request");
-        headers.set(InvocationContextEncoder.ORIGIN_IP, "203.0.113.8");
-        headers.set(AuthContextEncoder.PRINCIPAL_TYPE, "ADMIN");
-        headers.set(AuthContextEncoder.PRINCIPAL_ID, "99");
-        headers.set(AuthContextEncoder.PRINCIPAL_NAME, "mallory");
+        headers.set(InvocationContextCodec.REQUEST_ID, "forged-request");
+        headers.set(InvocationContextCodec.ORIGIN_IP, "203.0.113.8");
+        headers.set(AuthContextCodec.PRINCIPAL_TYPE, "ADMIN");
+        headers.set(AuthContextCodec.PRINCIPAL_ID, "99");
+        headers.set(AuthContextCodec.PRINCIPAL_NAME, "mallory");
         final HttpRequest request = mock(HttpRequest.class);
         final ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
         final ClientHttpResponse response = mock(ClientHttpResponse.class);
@@ -77,10 +77,10 @@ class InvocationContextClientHttpRequestInterceptorTest {
         assertThat(interceptor.intercept(request, body, execution)).isSameAs(response);
 
         assertThat(headers)
-                .doesNotContainKey(InvocationContextEncoder.REQUEST_ID)
-                .doesNotContainKey(InvocationContextEncoder.ORIGIN_IP)
-                .doesNotContainKey(AuthContextEncoder.PRINCIPAL_TYPE)
-                .doesNotContainKey(AuthContextEncoder.PRINCIPAL_ID)
-                .doesNotContainKey(AuthContextEncoder.PRINCIPAL_NAME);
+                .doesNotContainKey(InvocationContextCodec.REQUEST_ID)
+                .doesNotContainKey(InvocationContextCodec.ORIGIN_IP)
+                .doesNotContainKey(AuthContextCodec.PRINCIPAL_TYPE)
+                .doesNotContainKey(AuthContextCodec.PRINCIPAL_ID)
+                .doesNotContainKey(AuthContextCodec.PRINCIPAL_NAME);
     }
 }

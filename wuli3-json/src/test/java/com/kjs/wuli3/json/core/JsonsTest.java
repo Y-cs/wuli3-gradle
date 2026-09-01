@@ -4,11 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.kjs.wuli3.core.error.exception.ErrorCodeException;
-import com.kjs.wuli3.core.error.policy.ErrorOrigin;
-import com.kjs.wuli3.core.error.policy.ErrorSeverity;
-import com.kjs.wuli3.core.error.policy.ErrorVisibility;
-import com.kjs.wuli3.core.error.policy.ResolvedErrorPolicy;
+import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.model.ErrorOrigin;
+import com.kjs.wuli3.core.error.model.ErrorSeverity;
+import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -73,9 +72,9 @@ class JsonsTest {
         assertThatThrownBy(() -> Jsons.fromJson("{", Sample.class))
                 .isInstanceOfSatisfying(ErrorCodeException.class, ex -> {
                     assertThat(ex.getErrorCode()).isEqualTo(JsonErrors.DESERIALIZATION_FAILED);
-                    assertThat(ex.getResolvedErrorPolicy())
-                            .isEqualTo(new ResolvedErrorPolicy(
-                                    ErrorSeverity.CRITICAL, ErrorVisibility.INTERNAL, ErrorOrigin.SYSTEM));
+                    assertThat(ex.getOrigin()).isEqualTo(ErrorOrigin.SERVER);
+                    assertThat(ex.getSeverity()).isEqualTo(ErrorSeverity.CRITICAL);
+                    assertThat(ex.getVisibility()).isEqualTo(ErrorVisibility.INTERNAL);
                 });
     }
 

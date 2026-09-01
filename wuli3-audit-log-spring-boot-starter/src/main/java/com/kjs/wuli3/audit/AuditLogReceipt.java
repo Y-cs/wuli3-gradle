@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * 审计事件被写入 Transport 后返回的生产者侧回执。
+ * 审计事件发布后返回的生产者侧回执。
  *
  * @author GuoYang create on 2026/8/17 11:53
  */

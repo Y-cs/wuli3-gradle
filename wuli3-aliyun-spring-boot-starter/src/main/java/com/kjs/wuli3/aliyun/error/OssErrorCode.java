@@ -13,7 +13,9 @@ import lombok.RequiredArgsConstructor;
  *
  * @author GuoYang create on 2026/8/12 17:38
  */
-@ErrorModule(name = "OSS", defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.CALLER, severity = ErrorSeverity.WARNING))
+@ErrorModule(
+        name = "OSS",
+        defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.CALLER, severity = ErrorSeverity.WARNING))
 @RequiredArgsConstructor
 public enum OssErrorCode implements ErrorCode {
     @ErrorMetadata(origin = ErrorOrigin.SERVER, severity = ErrorSeverity.CRITICAL)

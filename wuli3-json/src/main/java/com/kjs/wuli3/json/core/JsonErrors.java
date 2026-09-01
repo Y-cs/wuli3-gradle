@@ -15,7 +15,9 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@ErrorModule(name = "JSON", defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.SERVER, severity = ErrorSeverity.CRITICAL))
+@ErrorModule(
+        name = "JSON",
+        defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.SERVER, severity = ErrorSeverity.CRITICAL))
 public enum JsonErrors implements ErrorCode {
     SERIALIZATION_FAILED("JSON序列化失败"),
     DESERIALIZATION_FAILED("JSON反序列化失败"),

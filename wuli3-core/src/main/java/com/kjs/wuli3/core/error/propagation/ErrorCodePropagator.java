@@ -2,12 +2,11 @@ package com.kjs.wuli3.core.error.propagation;
 
 import com.kjs.wuli3.core.error.model.ErrorOrigin;
 import com.kjs.wuli3.core.error.model.ErrorSeverity;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 在错误传播协议与字符串字段之间进行协议无关的编码和解码。

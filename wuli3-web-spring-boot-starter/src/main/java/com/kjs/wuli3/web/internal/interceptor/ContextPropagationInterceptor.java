@@ -22,8 +22,7 @@ public final class ContextPropagationInterceptor implements ClientHttpRequestInt
     private final ContextReader contextReader;
     private final ContextPropagator contextPropagator;
 
-    public ContextPropagationInterceptor(
-            final ContextReader contextReader, final ContextPropagator contextPropagator) {
+    public ContextPropagationInterceptor(final ContextReader contextReader, final ContextPropagator contextPropagator) {
         this.contextReader = Objects.requireNonNull(contextReader, "contextReader");
         this.contextPropagator = Objects.requireNonNull(contextPropagator, "contextPropagator");
     }

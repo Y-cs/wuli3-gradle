@@ -3,7 +3,6 @@ package com.kjs.wuli3.core.error.propagation;
 import com.kjs.wuli3.core.error.model.ErrorCode;
 import com.kjs.wuli3.core.error.model.ErrorOrigin;
 import com.kjs.wuli3.core.error.model.ErrorSeverity;
-
 import java.util.Objects;
 
 /**

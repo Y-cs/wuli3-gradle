@@ -3,8 +3,8 @@ package com.kjs.wuli3.rabbit.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
-import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.codec.ContextPropagator;
+import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;

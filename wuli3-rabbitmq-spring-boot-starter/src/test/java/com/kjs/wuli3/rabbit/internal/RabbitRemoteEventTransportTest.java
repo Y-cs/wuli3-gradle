@@ -11,8 +11,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.error.SendFailedException;
-import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.codec.ContextPropagator;
+import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -61,7 +61,8 @@ class RabbitRemoteEventTransportTest {
         contextStore.put(new InvocationContext("10.0.0.8", "request-42"));
         final RabbitRemoteEventTransport transport = new RabbitRemoteEventTransport(
                 template,
-                new RabbitMessageEncoder(contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder())),
+                new RabbitMessageEncoder(
+                        contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder())),
                 executor);
 
         transport.send(new RabbitPublishOptions().withAsync(), RabbitRemoteEventTransportTest.envelope());

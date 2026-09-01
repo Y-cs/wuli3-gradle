@@ -25,7 +25,8 @@ public final class RabbitMessageEncoder {
      * @param contextReader  可选的当前上下文读取器
      * @param contextPropagator 上下文字段编码器
      */
-    public RabbitMessageEncoder(final @Nullable ContextReader contextReader, final ContextPropagator contextPropagator) {
+    public RabbitMessageEncoder(
+            final @Nullable ContextReader contextReader, final ContextPropagator contextPropagator) {
         this.contextReader = contextReader;
         this.contextPropagator = Objects.requireNonNull(contextPropagator, "contextEncoder");
     }

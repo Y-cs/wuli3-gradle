@@ -26,7 +26,7 @@
 | [wuli3-aliyun-spring-boot-starter](wuli3-aliyun-spring-boot-starter.md) | AliYun OSS SDK V2 多套命名客户端配置。 |
 | [wuli3-configuration-spring-boot-starter](wuli3-configuration-spring-boot-starter.md) | Jasypt 配置属性加密与解密。 |
 | [wuli3-logging-spring-boot-starter](wuli3-logging-spring-boot-starter.md) | Spring Boot + Logback 日志格式、结构化输出与滚动归档。 |
-| [wuli3-audit-log-spring-boot-starter](wuli3-audit-log-spring-boot-starter.md) | 审计协议、上下文补全、写入/查询 Transport 与存储端口。 |
+| [wuli3-audit-log-spring-boot-starter](wuli3-audit-log-spring-boot-starter.md) | 审计协议、上下文补全、事件写入与存储端口。 |
 | [wuli3-opentelemetry-spring-boot-starter](wuli3-opentelemetry-spring-boot-starter.md) | OpenTelemetry Java Agent 适配、Trace 上下文访问与业务指标记录。 |
 | [wuli3-web-spring-boot-starter](wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应与异常处理。 |
 | [wuli3-dubbo-spring-boot-starter](wuli3-dubbo-spring-boot-starter.md) | Dubbo 调用上下文与协议无关错误传播。 |

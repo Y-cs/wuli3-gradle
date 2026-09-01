@@ -54,8 +54,7 @@ class RocketAutoConfigurationTest {
                 .withBean(RemoteEventTransport.class, NoopRocketTransport::new)
                 .withBean(
                         RocketMessageWrapperEncoder.class,
-                        () -> new RocketMessageWrapperEncoder(
-                                null, new ContextPropagator(java.util.List.of())))
+                        () -> new RocketMessageWrapperEncoder(null, new ContextPropagator(java.util.List.of())))
                 .run(context -> {
                     assertThat(context).hasSingleBean(RemoteEventTransport.class);
                     assertThat(context).doesNotHaveBean(RocketRemoteEventTransport.class);

@@ -12,6 +12,7 @@ import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.store.ContextStore;
+import com.kjs.wuli3.web.internal.interceptor.ContextPropagationInterceptor;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -27,9 +28,8 @@ class InvocationContextClientHttpRequestInterceptorTest {
         final ContextStore contextStore = new ContextStore();
         contextStore.put(new InvocationContext("10.0.0.8", "request-42"));
         contextStore.put(new AuthContext(PrincipalType.CUSTOMER, "7", "alice"));
-        final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(
-                        contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
+        final ContextPropagationInterceptor interceptor = new ContextPropagationInterceptor(
+                contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
         final HttpHeaders headers = new HttpHeaders();
         headers.set(InvocationContextCodec.REQUEST_ID, "forged-request");
         headers.set(InvocationContextCodec.ORIGIN_IP, "203.0.113.8");
@@ -58,9 +58,8 @@ class InvocationContextClientHttpRequestInterceptorTest {
     @Test
     void removesReservedHeadersWhenNoContextIsAvailable() throws Exception {
         final ContextStore contextStore = new ContextStore();
-        final InvocationContextClientHttpRequestInterceptor interceptor =
-                new InvocationContextClientHttpRequestInterceptor(
-                        contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
+        final ContextPropagationInterceptor interceptor = new ContextPropagationInterceptor(
+                contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
         final HttpHeaders headers = new HttpHeaders();
         headers.set(InvocationContextCodec.REQUEST_ID, "forged-request");
         headers.set(InvocationContextCodec.ORIGIN_IP, "203.0.113.8");

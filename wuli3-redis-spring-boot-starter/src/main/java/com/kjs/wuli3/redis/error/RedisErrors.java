@@ -15,7 +15,9 @@ import lombok.RequiredArgsConstructor;
  */
 @Getter
 @RequiredArgsConstructor
-@ErrorModule(name = "REDIS", defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.SERVER, severity = ErrorSeverity.WARNING))
+@ErrorModule(
+        name = "REDIS",
+        defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.SERVER, severity = ErrorSeverity.WARNING))
 public enum RedisErrors implements ErrorCode {
     ID_ALLOCATION_FAILED("Redis ID allocation failed"),
     ID_CLOCK_ROLLBACK("Redis ID generator clock moved backwards"),

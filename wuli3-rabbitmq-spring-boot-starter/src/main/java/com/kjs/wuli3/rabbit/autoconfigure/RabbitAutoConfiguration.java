@@ -1,6 +1,6 @@
 package com.kjs.wuli3.rabbit.autoconfigure;
 
-import com.kjs.wuli3.event.autoconfigure.ConditionalOnMissingRemoteEventTransport;
+import com.kjs.wuli3.event.autoconfigure.ConditionalOnMissingRoutingEventTransport;
 import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
 import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextReader;
@@ -74,7 +74,7 @@ public class RabbitAutoConfiguration {
      * @return RabbitMQ 远程事件传输
      */
     @Bean
-    @ConditionalOnMissingRemoteEventTransport(optionsType = RabbitPublishOptions.class)
+    @ConditionalOnMissingRoutingEventTransport(optionsType = RabbitPublishOptions.class)
     @ConditionalOnBean(RabbitTemplate.class)
     RabbitRemoteEventTransport rabbitMqRemoteEventMessageTransport(
             final RabbitTemplate rabbitTemplate,

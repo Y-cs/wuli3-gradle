@@ -3,12 +3,12 @@ package com.kjs.wuli3.rocket.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.kjs.wuli3.propagation.ContextScope;
-import com.kjs.wuli3.propagation.context.AuthContext;
-import com.kjs.wuli3.propagation.context.InvocationContext;
-import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.codec.AuthContextCodec;
 import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
+import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.context.InvocationContext;
+import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -19,8 +19,8 @@ class RocketContextSupportTest {
     void decodesHeadersAndRestoresThePreviousContextAfterScopeClose() {
         final ContextStore contextStore = new ContextStore();
         contextStore.put(new InvocationContext("127.0.0.1", "previous"));
-        final RocketContextSupport support =
-                new RocketContextSupport(contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
+        final RocketContextSupport support = new RocketContextSupport(
+                contextStore, new ContextPropagator(ContextPropagator.standardContextEncoder()));
         final RocketContextSupport.RocketContextProxy propagator = support.restoreFrom(Map.of(
                 InvocationContextCodec.REQUEST_ID, "request-42",
                 InvocationContextCodec.ORIGIN_IP, "10.0.0.8",

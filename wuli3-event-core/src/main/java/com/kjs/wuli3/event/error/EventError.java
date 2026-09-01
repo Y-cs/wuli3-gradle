@@ -15,7 +15,9 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 @Getter
-@ErrorModule(name = "EVENT", defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.CALLER, severity = ErrorSeverity.NORMAL))
+@ErrorModule(
+        name = "EVENT",
+        defaultMetadata = @ErrorMetadata(origin = ErrorOrigin.CALLER, severity = ErrorSeverity.NORMAL))
 public enum EventError implements ErrorCode {
     /** 传输层不支持请求的事件发布能力。 */
     UNSUPPORTED_CAPABILITY("Unsupported Capability"),

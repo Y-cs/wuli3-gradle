@@ -27,8 +27,7 @@ public final class AuthContextCodec implements ContextFieldCodec<AuthContext> {
 
     @Override
     public Set<String> fieldNames() {
-        return Set.of(
-                AuthContextCodec.PRINCIPAL_TYPE, AuthContextCodec.PRINCIPAL_ID, AuthContextCodec.PRINCIPAL_NAME);
+        return Set.of(AuthContextCodec.PRINCIPAL_TYPE, AuthContextCodec.PRINCIPAL_ID, AuthContextCodec.PRINCIPAL_NAME);
     }
 
     @Override

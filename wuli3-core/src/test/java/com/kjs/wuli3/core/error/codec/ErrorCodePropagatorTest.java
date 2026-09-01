@@ -4,12 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import com.kjs.wuli3.core.error.model.ErrorOrigin;
-import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.core.error.model.ErrorSeverity;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
+import com.kjs.wuli3.core.error.propagation.ErrorCodePropagator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.kjs.wuli3.core.error.propagation.ErrorCodePropagator;
 import org.junit.jupiter.api.Test;
 
 /**

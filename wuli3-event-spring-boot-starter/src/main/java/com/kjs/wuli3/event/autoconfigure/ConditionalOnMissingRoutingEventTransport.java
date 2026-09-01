@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Conditional;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-@Conditional(OnMissingRemoteEventTransportCondition.class)
-public @interface ConditionalOnMissingRemoteEventTransport {
+@Conditional(OnMissingRoutingEventTransportCondition.class)
+public @interface ConditionalOnMissingRoutingEventTransport {
 
     /**
      * 默认传输实现处理的具体发布选项类型。

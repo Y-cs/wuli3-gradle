@@ -3,7 +3,6 @@ package com.kjs.wuli3.core.error.propagation;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import com.kjs.wuli3.core.error.resolver.ErrorCodeResolver;
-
 import java.util.Objects;
 
 /**
@@ -30,13 +29,11 @@ public class ErrorCodeCarrierCodec {
                 switch (visibility) {
                     case CODE_ONLY, INTERNAL -> "Internal server error";
                     case MESSAGE_ONLY, PUBLIC ->
-                            Objects.requireNonNullElse(
-                                    exception.getMessage(), exception.getErrorCode().getMessage());
+                        Objects.requireNonNullElse(
+                                exception.getMessage(), exception.getErrorCode().getMessage());
                 };
-        final String source = exception
-                .asRemoteError()
-                .map(ErrorCodeCarrier::sourceService)
-                .orElse(this.sourceService);
+        final String source =
+                exception.asRemoteError().map(ErrorCodeCarrier::sourceService).orElse(this.sourceService);
         return new ErrorCodeCarrier(
                 this.codeResolver.resolve(exception.getErrorCode()),
                 message,

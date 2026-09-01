@@ -9,10 +9,21 @@ package com.kjs.wuli3.audit;
 public interface AuditLogRecorder {
 
     /**
-     * 记录一次审计操作。
+     * 记录一次审计操作，默认在当前事务提交后发送。
      *
-     * @param command 业务方提供的审计内容
-     * @return 事件写入回执；其中不包含由独立审计服务生成的数据库 logId
+     * @param entry 业务方提供的审计内容
+     * @return 事件写入回执
      */
-    AuditLogReceipt record(AuditLogCommand command);
+    default AuditLogReceipt record(final AuditLogEntry entry) {
+        return this.record(entry, true);
+    }
+
+    /**
+     * 记录一次审计操作并指定是否在事务提交后发送。
+     *
+     * @param entry 业务方提供的审计内容
+     * @param afterCommit 是否延后到当前事务提交后再发布
+     * @return 事件写入回执
+     */
+    AuditLogReceipt record(AuditLogEntry entry, boolean afterCommit);
 }

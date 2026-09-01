@@ -3,13 +3,13 @@ package com.kjs.wuli3.core.error.resolver;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.kjs.wuli3.core.error.model.ErrorCode;
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.builtin.ErrorFrameworkErrors;
+import com.kjs.wuli3.core.error.model.ErrorCode;
 import com.kjs.wuli3.core.error.model.ErrorMetadata;
 import com.kjs.wuli3.core.error.model.ErrorModule;
 import com.kjs.wuli3.core.error.model.ErrorOrigin;
 import com.kjs.wuli3.core.error.model.ErrorSeverity;
-import com.kjs.wuli3.core.error.builtin.ErrorFrameworkErrors;
 import org.junit.jupiter.api.Test;
 
 /** 验证错误模块及字段元数据解析规则。 */

@@ -1,6 +1,6 @@
 package com.kjs.wuli3.rocket.autoconfigure;
 
-import com.kjs.wuli3.event.autoconfigure.ConditionalOnMissingRemoteEventTransport;
+import com.kjs.wuli3.event.autoconfigure.ConditionalOnMissingRoutingEventTransport;
 import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
 import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.store.ContextReader;
@@ -83,7 +83,7 @@ public class RocketAutoConfiguration {
      * @return 远程传输实现
      */
     @Bean
-    @ConditionalOnMissingRemoteEventTransport(optionsType = RocketPublishOptions.class)
+    @ConditionalOnMissingRoutingEventTransport(optionsType = RocketPublishOptions.class)
     @ConditionalOnBean(RocketMQTemplate.class)
     @ConditionalOnProperty(
             prefix = "wuli3.rocketmq",
@@ -127,7 +127,7 @@ public class RocketAutoConfiguration {
          * @return v5 远程事件传输
          */
         @Bean
-        @ConditionalOnMissingRemoteEventTransport(optionsType = RocketPublishOptions.class)
+        @ConditionalOnMissingRoutingEventTransport(optionsType = RocketPublishOptions.class)
         RocketV5RemoteEventTransport rocketV5RemoteEventTransport(
                 final Producer producer,
                 final ClientServiceProvider clientServiceProvider,

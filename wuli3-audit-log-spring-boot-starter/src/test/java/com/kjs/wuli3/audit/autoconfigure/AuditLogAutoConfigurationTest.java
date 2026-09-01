@@ -2,91 +2,135 @@ package com.kjs.wuli3.audit.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.kjs.wuli3.audit.AuditLogCommand;
-import com.kjs.wuli3.audit.AuditLogPage;
-import com.kjs.wuli3.audit.AuditLogPayload;
-import com.kjs.wuli3.audit.AuditLogQuery;
-import com.kjs.wuli3.audit.AuditLogQueryClient;
+import com.kjs.wuli3.audit.AuditLogEntry;
 import com.kjs.wuli3.audit.AuditLogRecorder;
-import com.kjs.wuli3.audit.AuditLogView;
+import com.kjs.wuli3.audit.annotation.AuditLog;
+import com.kjs.wuli3.audit.payload.AuditLogPayload;
+import com.kjs.wuli3.audit.publish.AuditLogPublishOptions;
 import com.kjs.wuli3.audit.store.AuditLogStore;
-import com.kjs.wuli3.audit.transport.AuditLogWriteTransport;
+import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
+import com.kjs.wuli3.event.remote.RemoteEventTransport;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 class AuditLogAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(AuditLogAutoConfiguration.class))
+            .withConfiguration(AutoConfigurations.of(
+                    AopAutoConfiguration.class,
+                    EventAutoConfiguration.class,
+                    AuditLogStoreAutoConfiguration.class,
+                    AuditLogAutoConfiguration.class))
             .withPropertyValues("spring.application.name=orders");
 
     @Test
-    void doesNotCreateARecorderWithoutADurableTransport() {
-        this.contextRunner.run(context -> {
-            assertThat(context).doesNotHaveBean(AuditLogRecorder.class);
-            assertThat(context).doesNotHaveBean(AuditLogQueryClient.class);
-        });
-    }
-
-    @Test
-    void configuresRecorderForAnApplicationTransport() {
+    void configuresRecorderOnTopOfTheSharedEventPublisher() {
         this.contextRunner
                 .withBean(RecordingTransport.class, RecordingTransport::new)
                 .run(context -> {
                     final AuditLogRecorder recorder = context.getBean(AuditLogRecorder.class);
                     final RecordingTransport transport = context.getBean(RecordingTransport.class);
 
-                    recorder.record(AuditLogCommand.success("ORDER", "order-1", "CREATE", "created"));
+                    recorder.record(AuditLogEntry.success("ORDER", "order-1", "CREATE", "created"));
 
-                    assertThat(transport.events)
+                    assertThat(transport.envelopes)
                             .singleElement()
-                            .satisfies(event ->
-                                    assertThat(event.payload().application()).isEqualTo("orders"));
+                            .satisfies(
+                                    event -> assertThat(event.payload().origin().application())
+                                            .isEqualTo("orders"));
                 });
     }
 
     @Test
-    void adaptsAnAuditServiceStoreForLocalWriteAndQuery() {
+    void appliesTheAnnotationDrivenAdvisorToApplicationBeans() {
+        this.contextRunner
+                .withBean(RecordingTransport.class, RecordingTransport::new)
+                .withUserConfiguration(AuditedServiceConfiguration.class)
+                .run(context -> {
+                    final AuditedService service = context.getBean(AuditedService.class);
+                    final RecordingTransport transport = context.getBean(RecordingTransport.class);
+
+                    service.rename("order-3", "new name");
+
+                    assertThat(transport.envelopes).singleElement().satisfies(event -> {
+                        assertThat(event.payload().entry().targetId()).isEqualTo("order-3");
+                        assertThat(event.payload().entry().content()).isEqualTo("重命名为 new name");
+                    });
+                });
+    }
+
+    @Test
+    void adaptsAnAuditServiceStoreForLocalWrite() {
         this.contextRunner.withBean(RecordingStore.class, RecordingStore::new).run(context -> {
             final AuditLogRecorder recorder = context.getBean(AuditLogRecorder.class);
-            final AuditLogQueryClient queryClient = context.getBean(AuditLogQueryClient.class);
             final RecordingStore store = context.getBean(RecordingStore.class);
 
-            recorder.record(AuditLogCommand.success("ORDER", "order-1", "CREATE", "created"));
-            final AuditLogPage page = queryClient.query(AuditLogQuery.all(0, 20));
+            recorder.record(AuditLogEntry.success("ORDER", "order-1", "CREATE", "created"));
 
-            assertThat(store.events).hasSize(1);
-            assertThat(page).isEqualTo(new AuditLogPage(List.of(), 0, 0, 20));
+            assertThat(store.envelopes).hasSize(1);
         });
     }
 
-    private static final class RecordingTransport implements AuditLogWriteTransport {
+    @Test
+    void backsOffEntirelyWhenDisabled() {
+        this.contextRunner
+                .withBean(RecordingStore.class, RecordingStore::new)
+                .withPropertyValues("wuli3.audit-log.enabled=false")
+                .run(context -> {
+                    assertThat(context).doesNotHaveBean(AuditLogRecorder.class);
+                });
+    }
 
-        private final List<EventEnvelope<AuditLogPayload>> events = new ArrayList<>();
+    @Configuration(proxyBeanMethods = false)
+    static class AuditedServiceConfiguration {
+
+        @Bean
+        AuditedService auditedService() {
+            return new AuditedService();
+        }
+    }
+
+    static class AuditedService {
+
+        @AuditLog(module = "ORDER", action = "RENAME", targetId = "#{#orderId}", content = "重命名为 #{#name}")
+        public void rename(final String orderId, final String name) {
+            // 仅用于验证注解驱动的记录路径
+        }
+    }
+
+    private static final class RecordingTransport implements RemoteEventTransport<AuditLogPublishOptions> {
+
+        private final List<EventEnvelope<AuditLogPayload>> envelopes = new ArrayList<>();
 
         @Override
-        public void append(final EventEnvelope<AuditLogPayload> event) {
-            this.events.add(event);
+        public Class<AuditLogPublishOptions> supportedOptionsType() {
+            return AuditLogPublishOptions.class;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void send(final AuditLogPublishOptions options, final EventEnvelope<?>... events) {
+            Arrays.stream(events)
+                    .map(event -> (EventEnvelope<AuditLogPayload>) event)
+                    .forEach(this.envelopes::add);
         }
     }
 
     private static final class RecordingStore implements AuditLogStore {
 
-        private final List<EventEnvelope<AuditLogPayload>> events = new ArrayList<>();
+        private final List<EventEnvelope<AuditLogPayload>> envelopes = new ArrayList<>();
 
         @Override
-        public AuditLogView append(final EventEnvelope<AuditLogPayload> event) {
-            this.events.add(event);
-            return AuditLogView.from(1L, event.occurredOn(), event);
-        }
-
-        @Override
-        public AuditLogPage query(final AuditLogQuery query) {
-            return new AuditLogPage(List.of(), 0, query.pageNumber(), query.pageSize());
+        public void append(final EventEnvelope<AuditLogPayload> event) {
+            this.envelopes.add(event);
         }
     }
 }

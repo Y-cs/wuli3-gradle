@@ -6,11 +6,9 @@ import com.kjs.wuli3.core.error.model.ErrorSeverity;
 import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.core.error.resolver.ErrorMetadataResolver;
-
 import java.io.Serial;
 import java.util.Objects;
 import java.util.Optional;
-
 import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 

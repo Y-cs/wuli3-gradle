@@ -8,6 +8,7 @@ import com.kjs.wuli3.propagation.context.PrincipalType;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import com.kjs.wuli3.web.auth.AuthContextResolver;
 import com.kjs.wuli3.web.context.WebContextProperties;
+import com.kjs.wuli3.web.internal.filter.ContextFilter;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;

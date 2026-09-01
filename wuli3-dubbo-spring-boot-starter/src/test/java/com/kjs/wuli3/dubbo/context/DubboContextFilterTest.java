@@ -7,9 +7,9 @@ import static org.mockito.Mockito.when;
 
 import com.kjs.wuli3.dubbo.autoconfigure.DubboProperties;
 import com.kjs.wuli3.propagation.DefaultContextProxy;
-import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.codec.ContextPropagator;
 import com.kjs.wuli3.propagation.codec.InvocationContextCodec;
+import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextStore;
 import org.apache.dubbo.rpc.AppResponse;
 import org.apache.dubbo.rpc.Invocation;

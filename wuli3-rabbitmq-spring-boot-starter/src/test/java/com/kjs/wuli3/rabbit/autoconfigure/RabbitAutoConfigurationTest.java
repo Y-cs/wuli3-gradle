@@ -60,8 +60,7 @@ class RabbitAutoConfigurationTest {
                 .withBean(NoopRabbitTransport.class, NoopRabbitTransport::new)
                 .withBean(
                         RabbitMessageEncoder.class,
-                        () -> new RabbitMessageEncoder(
-                                null, new ContextPropagator(java.util.List.of())))
+                        () -> new RabbitMessageEncoder(null, new ContextPropagator(java.util.List.of())))
                 .run(context -> {
                     assertThat(context).hasSingleBean(RemoteEventTransport.class);
                     assertThat(context).doesNotHaveBean(RabbitRemoteEventTransport.class);

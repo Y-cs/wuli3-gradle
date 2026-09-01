@@ -5,11 +5,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.builtin.CommonErrors;
 import com.kjs.wuli3.core.error.model.ErrorOrigin;
-import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.core.error.model.ErrorSeverity;
 import com.kjs.wuli3.core.error.model.ErrorVisibility;
-import com.kjs.wuli3.core.error.builtin.CommonErrors;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.core.error.propagation.ErrorCodePropagator;
 import com.kjs.wuli3.dubbo.autoconfigure.DubboProperties;
 import org.apache.dubbo.common.URL;
@@ -48,8 +48,7 @@ class DubboErrorFilterTest {
         assertThat(wireResult.getAttachment(ErrorCodePropagator.MESSAGE)).isEqualTo("Internal server error");
         assertThat(wireResult.getAttachment(ErrorCodePropagator.ORIGIN)).isEqualTo("CALLER");
         assertThat(wireResult.getAttachment(ErrorCodePropagator.SEVERITY)).isEqualTo("NORMAL");
-        assertThat(wireResult.getAttachment(ErrorCodePropagator.SOURCE_SERVICE))
-                .isEqualTo("group-service");
+        assertThat(wireResult.getAttachment(ErrorCodePropagator.SOURCE_SERVICE)).isEqualTo("group-service");
         final Invoker<?> consumerInvoker = mock(Invoker.class);
         when(consumerInvoker.invoke(invocation)).thenReturn(wireResult);
         final DubboErrorConsumerFilter consumer = new DubboErrorConsumerFilter();
@@ -114,8 +113,7 @@ class DubboErrorFilterTest {
         final Result wireResult = provider.invoke(providerInvoker, invocation);
 
         assertThat(wireResult.getAttachment(ErrorCodePropagator.CODE)).isEqualTo("COMMON.ILLEGAL_STATE");
-        assertThat(wireResult.getAttachment(ErrorCodePropagator.SOURCE_SERVICE))
-                .isEmpty();
+        assertThat(wireResult.getAttachment(ErrorCodePropagator.SOURCE_SERVICE)).isEmpty();
     }
 
     /** 验证同一个 provider Filter 处理不同 application 的 Invoker 时不会混用错误码前缀。 */
@@ -137,8 +135,7 @@ class DubboErrorFilterTest {
         final Result firstResult = provider.invoke(firstInvoker, invocation);
         final Result secondResult = provider.invoke(secondInvoker, invocation);
 
-        assertThat(firstResult.getAttachment(ErrorCodePropagator.CODE))
-                .isEqualTo("FIRST-SERVICE.COMMON.ILLEGAL_STATE");
+        assertThat(firstResult.getAttachment(ErrorCodePropagator.CODE)).isEqualTo("FIRST-SERVICE.COMMON.ILLEGAL_STATE");
         assertThat(firstResult.getAttachment(ErrorCodePropagator.SOURCE_SERVICE))
                 .isEqualTo("first-service");
         assertThat(secondResult.getAttachment(ErrorCodePropagator.CODE))

@@ -3,6 +3,7 @@ package com.kjs.wuli3.json.core;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import com.kjs.wuli3.json.provider.JacksonProvider;
 
 /**
@@ -55,6 +56,6 @@ public final class Jsons {
     }
 
     private static ErrorCodeException jsonException(final JsonErrors error, final Exception ex) {
-        return new ErrorCodeException(error, error.getMessage(), ex);
+        return new ErrorCodeException(error, error.getMessage(), ex).withVisibility(ErrorVisibility.INTERNAL);
     }
 }

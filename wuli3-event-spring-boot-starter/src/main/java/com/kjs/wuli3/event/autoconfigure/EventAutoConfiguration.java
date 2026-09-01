@@ -4,7 +4,7 @@ import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.EventTransport;
 import com.kjs.wuli3.event.PublishOptions;
 import com.kjs.wuli3.event.RoutingEventPublisher;
-import com.kjs.wuli3.event.remote.RemoteEventTransport;
+import com.kjs.wuli3.event.remote.RoutingEventTransport;
 import com.kjs.wuli3.event.transport.AsyncEventTransport;
 import com.kjs.wuli3.event.transport.SpringLocalEventTransport;
 import com.kjs.wuli3.event.transport.TransactionalEventTransport;
@@ -43,13 +43,13 @@ public class EventAutoConfiguration {
     @ConditionalOnMissingBean(EventPublisher.class)
     EventPublisher eventPublisher(
             final SpringLocalEventTransport springLocalEventMessageTransport,
-            final List<RemoteEventTransport<?>> remoteEventTransports,
+            final List<RoutingEventTransport<?>> routingEventTransports,
             @Qualifier("applicationTaskExecutor") final TaskExecutor executor) {
         final EventTransport<?> localTransport = new TransactionalEventTransport<>(
                 new AsyncEventTransport<>(springLocalEventMessageTransport, executor));
         final RoutingEventPublisher publisher = new RoutingEventPublisher();
         EventAutoConfiguration.register(publisher, localTransport);
-        remoteEventTransports.forEach(
+        routingEventTransports.forEach(
                 transport -> EventAutoConfiguration.register(publisher, new TransactionalEventTransport<>(transport)));
         return publisher;
     }

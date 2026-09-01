@@ -1,12 +1,11 @@
 package com.kjs.wuli3.web.json;
 
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
-import org.jspecify.annotations.NullMarked;
-
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 根据 Web 配置在资源路径与公开 URL 之间转换。

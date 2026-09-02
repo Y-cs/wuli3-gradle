@@ -3,11 +3,9 @@ package com.kjs.wuli3.audit.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.kjs.wuli3.audit.AuditLogEntry;
-import com.kjs.wuli3.audit.AuditLogOutcome;
 import com.kjs.wuli3.audit.AuditLogReceipt;
 import com.kjs.wuli3.audit.AuditLogRecorder;
-import com.kjs.wuli3.audit.annotation.AuditLog;
+import com.kjs.wuli3.audit.payload.AuditLog;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,7 @@ class AuditLogInterceptorTest {
             assertThat(entry.action()).isEqualTo("CREATE");
             assertThat(entry.targetId()).isEqualTo("order-7");
             assertThat(entry.content()).isEqualTo("创建订单 order-7 金额 99，结果 created:order-7");
-            assertThat(entry.outcome()).isEqualTo(AuditLogOutcome.SUCCESS);
+            assertThat(entry.outcome()).isEqualTo(AuditLog.AuditLogOutcome.SUCCESS);
         });
         assertThat(recorder.afterCommitFlags).containsExactly(true);
     }
@@ -59,7 +57,7 @@ class AuditLogInterceptorTest {
                 .hasMessage("order is locked");
 
         assertThat(recorder.entries).singleElement().satisfies(entry -> {
-            assertThat(entry.outcome()).isEqualTo(AuditLogOutcome.FAILURE);
+            assertThat(entry.outcome()).isEqualTo(AuditLog.AuditLogOutcome.FAILURE);
             assertThat(entry.targetId()).isEqualTo("order-9");
             assertThat(entry.content()).isEqualTo("取消失败：order is locked");
         });
@@ -87,7 +85,8 @@ class AuditLogInterceptorTest {
     private static OrderService proxy(final OrderService target, final AuditLogRecorder recorder) {
         final ProxyFactory factory = new ProxyFactory(target);
         factory.addAdvisor(new DefaultPointcutAdvisor(
-                new AnnotationMatchingPointcut(null, AuditLog.class, true), new AuditLogInterceptor(recorder)));
+                new AnnotationMatchingPointcut(null, com.kjs.wuli3.audit.annotation.AuditLog.class, true),
+                new AuditLogInterceptor(recorder)));
         return (OrderService) factory.getProxy();
     }
 
@@ -107,7 +106,7 @@ class AuditLogInterceptorTest {
     static class DefaultOrderService implements OrderService {
 
         @Override
-        @AuditLog(
+        @com.kjs.wuli3.audit.annotation.AuditLog(
                 module = "ORDER",
                 action = "CREATE",
                 targetId = "#{#orderId}",
@@ -117,7 +116,7 @@ class AuditLogInterceptorTest {
         }
 
         @Override
-        @AuditLog(
+        @com.kjs.wuli3.audit.annotation.AuditLog(
                 module = "ORDER",
                 action = "ARCHIVE",
                 targetId = "all-orders",
@@ -128,13 +127,22 @@ class AuditLogInterceptorTest {
         }
 
         @Override
-        @AuditLog(module = "ORDER", action = "CANCEL", targetId = "#{#orderId}", content = "取消失败：#{#exception.message}")
+        @com.kjs.wuli3.audit.annotation.AuditLog(
+                module = "ORDER",
+                action = "CANCEL",
+                targetId = "#{#orderId}",
+                content = "取消失败：#{#exception.message}")
         public void cancel(final String orderId) {
             throw new IllegalStateException("order is locked");
         }
 
         @Override
-        @AuditLog(module = "ORDER", action = "PURGE", targetId = "all-orders", content = "清理订单", recordFailure = false)
+        @com.kjs.wuli3.audit.annotation.AuditLog(
+                module = "ORDER",
+                action = "PURGE",
+                targetId = "all-orders",
+                content = "清理订单",
+                recordFailure = false)
         public void purge() {
             throw new IllegalStateException("not allowed");
         }
@@ -147,16 +155,16 @@ class AuditLogInterceptorTest {
 
     private static final class RecordingRecorder implements AuditLogRecorder {
 
-        private final List<AuditLogEntry> entries = new ArrayList<>();
+        private final List<AuditLog> entries = new ArrayList<>();
         private final List<Boolean> afterCommitFlags = new ArrayList<>();
 
         @Override
-        public AuditLogReceipt record(final AuditLogEntry entry) {
+        public AuditLogReceipt record(final AuditLog entry) {
             return this.record(entry, true);
         }
 
         @Override
-        public AuditLogReceipt record(final AuditLogEntry entry, final boolean afterCommit) {
+        public AuditLogReceipt record(final AuditLog entry, final boolean afterCommit) {
             this.entries.add(entry);
             this.afterCommitFlags.add(afterCommit);
             return new AuditLogReceipt("event-" + this.entries.size(), Instant.EPOCH);

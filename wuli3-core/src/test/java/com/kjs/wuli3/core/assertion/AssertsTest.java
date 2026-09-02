@@ -10,41 +10,80 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
+/**
+ * 验证失败条件断言的判断语义与异常转换行为。
+ *
+ * @author GuoYang create on 2026/9/1 17:55
+ */
 class AssertsTest {
 
     @Test
-    void passesWhenAssertionsAreSatisfied() {
-        assertThatCode(() -> Asserts.isTrue(true).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> Asserts.notNull("value").throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> Asserts.notBlank("value").throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> Asserts.notEmpty("value").throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> Asserts.isEmptyCollection(List.of()).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .doesNotThrowAnyException();
-        assertThatCode(() ->
-                        Asserts.isNotEmptyCollection(List.of("value")).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .doesNotThrowAnyException();
-        assertThatCode(() -> Asserts.isEmptyMap(Map.of()).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .doesNotThrowAnyException();
-        assertThatCode(() ->
-                        Asserts.isNotEmptyMap(Map.of("key", "value")).throwException(CommonErrors.ILLEGAL_ARGUMENT))
+    void exposesFailureConditionSemantics() {
+        assertThat(Asserts.whenFalse(false).condition()).isTrue();
+        assertThat(Asserts.whenTrue(true).condition()).isTrue();
+        assertThat(Asserts.whenNull(null).condition()).isTrue();
+        assertThat(Asserts.whenNotNull("value").condition()).isTrue();
+        assertThat(Asserts.whenBlank(" ").condition()).isTrue();
+        assertThat(Asserts.whenNotBlank("value").condition()).isTrue();
+        assertThat(Asserts.whenEmpty("").condition()).isTrue();
+        assertThat(Asserts.whenNotEmpty("value").condition()).isTrue();
+        assertThat(Asserts.whenEmptyCollection(List.of()).condition()).isTrue();
+        assertThat(Asserts.whenNotEmptyCollection(List.of("value")).condition()).isTrue();
+        assertThat(Asserts.whenEmptyMap(Map.of()).condition()).isTrue();
+        assertThat(Asserts.whenNotEmptyMap(Map.of("key", "value")).condition()).isTrue();
+    }
+
+    @Test
+    void exposesNonFailureConditionSemantics() {
+        assertThat(Asserts.whenFalse(true).condition()).isFalse();
+        assertThat(Asserts.whenTrue(false).condition()).isFalse();
+        assertThat(Asserts.whenNull("value").condition()).isFalse();
+        assertThat(Asserts.whenNotNull(null).condition()).isFalse();
+        assertThat(Asserts.whenBlank("value").condition()).isFalse();
+        assertThat(Asserts.whenNotBlank(" ").condition()).isFalse();
+        assertThat(Asserts.whenEmpty("value").condition()).isFalse();
+        assertThat(Asserts.whenNotEmpty("").condition()).isFalse();
+        assertThat(Asserts.whenEmptyCollection(List.of("value")).condition()).isFalse();
+        assertThat(Asserts.whenNotEmptyCollection(List.of()).condition()).isFalse();
+        assertThat(Asserts.whenEmptyMap(Map.of("key", "value")).condition()).isFalse();
+        assertThat(Asserts.whenNotEmptyMap(Map.of()).condition()).isFalse();
+    }
+
+    @Test
+    void treatsNullAsEmptyButNotAsNonEmpty() {
+        assertThat(Asserts.whenBlank(null).condition()).isTrue();
+        assertThat(Asserts.whenNotBlank(null).condition()).isFalse();
+        assertThat(Asserts.whenEmpty(null).condition()).isTrue();
+        assertThat(Asserts.whenNotEmpty(null).condition()).isFalse();
+        assertThat(Asserts.whenEmptyCollection(null).condition()).isTrue();
+        assertThat(Asserts.whenNotEmptyCollection(null).condition()).isFalse();
+        assertThat(Asserts.whenEmptyMap(null).condition()).isTrue();
+        assertThat(Asserts.whenNotEmptyMap(null).condition()).isFalse();
+    }
+
+    @Test
+    void reversesFailureCondition() {
+        assertThat(Asserts.whenTrue(true).reversed().condition()).isFalse();
+        assertThat(Asserts.whenTrue(false).reversed().condition()).isTrue();
+    }
+
+    @Test
+    void doesNotThrowWhenFailureConditionIsFalse() {
+        assertThatCode(() -> Asserts.whenTrue(false).throwException(CommonErrors.ILLEGAL_ARGUMENT))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void failsWithErrorCodeException() {
-        assertThatThrownBy(() -> Asserts.notBlank(" ").throwException(CommonErrors.ILLEGAL_ARGUMENT))
+    void throwsErrorCodeException() {
+        assertThatThrownBy(() -> Asserts.whenTrue(true).throwException(CommonErrors.ILLEGAL_ARGUMENT))
                 .isInstanceOfSatisfying(
                         ErrorCodeException.class,
                         exception -> assertThat(exception.getErrorCode()).isSameAs(CommonErrors.ILLEGAL_ARGUMENT));
     }
 
     @Test
-    void failsWithErrorCodeExceptionAndCustomMessage() {
-        assertThatThrownBy(() -> Asserts.notEmpty("").throwException(CommonErrors.ILLEGAL_ARGUMENT, "empty value"))
+    void throwsErrorCodeExceptionWithCustomMessage() {
+        assertThatThrownBy(() -> Asserts.whenEmpty("").throwException(CommonErrors.ILLEGAL_ARGUMENT, "empty value"))
                 .isInstanceOfSatisfying(ErrorCodeException.class, exception -> {
                     assertThat(exception.getErrorCode()).isSameAs(CommonErrors.ILLEGAL_ARGUMENT);
                     assertThat(exception).hasMessage("empty value");
@@ -52,27 +91,11 @@ class AssertsTest {
     }
 
     @Test
-    void failsWithInternalErrorWhenOnlyMessageIsProvided() {
-        assertThatThrownBy(() -> Asserts.isTrue(false).throwIllegalArgumentException("invalid state"))
+    void throwsIllegalArgumentErrorCode() {
+        assertThatThrownBy(() -> Asserts.whenFalse(false).throwIllegalArgumentException("invalid state"))
                 .isInstanceOfSatisfying(ErrorCodeException.class, exception -> {
                     assertThat(exception.getErrorCode()).isSameAs(CommonErrors.ILLEGAL_ARGUMENT);
                     assertThat(exception).hasMessage("invalid state");
                 });
-    }
-
-    @Test
-    void failsWhenCollectionAndMapAssertionsAreNotSatisfied() {
-        assertThatThrownBy(
-                        () -> Asserts.isEmptyCollection(List.of("value")).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .isInstanceOfSatisfying(
-                        ErrorCodeException.class,
-                        exception -> assertThat(exception.getErrorCode()).isSameAs(CommonErrors.ILLEGAL_ARGUMENT));
-        assertThatThrownBy(() -> Asserts.isNotEmptyCollection(List.of()).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .isInstanceOf(ErrorCodeException.class);
-        assertThatThrownBy(
-                        () -> Asserts.isEmptyMap(Map.of("key", "value")).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .isInstanceOf(ErrorCodeException.class);
-        assertThatThrownBy(() -> Asserts.isNotEmptyMap(Map.of()).throwException(CommonErrors.ILLEGAL_ARGUMENT))
-                .isInstanceOf(ErrorCodeException.class);
     }
 }

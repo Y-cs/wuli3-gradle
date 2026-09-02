@@ -1,6 +1,7 @@
 package com.kjs.wuli3.propagation.snapshot;
 
 import com.kjs.wuli3.propagation.context.Context;
+import com.kjs.wuli3.propagation.context.PropagationContext;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +53,25 @@ public final class ContextSnapshot {
             snapshotContexts.put(type, actualContext);
         }
         return new ContextSnapshot(snapshotContexts);
+    }
+
+    /**
+     * 由容器内部映射直接构建快照，仅保留可传播上下文；单次遍历完成过滤与拷贝。
+     *
+     * @param rawContexts 容器内部的完整上下文映射
+     * @return 仅包含 {@link PropagationContext} 的独立快照
+     */
+    public static ContextSnapshot ofPropagationOnly(final Map<Class<? extends Context>, Context> rawContexts) {
+        if (rawContexts.isEmpty()) {
+            return ContextSnapshot.EMPTY;
+        }
+        final Map<Class<? extends Context>, Context> filtered = new HashMap<>(rawContexts.size());
+        for (final Map.Entry<Class<? extends Context>, Context> entry : rawContexts.entrySet()) {
+            if (entry.getValue() instanceof PropagationContext) {
+                filtered.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return filtered.isEmpty() ? ContextSnapshot.EMPTY : new ContextSnapshot(filtered);
     }
 
     /**

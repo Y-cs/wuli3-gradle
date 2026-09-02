@@ -1,4 +1,4 @@
-package com.kjs.wuli3.audit.publish;
+package com.kjs.wuli3.audit.protocol;
 
 import com.kjs.wuli3.event.options.TransactionalPublishOptions;
 

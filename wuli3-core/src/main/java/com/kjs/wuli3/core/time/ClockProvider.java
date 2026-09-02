@@ -13,6 +13,12 @@ import java.util.Objects;
 @FunctionalInterface
 public interface ClockProvider {
 
+    Clock ASIA_SHANGHAI = Clock.system(ZoneId.of("Asia/Shanghai"));
+
+    class Asia {
+        public static final ClockProvider SHANGHAI = () -> ASIA_SHANGHAI;
+    }
+
     /** 返回应用使用的时钟。 */
     Clock clock();
 

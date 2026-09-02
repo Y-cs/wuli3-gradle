@@ -2,12 +2,11 @@ package com.kjs.wuli3.audit.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.kjs.wuli3.audit.AuditLogEntry;
+import com.kjs.wuli3.audit.payload.AuditLog;
 import com.kjs.wuli3.audit.AuditLogRecorder;
-import com.kjs.wuli3.audit.annotation.AuditLog;
 import com.kjs.wuli3.audit.payload.AuditLogPayload;
-import com.kjs.wuli3.audit.publish.AuditLogPublishOptions;
-import com.kjs.wuli3.audit.store.AuditLogStore;
+import com.kjs.wuli3.audit.protocol.AuditLogPublishOptions;
+import com.kjs.wuli3.audit.protocol.AuditLogStore;
 import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.remote.RemoteEventTransport;
@@ -39,13 +38,13 @@ class AuditLogAutoConfigurationTest {
                     final AuditLogRecorder recorder = context.getBean(AuditLogRecorder.class);
                     final RecordingTransport transport = context.getBean(RecordingTransport.class);
 
-                    recorder.record(AuditLogEntry.success("ORDER", "order-1", "CREATE", "created"));
+                    recorder.record(AuditLog.success("ORDER", "order-1", "CREATE", "created"));
 
                     assertThat(transport.envelopes)
                             .singleElement()
-                            .satisfies(
-                                    event -> assertThat(event.payload().origin().application())
-                                            .isEqualTo("orders"));
+                            .satisfies(event -> assertThat(
+                                            event.payload().runtimeSnapshot().application())
+                                    .isEqualTo("orders"));
                 });
     }
 
@@ -61,8 +60,8 @@ class AuditLogAutoConfigurationTest {
                     service.rename("order-3", "new name");
 
                     assertThat(transport.envelopes).singleElement().satisfies(event -> {
-                        assertThat(event.payload().entry().targetId()).isEqualTo("order-3");
-                        assertThat(event.payload().entry().content()).isEqualTo("重命名为 new name");
+                        assertThat(event.payload().auditLog().targetId()).isEqualTo("order-3");
+                        assertThat(event.payload().auditLog().content()).isEqualTo("重命名为 new name");
                     });
                 });
     }
@@ -73,7 +72,7 @@ class AuditLogAutoConfigurationTest {
             final AuditLogRecorder recorder = context.getBean(AuditLogRecorder.class);
             final RecordingStore store = context.getBean(RecordingStore.class);
 
-            recorder.record(AuditLogEntry.success("ORDER", "order-1", "CREATE", "created"));
+            recorder.record(AuditLog.success("ORDER", "order-1", "CREATE", "created"));
 
             assertThat(store.envelopes).hasSize(1);
         });
@@ -100,7 +99,11 @@ class AuditLogAutoConfigurationTest {
 
     static class AuditedService {
 
-        @AuditLog(module = "ORDER", action = "RENAME", targetId = "#{#orderId}", content = "重命名为 #{#name}")
+        @com.kjs.wuli3.audit.annotation.AuditLog(
+                module = "ORDER",
+                action = "RENAME",
+                targetId = "#{#orderId}",
+                content = "重命名为 #{#name}")
         public void rename(final String orderId, final String name) {
             // 仅用于验证注解驱动的记录路径
         }

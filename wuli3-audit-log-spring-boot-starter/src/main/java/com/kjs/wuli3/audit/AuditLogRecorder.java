@@ -1,5 +1,7 @@
 package com.kjs.wuli3.audit;
 
+import com.kjs.wuli3.audit.payload.AuditLog;
+
 /**
  * 创建并发送包含当前调用上下文的审计事件。
  *
@@ -14,7 +16,7 @@ public interface AuditLogRecorder {
      * @param entry 业务方提供的审计内容
      * @return 事件写入回执
      */
-    default AuditLogReceipt record(final AuditLogEntry entry) {
+    default AuditLogReceipt record(final AuditLog entry) {
         return this.record(entry, true);
     }
 
@@ -25,5 +27,5 @@ public interface AuditLogRecorder {
      * @param afterCommit 是否延后到当前事务提交后再发布
      * @return 事件写入回执
      */
-    AuditLogReceipt record(AuditLogEntry entry, boolean afterCommit);
+    AuditLogReceipt record(AuditLog entry, boolean afterCommit);
 }

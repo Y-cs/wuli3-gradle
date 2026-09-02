@@ -1,9 +1,10 @@
 package com.kjs.wuli3.event.envelope;
 
-import java.time.Instant;
+import com.kjs.wuli3.core.id.IdGenerator;
+import com.kjs.wuli3.core.id.UuidStringIdGenerator;
+import com.kjs.wuli3.core.time.ClockProvider;
+
 import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 /** 为固定主题和事件类型创建标识一致的事件信封。
  *
@@ -14,12 +15,14 @@ public final class EventEnvelopeTemplate {
     private final String topic;
     private final String eventType;
 
-    private final Supplier<String> eventIdSupplier;
+    private final ClockProvider clockProvider;
+    private final IdGenerator<String> idGenerator;
 
-    private EventEnvelopeTemplate(final String topic, final String eventType, final Supplier<String> eventIdSupplier) {
+    private EventEnvelopeTemplate(final String topic, final String eventType, final ClockProvider clockProvider, final IdGenerator<String> idGenerator) {
         this.topic = EventEnvelopeTemplate.requireNonBlank(topic, "topic");
         this.eventType = EventEnvelopeTemplate.requireNonBlank(eventType, "eventType");
-        this.eventIdSupplier = Objects.requireNonNull(eventIdSupplier, "eventIdSupplier cannot be null");
+        this.clockProvider = Objects.requireNonNull(clockProvider, "clockProvider cannot be null");
+        this.idGenerator = Objects.requireNonNull(idGenerator, "eventIdSupplier cannot be null");
     }
 
     /**
@@ -31,8 +34,8 @@ public final class EventEnvelopeTemplate {
      * @return 可复用的事件信封模板
      */
     public static EventEnvelopeTemplate of(
-            final String topic, final String eventType, final Supplier<String> eventIdSupplier) {
-        return new EventEnvelopeTemplate(topic, eventType, eventIdSupplier);
+            final String topic, final String eventType, final IdGenerator<String> eventIdSupplier) {
+        return new EventEnvelopeTemplate(topic, eventType, ClockProvider.Asia.SHANGHAI, eventIdSupplier);
     }
 
     /**
@@ -44,7 +47,7 @@ public final class EventEnvelopeTemplate {
      */
     public static EventEnvelopeTemplate of(final String topic, final String eventType) {
         return new EventEnvelopeTemplate(
-                topic, eventType, () -> UUID.randomUUID().toString());
+                topic, eventType, ClockProvider.Asia.SHANGHAI, UuidStringIdGenerator.INSTANCE);
     }
 
     /**
@@ -55,7 +58,8 @@ public final class EventEnvelopeTemplate {
      * @return 带有新生成标识和当前时间戳的事件信封
      */
     public <T> EventEnvelope<T> wrap(final T payload) {
-        return new EventEnvelope<>(this.topic, this.eventType, this.eventIdSupplier.get(), Instant.now(), payload);
+        return new EventEnvelope<>(this.topic, this.eventType, this.idGenerator.nextId(), clockProvider.instant(),
+                payload);
     }
 
     private static String requireNonBlank(final String value, final String name) {

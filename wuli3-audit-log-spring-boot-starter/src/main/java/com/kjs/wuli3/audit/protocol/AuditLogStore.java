@@ -1,4 +1,4 @@
-package com.kjs.wuli3.audit.store;
+package com.kjs.wuli3.audit.protocol;
 
 import com.kjs.wuli3.audit.payload.AuditLogPayload;
 import com.kjs.wuli3.event.envelope.EventEnvelope;

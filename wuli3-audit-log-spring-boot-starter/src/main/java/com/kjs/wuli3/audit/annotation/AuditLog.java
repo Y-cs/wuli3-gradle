@@ -13,6 +13,7 @@ import java.lang.annotation.Target;
  *
  * <p>{@code targetId} 和 {@code content} 支持 {@code #{}} 模板语法，可引用方法参数（按名称）、
  * {@code #result}（方法返回值）和 {@code #exception}（捕获的异常）。不含 {@code #{}} 时视为字面量。
+ * 表达式采用只读数据绑定上下文，仅支持属性读取；不支持方法调用、类型或 Bean 引用以及赋值。
  *
  * <p>操作结果 {@code outcome} 由是否抛出异常自动推断：正常返回为 {@code SUCCESS}，抛出异常为 {@code FAILURE}。
  * 异常会在记录后原样抛出，不会被吞掉。

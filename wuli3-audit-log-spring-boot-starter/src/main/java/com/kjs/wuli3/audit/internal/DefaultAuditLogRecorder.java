@@ -1,26 +1,28 @@
 package com.kjs.wuli3.audit.internal;
 
-import com.kjs.wuli3.audit.AuditLogEntry;
-import com.kjs.wuli3.audit.AuditLogProtocol;
 import com.kjs.wuli3.audit.AuditLogReceipt;
 import com.kjs.wuli3.audit.AuditLogRecorder;
-import com.kjs.wuli3.audit.payload.AuditLogOrigin;
+import com.kjs.wuli3.audit.payload.AuditLog;
 import com.kjs.wuli3.audit.payload.AuditLogPayload;
-import com.kjs.wuli3.audit.payload.AuditPrincipal;
-import com.kjs.wuli3.audit.publish.AuditLogPublishOptions;
-import com.kjs.wuli3.core.id.IdGenerator;
+import com.kjs.wuli3.audit.payload.AuditLogRuntimeSnapshot;
+import com.kjs.wuli3.audit.protocol.AuditLogProtocolConstants;
+import com.kjs.wuli3.audit.protocol.AuditLogPublishOptions;
+import com.kjs.wuli3.core.assertion.Asserts;
 import com.kjs.wuli3.core.time.ClockProvider;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
+import com.kjs.wuli3.event.envelope.EventEnvelopeTemplate;
 import com.kjs.wuli3.opentelemetry.trace.TraceContext;
 import com.kjs.wuli3.opentelemetry.trace.TraceContextAccessor;
 import com.kjs.wuli3.propagation.context.AuthContext;
+import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextReader;
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
-import org.jspecify.annotations.Nullable;
 
 /**
  * 默认的上下文感知审计日志记录器。
@@ -29,12 +31,14 @@ import org.jspecify.annotations.Nullable;
  */
 public final class DefaultAuditLogRecorder implements AuditLogRecorder {
 
+    private static final EventEnvelopeTemplate ENVELOPE_TEMPLATE =
+            EventEnvelopeTemplate.of(
+                    AuditLogProtocolConstants.TOPIC, AuditLogProtocolConstants.EVENT_TYPE);
+
     private final String application;
     private final EventPublisher eventPublisher;
     private final @Nullable ContextReader contextReader;
     private final @Nullable TraceContextAccessor traceContextAccessor;
-    private final ClockProvider clockProvider;
-    private final IdGenerator<String> eventIdGenerator;
 
     /**
      * 创建使用指定上下文和标识来源的记录器。
@@ -43,56 +47,46 @@ public final class DefaultAuditLogRecorder implements AuditLogRecorder {
      * @param eventPublisher 事件发布器
      * @param contextReader 上下文读取器；可为 {@code null}
      * @param traceContextAccessor 追踪上下文访问器；可为 {@code null}
-     * @param clockProvider 时钟提供器
-     * @param eventIdGenerator 事件标识生成器
      */
     public DefaultAuditLogRecorder(
             final String application,
             final EventPublisher eventPublisher,
             final @Nullable ContextReader contextReader,
-            final @Nullable TraceContextAccessor traceContextAccessor,
-            final ClockProvider clockProvider,
-            final IdGenerator<String> eventIdGenerator) {
-        this.application = DefaultAuditLogRecorder.requireNonBlank(application, "application");
+            final @Nullable TraceContextAccessor traceContextAccessor) {
+        Asserts.whenBlank(application).throwIllegalArgumentException("application cannot be blank");
+        this.application = application;
         this.eventPublisher = Objects.requireNonNull(eventPublisher, "eventPublisher");
         this.contextReader = contextReader;
         this.traceContextAccessor = traceContextAccessor;
-        this.clockProvider = Objects.requireNonNull(clockProvider, "clockProvider");
-        this.eventIdGenerator = Objects.requireNonNull(eventIdGenerator, "eventIdGenerator");
     }
 
     @Override
-    public AuditLogReceipt record(final AuditLogEntry entry) {
+    public AuditLogReceipt record(final AuditLog entry) {
         return this.record(entry, true);
     }
 
     @Override
-    public AuditLogReceipt record(final AuditLogEntry entry, final boolean afterCommit) {
-        final AuditLogEntry actualEntry = Objects.requireNonNull(entry, "entry");
-        final Instant occurredAt = this.clockProvider.instant();
-        final String eventId = DefaultAuditLogRecorder.requireNonBlank(this.eventIdGenerator.nextId(), "eventId");
-        final AuditLogOrigin origin = this.buildOrigin();
-        final AuditLogPayload payload = new AuditLogPayload(AuditLogProtocol.SCHEMA_VERSION, actualEntry, origin);
-        final EventEnvelope<AuditLogPayload> envelope =
-                new EventEnvelope<>(AuditLogProtocol.TOPIC, AuditLogProtocol.EVENT_TYPE, eventId, occurredAt, payload);
+    public AuditLogReceipt record(final AuditLog entry, final boolean afterCommit) {
+        final AuditLog auditLog = Objects.requireNonNull(entry, "auditLog");
+        final AuditLogRuntimeSnapshot runtimeSnapshot = this.captureRuntimeSnapshot();
+        final AuditLogPayload payload = new AuditLogPayload(auditLog, runtimeSnapshot);
+        final EventEnvelope<AuditLogPayload> envelope = ENVELOPE_TEMPLATE.wrap(payload);
         this.eventPublisher.publish(AuditLogPublishOptions.of(afterCommit), envelope);
-        return new AuditLogReceipt(eventId, occurredAt);
+        return new AuditLogReceipt(envelope.eventId(), envelope.occurredOn());
     }
 
-    private AuditLogOrigin buildOrigin() {
+    private AuditLogRuntimeSnapshot captureRuntimeSnapshot() {
         final Optional<AuthContext> authContext = this.context(AuthContext.class);
         final Optional<InvocationContext> invocationContext = this.context(InvocationContext.class);
         final Optional<TraceContext> traceContext = this.traceContext();
-        return new AuditLogOrigin(
+        return new AuditLogRuntimeSnapshot(
                 this.application,
                 authContext.map(DefaultAuditLogRecorder::principal).orElse(null),
-                invocationContext.map(InvocationContext::requestId).orElse(null),
-                traceContext.map(TraceContext::traceId).orElse(null),
-                traceContext.map(TraceContext::spanId).orElse(null),
-                invocationContext.map(InvocationContext::originIp).orElse(null));
+                traceContext.map(DefaultAuditLogRecorder::trace).orElse(null),
+                invocationContext.map(DefaultAuditLogRecorder::invocation).orElse(null));
     }
 
-    private <T extends com.kjs.wuli3.propagation.context.Context> Optional<T> context(final Class<T> type) {
+    private <T extends Context> Optional<T> context(final Class<T> type) {
         return this.contextReader == null ? Optional.empty() : this.contextReader.get(type);
     }
 
@@ -100,14 +94,16 @@ public final class DefaultAuditLogRecorder implements AuditLogRecorder {
         return this.traceContextAccessor == null ? Optional.empty() : this.traceContextAccessor.current();
     }
 
-    private static AuditPrincipal principal(final AuthContext context) {
-        return new AuditPrincipal(context.principalType(), context.principalId(), context.principalName());
+    private static AuditLogRuntimeSnapshot.AuditPrincipal principal(final AuthContext context) {
+        return new AuditLogRuntimeSnapshot.AuditPrincipal(
+                context.principalType(), context.principalId(), context.principalName());
     }
 
-    private static String requireNonBlank(final String value, final String name) {
-        if (Objects.requireNonNull(value, name).isBlank()) {
-            throw new IllegalArgumentException(name + " cannot be blank");
-        }
-        return value;
+    private static AuditLogRuntimeSnapshot.AuditTrace trace(final TraceContext context) {
+        return new AuditLogRuntimeSnapshot.AuditTrace(context.traceId(), context.spanId());
+    }
+
+    private static AuditLogRuntimeSnapshot.AuditInvocation invocation(final InvocationContext context) {
+        return new AuditLogRuntimeSnapshot.AuditInvocation(context.requestId(), context.originIp());
     }
 }

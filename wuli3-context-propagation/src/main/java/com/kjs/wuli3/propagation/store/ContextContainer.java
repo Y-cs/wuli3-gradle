@@ -1,7 +1,6 @@
 package com.kjs.wuli3.propagation.store;
 
 import com.kjs.wuli3.propagation.context.Context;
-import com.kjs.wuli3.propagation.context.PropagationContext;
 import com.kjs.wuli3.propagation.snapshot.ContextSnapshot;
 import java.util.Collection;
 import java.util.HashMap;
@@ -84,8 +83,6 @@ public final class ContextContainer {
      * @return 当前容器的传播上下文快照
      */
     public ContextSnapshot capture() {
-        return ContextSnapshot.of(this.contexts.values().stream()
-                .filter(PropagationContext.class::isInstance)
-                .toArray(Context[]::new));
+        return ContextSnapshot.ofPropagationOnly(this.contexts);
     }
 }

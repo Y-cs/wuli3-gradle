@@ -35,35 +35,19 @@ import org.springframework.core.env.Environment;
 public class AuditLogAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(ClockProvider.class)
-    ClockProvider clockProvider() {
-        return () -> Clock.systemUTC();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(IdGenerator.class)
-    IdGenerator<String> eventIdGenerator() {
-        return UuidStringIdGenerator.INSTANCE;
-    }
-
-    @Bean
     @ConditionalOnBean(EventPublisher.class)
     @ConditionalOnMissingBean(AuditLogRecorder.class)
     AuditLogRecorder auditLogRecorder(
             final EventPublisher eventPublisher,
             final ObjectProvider<ContextReader> contextReaders,
             final ObjectProvider<TraceContextAccessor> traceContextAccessors,
-            final ClockProvider clockProvider,
-            final IdGenerator<String> eventIdGenerator,
             final Environment environment) {
         final String application = environment.getProperty("spring.application.name", "application");
         return new DefaultAuditLogRecorder(
                 application,
                 eventPublisher,
                 contextReaders.getIfAvailable(),
-                traceContextAccessors.getIfAvailable(),
-                clockProvider,
-                eventIdGenerator);
+                traceContextAccessors.getIfAvailable());
     }
 
     @Bean

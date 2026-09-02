@@ -16,7 +16,7 @@ dependencies {
 业务代码只提交业务事实：
 
 ```java
-final AuditLogReceipt receipt = auditLogRecorder.record(AuditLogEntry.success(
+final AuditLogReceipt receipt = auditLogRecorder.record(AuditLog.success(
         "ORDER",
         orderId.toString(),
         "CREATE",

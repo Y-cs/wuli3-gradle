@@ -1,12 +1,13 @@
 package com.kjs.wuli3.audit.autoconfigure;
 
-import com.kjs.wuli3.audit.store.AuditLogStore;
-import com.kjs.wuli3.audit.store.StoreBackedAuditLogEventTransport;
+import com.kjs.wuli3.audit.protocol.AuditLogPublishOptions;
+import com.kjs.wuli3.audit.protocol.AuditLogStore;
+import com.kjs.wuli3.audit.protocol.StoreBackedAuditLogEventTransport;
+import com.kjs.wuli3.event.autoconfigure.ConditionalOnMissingRoutingEventTransport;
 import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
 import com.kjs.wuli3.event.remote.RoutingEventTransport;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
@@ -23,7 +24,7 @@ public class AuditLogStoreAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(AuditLogStore.class)
-    @ConditionalOnMissingBean(RoutingEventTransport.class)
+    @ConditionalOnMissingRoutingEventTransport(optionsType = AuditLogPublishOptions.class)
     RoutingEventTransport<?> storeBackedAuditLogEventTransport(final AuditLogStore auditLogStore) {
         return new StoreBackedAuditLogEventTransport(auditLogStore);
     }

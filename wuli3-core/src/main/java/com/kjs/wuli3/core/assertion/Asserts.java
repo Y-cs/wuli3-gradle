@@ -16,50 +16,70 @@ public final class Asserts {
 
     private Asserts() {}
 
-    /** 在条件为假时返回失败断言。 */
-    public static AssertCondition isTrue(final boolean condition) {
+    /** 当条件为假时触发失败断言。 */
+    public static AssertCondition whenFalse(final boolean condition) {
         return () -> !condition;
     }
 
-    /** 在对象为空时返回失败断言。 */
-    public static AssertCondition notNull(final @Nullable Object obj) {
+    /** 当条件为真时触发失败断言。 */
+    public static AssertCondition whenTrue(final boolean condition) {
+        return () -> condition;
+    }
+
+    /** 当对象为 null 时触发失败断言。 */
+    public static AssertCondition whenNull(final @Nullable Object obj) {
         return () -> obj == null;
     }
 
-    /** 在字符串为空或仅包含空白字符时返回失败断言。 */
-    public static AssertCondition notBlank(final @Nullable String value) {
+    /** 当对象不为 null 时触发失败断言。 */
+    public static AssertCondition whenNotNull(final @Nullable Object obj) {
+        return () -> obj != null;
+    }
+
+    /** 当字符串为空或仅包含空白字符时触发失败断言。 */
+    public static AssertCondition whenBlank(final @Nullable String value) {
         return () -> value == null || value.isBlank();
     }
 
-    /** 在字符串为空或长度为零时返回失败断言。 */
-    public static AssertCondition notEmpty(final @Nullable String value) {
+    /** 当字符串非空且包含非空白字符时触发失败断言。 */
+    public static AssertCondition whenNotBlank(final @Nullable String value) {
+        return () -> value != null && !value.isBlank();
+    }
+
+    /** 当字符串为空或长度为零时触发失败断言。 */
+    public static AssertCondition whenEmpty(final @Nullable String value) {
         return () -> value == null || value.isEmpty();
     }
 
-    /** 在集合非空时返回失败断言。 */
-    public static AssertCondition isEmptyCollection(final @Nullable Collection<?> collection) {
-        return () -> collection != null && !collection.isEmpty();
+    /** 当字符串非空且长度大于零时触发失败断言。 */
+    public static AssertCondition whenNotEmpty(final @Nullable String value) {
+        return () -> value != null && !value.isEmpty();
     }
 
-    /** 在集合为空时返回失败断言。 */
-    public static AssertCondition isNotEmptyCollection(final @Nullable Collection<?> collection) {
+    /** 当集合为空时触发失败断言。 */
+    public static AssertCondition whenEmptyCollection(final @Nullable Collection<?> collection) {
         return () -> collection == null || collection.isEmpty();
     }
 
-    /** 在 Map 非空时返回失败断言。 */
-    public static AssertCondition isEmptyMap(final @Nullable Map<?, ?> map) {
-        return () -> map != null && !map.isEmpty();
+    /** 当集合非空时触发失败断言。 */
+    public static AssertCondition whenNotEmptyCollection(final @Nullable Collection<?> collection) {
+        return () -> collection != null && !collection.isEmpty();
     }
 
-    /** 在 Map 为空时返回失败断言。 */
-    public static AssertCondition isNotEmptyMap(final @Nullable Map<?, ?> map) {
+    /** 当 Map 为空时触发失败断言。 */
+    public static AssertCondition whenEmptyMap(final @Nullable Map<?, ?> map) {
         return () -> map == null || map.isEmpty();
+    }
+
+    /** 当 Map 非空时触发失败断言。 */
+    public static AssertCondition whenNotEmptyMap(final @Nullable Map<?, ?> map) {
+        return () -> map != null && !map.isEmpty();
     }
 
     @FunctionalInterface
     public interface AssertCondition {
 
-        /** 返回当前断言条件是否成立。 */
+        /** 返回当前失败条件是否成立（即是否应该抛出异常）。 */
         boolean condition();
 
         /** 返回反转当前条件后的断言。 */

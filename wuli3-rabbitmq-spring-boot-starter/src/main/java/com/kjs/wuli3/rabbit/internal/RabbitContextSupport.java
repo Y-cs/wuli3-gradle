@@ -40,14 +40,14 @@ public final class RabbitContextSupport {
      *
      * <p>典型用法：
      * <pre>{@code
-     * final ContextPropagator propagator = rabbitContextSupport.restoreFrom(message.getMessageProperties().getHeaders());
-     * try (ContextScope ignored = propagator.restore(propagator.capture())) {
+     * final ContextProxy contextProxy = rabbitContextSupport.restoreFrom(message.getMessageProperties().getHeaders());
+     * try (ContextScope ignored = contextProxy.restore(contextProxy.capture())) {
      *     handleMessage(message);
      * }
      * }</pre>
      *
      * @param headers 消息 headers（来自 {@code MessageProperties.getHeaders()}）
-     * @return 持有解码快照的传播器
+     * @return 持有解码快照的上下文代理
      * @throws NullPointerException 当 {@code headers} 为 {@code null} 时
      */
     @SuppressWarnings("NullAway")

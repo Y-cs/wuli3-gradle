@@ -41,14 +41,14 @@ public final class RocketContextSupport {
      *
      * <p>典型用法：
      * <pre>{@code
-     * final ContextPropagator propagator = rocketMqContextSupport.restoreFrom(message.getProperties());
-     * try (ContextScope ignored = propagator.restore(propagator.capture())) {
+     * final ContextProxy contextProxy = rocketMqContextSupport.restoreFrom(message.getProperties());
+     * try (ContextScope ignored = contextProxy.restore(contextProxy.capture())) {
      *     handleMessage(message);
      * }
      * }</pre>
      *
      * @param headers 消息 headers（来自 {@code MessageExt.getProperties()} 或 {@code RocketMessageWrapper.headers()}）
-     * @return 持有解码快照的传播器
+     * @return 持有解码快照的上下文代理
      * @throws NullPointerException 当 {@code headers} 为 {@code null} 时
      */
     @SuppressWarnings("NullAway")

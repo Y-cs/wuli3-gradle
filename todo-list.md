@@ -20,6 +20,12 @@
 - [ ] 与 `wuli3-json` 集成，统一序列化行为
 - [ ] 测试支持，提供嵌入式 MongoDB 配置
 
+## wuli3-core-spring-boot-starter
+
+整合日志、配置加密、优雅关闭总线，作为所有 Spring Boot starter 的基础模块。
+
+详见：[core-spring-boot-starter 实施方案](todo-list/core-spring-boot-starter/todo-list.md)
+
 ## 优雅关闭
 
 ### 目标

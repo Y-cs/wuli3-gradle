@@ -89,17 +89,17 @@ eventPublisher.publish(options, envelope);
 
 ## 上下文传播
 
-Encoder 读取可选的 `ContextReader`，并通过 `ContextPropagator` 按显式白名单把传播字段写入 `RocketMessageWrapper.headers`。`EventEnvelope` 不承载传输 header，其 JSON body 只包含事件语义字段。
+`ContextPropagator` 读取可选的 `ContextReader`，并按显式白名单把传播字段写入 `RocketMessageWrapper.headers`。`EventEnvelope` 不承载传输 header，其 JSON body 只包含事件语义字段。
 
-默认自动配置使用 `ContextEncoder.standardContextEncoder()`，当前会传播 `X-Request-Id`、`X-Origin-Ip`、
+默认自动配置使用 `ContextPropagator.standardContextEncoder()`，当前会传播 `X-Request-Id`、`X-Origin-Ip`、
 `X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`。因此该 starter 应只用于允许传播认证信息的可信消息边界。
 
 若边界只允许传播调用标识，应显式覆盖该 Bean：
 
 ```java
 @Bean
-ContextEncoder rocketMqContextEncoder() {
-    return new ContextEncoder(List.of(new InvocationContextEncoder()));
+ContextPropagator rocketMqContextEncoder() {
+    return new ContextPropagator(List.of(new InvocationContextCodec()));
 }
 ```
 
@@ -108,8 +108,8 @@ ContextEncoder rocketMqContextEncoder() {
 消费适配器需要先得到已解码的 `ContextProxy`，再显式恢复作用域：
 
 ```java
-final ContextPropagator propagator = rocketMqContextSupport.restoreFrom(messageExt.getProperties());
-try (ContextScope ignored = propagator.restore(propagator.capture())) {
+final ContextProxy contextProxy = rocketMqContextSupport.restoreFrom(messageExt.getProperties());
+try (ContextScope ignored = contextProxy.restore(contextProxy.capture())) {
     listener.handle(envelope);
 }
 ```

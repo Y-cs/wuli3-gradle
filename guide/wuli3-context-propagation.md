@@ -32,7 +32,7 @@ dependencies {
 
 ## 协议字段编码
 
-两个固定编码器定义稳定字段契约：
+两个固定 codec 定义稳定字段契约：
 
 - `InvocationContextCodec` 写入 `X-Request-Id` 和 `X-Origin-Ip`。
 - `AuthContextCodec` 写入 `X-Principal-Type`、`X-Principal-Id` 和 `X-Principal-Name`。
@@ -40,19 +40,20 @@ dependencies {
 认证主体的三个字段必须同时存在且非空白，`X-Principal-Type` 必须是 `CUSTOMER`、`ADMIN` 或 `SYSTEM`。
 解码遇到缺失或非法字段时会整体拒绝该认证上下文，不会恢复部分身份信息。
 
-`ContextEncoder.standardContextEncoder()` 当前返回上述两个编码器，因此会同时读写调用标识和认证信息。协议适配器若只允许传播调用标识，应显式构造白名单：
+`ContextPropagator.standardContextEncoder()` 当前返回上述两个 codec，因此会同时读写调用标识和认证信息。协议适配器若只允许传播调用标识，应显式构造白名单：
 
 ```java
-final ContextEncoder invocationOnly =
-        new ContextEncoder(List.of(new InvocationContextEncoder()));
+final ContextPropagator invocationOnly =
+        new ContextPropagator(List.of(new InvocationContextCodec()));
 ```
 
 协议适配器使用 `ContextPropagator` 声明白名单，而不是逐一判断上下文类型：
 
 ```java
-final ContextEncoder encoder = new ContextEncoder(ContextEncoder.standardContextEncoder());
-encoder.reservedFieldNames().forEach(headers::remove);
-encoder.writeTo(contextReader.capture(), headers::set);
+final ContextPropagator propagator =
+        new ContextPropagator(ContextPropagator.standardContextEncoder());
+propagator.reservedFieldNames().forEach(headers::remove);
+propagator.inject(contextReader.capture(), headers::set);
 ```
 
 `reservedFieldNames()` 只包含当前实例所配置编码器管理的字段，不会自动加入未配置编码器的字段。
@@ -82,9 +83,9 @@ final String principalId = authAccessor.principalId()
 在异步任务中传播当前上下文：
 
 ```java
-final ContextPropagator propagator = new DefaultContextPropagator(contextStore);
+final ContextProxy contextProxy = new DefaultContextProxy(contextStore);
 
-executor.execute(propagator.wrap(() -> {
+executor.execute(contextProxy.wrap(() -> {
     // 这里可以读取提交任务时捕获到的上下文。
 }));
 ```
@@ -92,8 +93,8 @@ executor.execute(propagator.wrap(() -> {
 需要手动控制生命周期时，可以捕获快照并恢复：
 
 ```java
-final ContextSnapshot snapshot = propagator.capture();
-final ContextScope scope = propagator.restore(snapshot);
+final ContextSnapshot snapshot = contextProxy.capture();
+final ContextScope scope = contextProxy.restore(snapshot);
 try {
     // 当前线程临时使用 snapshot 中的上下文。
 } finally {

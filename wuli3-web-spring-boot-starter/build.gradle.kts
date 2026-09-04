@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":wuli3-core-spring-boot-starter"))
     api(project(":wuli3-core"))
     api(project(":wuli3-json"))
     api(project(":wuli3-context-propagation"))

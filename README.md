@@ -13,9 +13,8 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | [`wuli3-event-core`](guide/wuli3-event-core.md) | 纯 Java 事件信封、发布选项和消息传输契约。 |
 | [`wuli3-event-spring-boot-starter`](guide/wuli3-event-spring-boot-starter.md) | Spring LOCAL/REMOTE 事件路由。 |
 | [`wuli3-context-propagation`](guide/wuli3-context-propagation.md) | 固定上下文、线程存储、异步快照和出站编码。 |
+| [`wuli3-core-spring-boot-starter`](guide/wuli3-core-spring-boot-starter.md) | Spring Boot 日志、配置加密与分阶段优雅关闭基础设施。 |
 | [`wuli3-aliyun-spring-boot-starter`](guide/wuli3-aliyun-spring-boot-starter.md) | AliYun OSS SDK V2 多套命名客户端配置。 |
-| [`wuli3-configuration-spring-boot-starter`](guide/wuli3-configuration-spring-boot-starter.md) | Jasypt 配置属性加密与解密。 |
-| [`wuli3-logging-spring-boot-starter`](guide/wuli3-logging-spring-boot-starter.md) | Spring Boot + Logback 日志格式、结构化输出与滚动归档。 |
 | [`wuli3-audit-log-spring-boot-starter`](guide/wuli3-audit-log-spring-boot-starter.md) | 审计协议、上下文补全、事件写入与存储端口。 |
 | [`wuli3-opentelemetry-spring-boot-starter`](guide/wuli3-opentelemetry-spring-boot-starter.md) | OpenTelemetry Java Agent 适配、Trace 上下文访问与业务指标记录。 |
 | [`wuli3-web-spring-boot-starter`](guide/wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应和异常处理。 |
@@ -117,4 +116,3 @@ Maven 项目引入：
 - Spring Boot 基线：3.5.x。
 - 核心模块不依赖 Spring。
 - 公共时间类型使用 `java.time`。
-- 注释使用中文。

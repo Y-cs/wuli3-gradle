@@ -23,9 +23,8 @@
 | 文档 | 用途 |
 | --- | --- |
 | [wuli3-event-spring-boot-starter](wuli3-event-spring-boot-starter.md) | LOCAL/REMOTE 事件路由和事务提交后发布。 |
+| [wuli3-core-spring-boot-starter](wuli3-core-spring-boot-starter.md) | 日志、配置加密与分阶段优雅关闭基础设施。 |
 | [wuli3-aliyun-spring-boot-starter](wuli3-aliyun-spring-boot-starter.md) | AliYun OSS SDK V2 多套命名客户端配置。 |
-| [wuli3-configuration-spring-boot-starter](wuli3-configuration-spring-boot-starter.md) | Jasypt 配置属性加密与解密。 |
-| [wuli3-logging-spring-boot-starter](wuli3-logging-spring-boot-starter.md) | Spring Boot + Logback 日志格式、结构化输出与滚动归档。 |
 | [wuli3-audit-log-spring-boot-starter](wuli3-audit-log-spring-boot-starter.md) | 审计协议、上下文补全、事件写入与存储端口。 |
 | [wuli3-opentelemetry-spring-boot-starter](wuli3-opentelemetry-spring-boot-starter.md) | OpenTelemetry Java Agent 适配、Trace 上下文访问与业务指标记录。 |
 | [wuli3-web-spring-boot-starter](wuli3-web-spring-boot-starter.md) | Spring MVC 上下文、JSON、统一响应与异常处理。 |

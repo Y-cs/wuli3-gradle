@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":wuli3-core-spring-boot-starter"))
     api(project(":wuli3-event-core"))
     implementation("org.springframework:spring-tx")
 }

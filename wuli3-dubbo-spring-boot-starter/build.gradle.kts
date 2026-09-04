@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":wuli3-core-spring-boot-starter"))
     api(project(":wuli3-core"))
     api(project(":wuli3-context-propagation"))
     implementation("org.apache.dubbo:dubbo-spring-boot-starter")

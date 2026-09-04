@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":wuli3-core-spring-boot-starter"))
     api(project(":wuli3-event-spring-boot-starter"))
     api(project(":wuli3-context-propagation"))
     api("org.apache.rocketmq:rocketmq-spring-boot-starter")

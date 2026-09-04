@@ -1,0 +1,2 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.kjs.wuli3.spring.logging.LoggingEnvironmentPostProcessor

@@ -41,7 +41,7 @@ eventPublisher.publish(options, envelope);
 
 `RabbitPublishOptions` 支持 `withAsync()` 和 `withAfterCommit()`：
 
-- `withAsync()` 在调用线程编码事件和上下文后，使用事件模块的 `applicationTaskExecutor` 发送。
+- `withAsync()` 在调用线程编码事件和上下文后，使用事件模块的 `eventTaskExecutor` 发送。
 - `withAfterCommit()` 在当前 Spring 事务存在时于提交后发送。
 异步任务启动失败会抛出 `SendFailedException`；已调度的后台发送失败会记录日志。该模块不将异步返回等同于 publisher confirm，也不实现 Outbox、重试、死信、延迟或顺序消息语义。
 

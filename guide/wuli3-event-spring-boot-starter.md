@@ -41,7 +41,7 @@ void onEvent(final EventEnvelope<?> envelope) {
 ```
 
 `SpringLocalPublishOptions` 的两个字段依次为 `async` 和 `afterCommit`。异步请求使用名为
-`applicationTaskExecutor` 的 `Executor` Bean；没有该 Bean 时会抛出 `UnsupportedCapabilityException`，
+`eventTaskExecutor` 的 `Executor` Bean；该 Bean 由 starter 默认提供，也可以由应用覆盖，
 不会绕过应用的线程池策略。delay 和 order key 不属于本地选项。
 
 ## 事务提交后发布

@@ -1,2 +1,0 @@
-org.springframework.boot.env.EnvironmentPostProcessor=\
-com.kjs.wuli3.logging.autoconfigure.LoggingEnvironmentPostProcessor

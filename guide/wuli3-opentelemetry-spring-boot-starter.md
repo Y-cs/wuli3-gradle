@@ -74,5 +74,5 @@ Java Agent 的 Logback MDC instrumentation 在有效 Span 内写入标准字段�
 
 ```bash
 ./gradlew :wuli3-opentelemetry-spring-boot-starter:check
-./gradlew :wuli3-logging-spring-boot-starter:check
+./gradlew :wuli3-core-spring-boot-starter:check
 ```

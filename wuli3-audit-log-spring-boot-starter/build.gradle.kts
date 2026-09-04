@@ -5,6 +5,7 @@ plugins {
 description = "Spring Boot audit log protocol, context enrichment, and event-based transport."
 
 dependencies {
+    api(project(":wuli3-core-spring-boot-starter"))
     api(project(":wuli3-event-core"))
     api(project(":wuli3-core"))
     api(project(":wuli3-context-propagation"))

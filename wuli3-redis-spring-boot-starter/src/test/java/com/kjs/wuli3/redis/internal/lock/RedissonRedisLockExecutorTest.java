@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.kjs.wuli3.redis.error.RedisLockAcquisitionException;
 import com.kjs.wuli3.redis.error.RedisLockInterruptedException;
-import com.kjs.wuli3.redis.lock.RedisLockRequest;
+import com.kjs.wuli3.redis.lock.RedisLock;
 import com.kjs.wuli3.redis.lock.RedissonRedisLockExecutor;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +41,7 @@ class RedissonRedisLockExecutorTest {
 
     @Test
     void executesWithWatchdogAndUnlocksOwnedLock() throws InterruptedException {
-        final RedisLockRequest request = RedisLockRequest.watchdog("orders:1", Duration.ofSeconds(2));
+        final RedisLock request = RedisLock.watchdog("orders:1", Duration.ofSeconds(2));
         final AtomicBoolean called = new AtomicBoolean();
         when(this.lock.tryLock(2_000L, TimeUnit.MILLISECONDS)).thenReturn(true);
         when(this.lock.isHeldByCurrentThread()).thenReturn(true);
@@ -54,8 +54,8 @@ class RedissonRedisLockExecutorTest {
 
     @Test
     void usesFixedLeaseAndReturnsSupplierValue() throws InterruptedException {
-        final RedisLockRequest request =
-                RedisLockRequest.fixedLease("orders:1", Duration.ofSeconds(2), Duration.ofSeconds(5));
+        final RedisLock request =
+                RedisLock.fixedLease("orders:1", Duration.ofSeconds(2), Duration.ofSeconds(5));
         when(this.lock.tryLock(2_000L, 5_000L, TimeUnit.MILLISECONDS)).thenReturn(true);
         when(this.lock.isHeldByCurrentThread()).thenReturn(true);
 
@@ -64,7 +64,7 @@ class RedissonRedisLockExecutorTest {
 
     @Test
     void distinguishesContentionForTryAndRequiredExecution() throws InterruptedException {
-        final RedisLockRequest request = RedisLockRequest.watchdog("orders:1", Duration.ZERO);
+        final RedisLock request = RedisLock.watchdog("orders:1", Duration.ZERO);
         final AtomicBoolean called = new AtomicBoolean();
         when(this.lock.tryLock(0L, TimeUnit.MILLISECONDS)).thenReturn(false);
 
@@ -77,7 +77,7 @@ class RedissonRedisLockExecutorTest {
 
     @Test
     void restoresInterruptStatusAndRaisesTypedException() throws InterruptedException {
-        final RedisLockRequest request = RedisLockRequest.watchdog("orders:1", Duration.ofSeconds(1));
+        final RedisLock request = RedisLock.watchdog("orders:1", Duration.ofSeconds(1));
         when(this.lock.tryLock(1_000L, TimeUnit.MILLISECONDS)).thenThrow(new InterruptedException("stop"));
 
         try {
@@ -91,7 +91,7 @@ class RedissonRedisLockExecutorTest {
 
     @Test
     void preservesBusinessFailureAndSuppressesUnlockFailure() throws InterruptedException {
-        final RedisLockRequest request = RedisLockRequest.watchdog("orders:1", Duration.ZERO);
+        final RedisLock request = RedisLock.watchdog("orders:1", Duration.ZERO);
         final IllegalStateException businessFailure = new IllegalStateException("business failed");
         final IllegalStateException unlockFailure = new IllegalStateException("unlock failed");
         when(this.lock.tryLock(0L, TimeUnit.MILLISECONDS)).thenReturn(true);
@@ -107,7 +107,7 @@ class RedissonRedisLockExecutorTest {
 
     @Test
     void doesNotUnlockWhenCurrentThreadNoLongerOwnsLock() throws InterruptedException {
-        final RedisLockRequest request = RedisLockRequest.watchdog("orders:1", Duration.ZERO);
+        final RedisLock request = RedisLock.watchdog("orders:1", Duration.ZERO);
         when(this.lock.tryLock(0L, TimeUnit.MILLISECONDS)).thenReturn(true);
         when(this.lock.isHeldByCurrentThread()).thenReturn(false);
 

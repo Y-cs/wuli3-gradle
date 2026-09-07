@@ -1,8 +1,9 @@
 package com.kjs.wuli3.redis.operation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.redis.RedisKey;
+import com.kjs.wuli3.redis.codec.JsonRedisCodec;
+import com.kjs.wuli3.redis.codec.RedisCodec;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,16 +20,24 @@ public final class HashRedisOperations {
 
     private final StringRedisTemplate redisTemplate;
     private final HashOperations<String, String, String> hashOperations;
+    private final RedisCodec codec;
 
+    /** 使用标准 JSON Codec 创建 Hash 操作入口。 */
     public HashRedisOperations(final StringRedisTemplate redisTemplate) {
+        this(redisTemplate, JsonRedisCodec.INSTANCE);
+    }
+
+    /** 使用指定 Codec 创建 Hash 操作入口。 */
+    public HashRedisOperations(final StringRedisTemplate redisTemplate, final RedisCodec codec) {
         this.redisTemplate = Objects.requireNonNull(redisTemplate, "redisTemplate");
+        this.codec = Objects.requireNonNull(codec, "codec");
         this.hashOperations = this.redisTemplate.opsForHash();
     }
 
     /** 写入单个字段，并在需要时刷新整个 Hash 的过期时间。 */
     public void put(final RedisKey key, final String field, final Object value) {
         HashRedisOperations.validateKeyAndField(key, field);
-        this.hashOperations.put(key.value(), field, Jsons.toJson(Objects.requireNonNull(value, "value")));
+        this.hashOperations.put(key.value(), field, this.codec.encode(Objects.requireNonNull(value, "value")));
         this.refreshAfterMutation(key, 1L);
     }
 
@@ -42,7 +51,7 @@ public final class HashRedisOperations {
         final Map<String, String> encodedValues = new LinkedHashMap<>();
         values.forEach((field, value) -> {
             HashRedisOperations.validateField(field);
-            encodedValues.put(field, Jsons.toJson(Objects.requireNonNull(value, "value")));
+            encodedValues.put(field, this.codec.encode(Objects.requireNonNull(value, "value")));
         });
         this.hashOperations.putAll(key.value(), encodedValues);
         this.refreshAfterMutation(key, encodedValues.size());
@@ -52,7 +61,7 @@ public final class HashRedisOperations {
     public boolean putIfAbsent(final RedisKey key, final String field, final Object value) {
         HashRedisOperations.validateKeyAndField(key, field);
         final boolean added = this.hashOperations.putIfAbsent(
-                key.value(), field, Jsons.toJson(Objects.requireNonNull(value, "value")));
+                key.value(), field, this.codec.encode(Objects.requireNonNull(value, "value")));
         this.refreshAfterMutation(key, added ? 1L : 0L);
         return added;
     }
@@ -61,16 +70,18 @@ public final class HashRedisOperations {
     public <T> Optional<T> get(final RedisKey key, final String field, final Class<T> type) {
         HashRedisOperations.validateKeyAndField(key, field);
         Objects.requireNonNull(type, "type");
-        final String json = this.hashOperations.get(key.value(), field);
-        return json == null ? Optional.empty() : Optional.ofNullable(Jsons.fromJson(json, type));
+        final String encodedValue = this.hashOperations.get(key.value(), field);
+        return encodedValue == null ? Optional.empty() : Optional.ofNullable(this.codec.decode(encodedValue, type));
     }
 
     /** 按泛型类型读取字段值。 */
     public <T> Optional<T> get(final RedisKey key, final String field, final TypeReference<T> typeReference) {
         HashRedisOperations.validateKeyAndField(key, field);
         Objects.requireNonNull(typeReference, "typeReference");
-        final String json = this.hashOperations.get(key.value(), field);
-        return json == null ? Optional.empty() : Optional.ofNullable(Jsons.fromJson(json, typeReference));
+        final String encodedValue = this.hashOperations.get(key.value(), field);
+        return encodedValue == null
+                ? Optional.empty()
+                : Optional.ofNullable(this.codec.decode(encodedValue, typeReference));
     }
 
     /** 按具体类型读取全部字段。 */
@@ -78,8 +89,8 @@ public final class HashRedisOperations {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(type, "type");
         final Map<String, T> decodedValues = new LinkedHashMap<>();
-        this.hashOperations.entries(key.value()).forEach((field, json) -> {
-            final T value = Jsons.fromJson(json, type);
+        this.hashOperations.entries(key.value()).forEach((field, encodedValue) -> {
+            final T value = this.codec.decode(encodedValue, type);
             if (value != null) {
                 decodedValues.put(field, value);
             }
@@ -92,8 +103,8 @@ public final class HashRedisOperations {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(typeReference, "typeReference");
         final Map<String, T> decodedValues = new LinkedHashMap<>();
-        this.hashOperations.entries(key.value()).forEach((field, json) -> {
-            final T value = Jsons.fromJson(json, typeReference);
+        this.hashOperations.entries(key.value()).forEach((field, encodedValue) -> {
+            final T value = this.codec.decode(encodedValue, typeReference);
             if (value != null) {
                 decodedValues.put(field, value);
             }

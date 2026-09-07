@@ -11,14 +11,14 @@ import java.util.function.Supplier;
 public interface RedisLockExecutor {
 
     /** 尝试获取锁，并返回任务是否执行。 */
-    boolean tryExecute(RedisLockRequest request, Runnable action);
+    boolean tryExecute(RedisLock lock, Runnable action);
 
     /** 尝试获取锁，并在任务执行时返回结果。 */
-    <T> Optional<T> tryExecute(RedisLockRequest request, Supplier<T> action);
+    <T> Optional<T> tryExecute(RedisLock lock, Supplier<T> action);
 
     /** 获取锁并执行任务，等待超时后抛出异常。 */
-    void execute(RedisLockRequest request, Runnable action);
+    void execute(RedisLock lock, Runnable action);
 
     /** 获取锁并返回任务结果，等待超时后抛出异常。 */
-    <T> T execute(RedisLockRequest request, Supplier<T> action);
+    <T> T execute(RedisLock lock, Supplier<T> action);
 }

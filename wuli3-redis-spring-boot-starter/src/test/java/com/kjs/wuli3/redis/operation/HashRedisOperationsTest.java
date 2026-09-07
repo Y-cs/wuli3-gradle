@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.redis.RedisKey;
+import com.kjs.wuli3.redis.codec.RedisCodec;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,9 @@ class HashRedisOperationsTest {
 
     @Mock
     private HashOperations<String, String, String> hashOperations;
+
+    @Mock
+    private RedisCodec codec;
 
     private HashRedisOperations operations;
 
@@ -97,6 +101,21 @@ class HashRedisOperationsTest {
         assertThat(this.operations.size(key)).isEqualTo(3L);
         verify(this.redisTemplate, never())
                 .expire(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void usesTheConfiguredCodec() {
+        final RedisKey key = RedisKey.persistent("orders:codec");
+        final Sample value = new Sample("created");
+        when(this.codec.encode(value)).thenReturn("encoded-value");
+        when(this.codec.decode("encoded-value", Sample.class)).thenReturn(value);
+        final HashRedisOperations codecOperations = new HashRedisOperations(this.redisTemplate, this.codec);
+
+        codecOperations.put(key, "1", value);
+
+        verify(this.hashOperations).put(key.value(), "1", "encoded-value");
+        when(this.hashOperations.get(key.value(), "1")).thenReturn("encoded-value");
+        assertThat(codecOperations.get(key, "1", Sample.class)).contains(value);
     }
 
     private record Sample(String state) {}

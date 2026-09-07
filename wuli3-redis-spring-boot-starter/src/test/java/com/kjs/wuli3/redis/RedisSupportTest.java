@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.kjs.wuli3.redis.codec.JsonRedisCodec;
+import com.kjs.wuli3.redis.codec.RedisCodec;
 import com.kjs.wuli3.redis.operation.HashRedisOperations;
 import com.kjs.wuli3.redis.operation.ObjectRedisOperations;
 import com.kjs.wuli3.redis.operation.SetRedisOperations;
@@ -17,12 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 @ExtendWith(MockitoExtension.class)
 class RedisSupportTest {
 
     @Mock
     private StringRedisTemplate redisTemplate;
+
+    @Mock
+    private ValueOperations<String, String> valueOperations;
 
     private RedisSupport redisSupport;
 
@@ -37,6 +43,28 @@ class RedisSupportTest {
         assertThat(this.redisSupport.objectOperations()).isInstanceOf(ObjectRedisOperations.class);
         assertThat(this.redisSupport.hashOperations()).isInstanceOf(HashRedisOperations.class);
         assertThat(this.redisSupport.setOperations()).isInstanceOf(SetRedisOperations.class);
+    }
+
+    @Test
+    void propagatesTheConfiguredCodecToStructuredOperations() {
+        final RedisCodec codec = org.mockito.Mockito.mock(RedisCodec.class);
+        when(this.redisTemplate.opsForValue()).thenReturn(this.valueOperations);
+        final RedisSupport support = new RedisSupport(this.redisTemplate, codec);
+
+        assertThat(support.codec()).isSameAs(codec);
+        assertThat(support.objectOperations()).isNotNull();
+        assertThat(support.hashOperations()).isNotNull();
+        assertThat(support.setOperations()).isNotNull();
+
+        when(codec.encode("value")).thenReturn("encoded-value");
+        support.objectOperations().set(RedisKey.persistent("codec:key"), "value");
+        verify(codec).encode("value");
+        verify(this.valueOperations).set("codec:key", "encoded-value");
+    }
+
+    @Test
+    void usesJsonCodecByDefault() {
+        assertThat(this.redisSupport.codec()).isSameAs(JsonRedisCodec.INSTANCE);
     }
 
     @Test

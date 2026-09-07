@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.redis.RedisKey;
+import com.kjs.wuli3.redis.codec.RedisCodec;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,9 @@ class SetRedisOperationsTest {
 
     @Mock
     private SetOperations<String, String> setOperations;
+
+    @Mock
+    private RedisCodec codec;
 
     private SetRedisOperations operations;
 
@@ -78,6 +82,21 @@ class SetRedisOperationsTest {
         when(this.setOperations.size(key.value())).thenReturn(2L);
 
         assertThat(this.operations.size(key)).isEqualTo(2L);
+    }
+
+    @Test
+    void usesTheConfiguredCodec() {
+        final RedisKey key = RedisKey.persistent("order:states:codec");
+        final Sample value = new Sample("created");
+        when(this.codec.encode(value)).thenReturn("encoded-value");
+        when(this.codec.decode("encoded-value", Sample.class)).thenReturn(value);
+        final SetRedisOperations codecOperations = new SetRedisOperations(this.redisTemplate, this.codec);
+
+        codecOperations.add(key, value);
+
+        verify(this.setOperations).add(key.value(), "encoded-value");
+        when(this.setOperations.members(key.value())).thenReturn(Set.of("encoded-value"));
+        assertThat(codecOperations.members(key, Sample.class)).containsExactly(value);
     }
 
     private record Sample(String state) {}

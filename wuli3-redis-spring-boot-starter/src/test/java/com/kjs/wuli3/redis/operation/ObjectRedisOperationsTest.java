@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.redis.RedisKey;
+import com.kjs.wuli3.redis.codec.RedisCodec;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -31,6 +32,9 @@ class ObjectRedisOperationsTest {
 
     @Mock
     private ValueOperations<String, String> valueOperations;
+
+    @Mock
+    private RedisCodec codec;
 
     private ObjectRedisOperations operations;
 
@@ -102,6 +106,21 @@ class ObjectRedisOperationsTest {
         cyclicValue.put("self", cyclicValue);
 
         assertThatThrownBy(() -> this.operations.set(key, cyclicValue)).isInstanceOf(ErrorCodeException.class);
+    }
+
+    @Test
+    void usesTheConfiguredCodec() {
+        final RedisKey key = RedisKey.persistent("orders:codec");
+        final Sample value = new Sample("created", Instant.EPOCH);
+        when(this.codec.encode(value)).thenReturn("encoded-value");
+        when(this.codec.decode("encoded-value", Sample.class)).thenReturn(value);
+        final ObjectRedisOperations codecOperations = new ObjectRedisOperations(this.redisTemplate, this.codec);
+
+        codecOperations.set(key, value);
+
+        verify(this.valueOperations).set(key.value(), "encoded-value");
+        when(this.valueOperations.get(key.value())).thenReturn("encoded-value");
+        assertThat(codecOperations.get(key, Sample.class)).contains(value);
     }
 
     private record Sample(String state, Instant occurredOn) {}

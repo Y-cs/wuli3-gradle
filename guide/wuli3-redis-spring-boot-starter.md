@@ -32,6 +32,8 @@ wuli3:
 
 数据结构操作和锁默认开启。存在 `StringRedisTemplate` 时创建 `RedisSupport` Bean，存在 `RedissonClient` 时创建 `RedisLockExecutor` Bean。应用可以关闭功能，也可以声明同类型 Bean 替换默认实现。
 
+结构化值编码通过 `RedisCodec` 集中配置。默认注册 `JsonRedisCodec`，使用 `wuli3-json` 的标准 `Jsons`；应用可以声明自己的 `RedisCodec` Bean，`RedisSupport` 会将它透传给对象、Hash value 和 Set member 操作。String 操作仍然保存原始字符串，不经过该 Codec。
+
 ## 统一入口
 
 `RedisSupport` 聚合不同数据结构的操作对象，并集中承载整 key 的删除、批量删除、存在判断和续期。
@@ -47,7 +49,7 @@ redisSupport.delete(RedisKey.persistent("orders:" + orderId));
 ```
 
 - `stringOperations()`：字符串读写、`setIfAbsent` 和整数自增。
-- `objectOperations()`：普通 JSON 对象读写。
+- `objectOperations()`：结构化对象读写，默认使用 JSON Codec。
 - `hashOperations()`：Redis Hash 字段级操作。
 - `setOperations()`：Redis Set 成员级操作。
 - `delete`、`exists`、`expire`：与数据结构无关的整 key 操作。
@@ -56,7 +58,19 @@ redisSupport.delete(RedisKey.persistent("orders:" + orderId));
 
 ## JSON 对象
 
-`ObjectRedisOperations` 使用 `wuli3-json` 的标准 `Jsons` 配置，将值保存为 UTF-8 JSON 字符串。JSON 中不写入 Java 类名，读取时必须显式提供目标类型。
+`ObjectRedisOperations` 默认使用 `RedisCodec` 的 `JsonRedisCodec` 实现，将值保存为 UTF-8 JSON 字符串。JSON 中不写入 Java 类名，读取时必须显式提供目标类型。
+
+如需切换结构化值格式，可以提供自定义 Codec：
+
+```java
+@Bean
+RedisCodec redisCodec() {
+    return new ApplicationRedisCodec(); // 应用自定义实现
+}
+```
+
+`RedisCodec` 的编码结果是保存到 `StringRedisTemplate` 的字符串；二进制格式需要由自定义实现自行转换为可保存的字符串。
+更换 Codec 会改变 Redis value 的数据协议，不会自动兼容已有 key；生产切换前应使用新命名空间、双读迁移或提供兼容解码策略。
 
 读取到 Redis 中的 JSON 顶层值 `null` 时，`get` 返回 `Optional.empty()`；Hash 的 `entries` 和 Set 的 `members`
 会忽略反序列化为 `null` 的成员。写入 API 仍拒绝 Java `null`，以避免把“缺失值”和“显式空值”混为一谈。
@@ -83,7 +97,7 @@ redisSupport.setOperations().add(pendingIds, orderId);
 final Set<String> ids = redisSupport.setOperations().members(pendingIds, String.class);
 ```
 
-Hash field 和 Set member 的值使用普通 JSON 编码。Hash 字段删除与 Set 成员删除属于数据结构内部操作；删除整个 Hash/Set key 应调用 `RedisSupport.delete`。
+Hash field 和 Set member 的值使用 `RedisCodec` 编码，默认是普通 JSON。Hash 字段删除与 Set 成员删除属于数据结构内部操作；删除整个 Hash/Set key 应调用 `RedisSupport.delete`。
 
 带 TTL 的 Hash/Set 在成功增加或更新成员后刷新整个 key 的过期时间。成员写入与刷新 TTL 是两个 Redis 命令，不提供跨命令原子性；需要严格原子语义的业务应使用专用 Lua 脚本。
 

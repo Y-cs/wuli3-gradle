@@ -24,9 +24,9 @@ public final class RedissonRedisLockExecutor implements RedisLockExecutor {
     }
 
     @Override
-    public boolean tryExecute(final RedisLockRequest request, final Runnable action) {
+    public boolean tryExecute(final RedisLock lock, final Runnable action) {
         Objects.requireNonNull(action, "action");
-        return this.tryExecute(request, () -> {
+        return this.tryExecute(lock, () -> {
                     action.run();
                     return Boolean.TRUE;
                 })
@@ -34,7 +34,7 @@ public final class RedissonRedisLockExecutor implements RedisLockExecutor {
     }
 
     @Override
-    public <T> Optional<T> tryExecute(final RedisLockRequest request, final Supplier<T> action) {
+    public <T> Optional<T> tryExecute(final RedisLock request, final Supplier<T> action) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(action, "action");
         final RLock lock = this.redissonClient.getLock(request.key());
@@ -54,18 +54,18 @@ public final class RedissonRedisLockExecutor implements RedisLockExecutor {
     }
 
     @Override
-    public void execute(final RedisLockRequest request, final Runnable action) {
-        if (!this.tryExecute(request, action)) {
-            throw new RedisLockAcquisitionException(request.key());
+    public void execute(final RedisLock lock, final Runnable action) {
+        if (!this.tryExecute(lock, action)) {
+            throw new RedisLockAcquisitionException(lock.key());
         }
     }
 
     @Override
-    public <T> T execute(final RedisLockRequest request, final Supplier<T> action) {
-        return this.tryExecute(request, action).orElseThrow(() -> new RedisLockAcquisitionException(request.key()));
+    public <T> T execute(final RedisLock lock, final Supplier<T> action) {
+        return this.tryExecute(lock, action).orElseThrow(() -> new RedisLockAcquisitionException(lock.key()));
     }
 
-    private boolean tryLock(final RLock lock, final RedisLockRequest request) {
+    private boolean tryLock(final RLock lock, final RedisLock request) {
         final long waitMillis = RedissonRedisLockExecutor.toMillis(request.waitTime());
         try {
             final Optional<Duration> leaseTime = request.leaseTime();

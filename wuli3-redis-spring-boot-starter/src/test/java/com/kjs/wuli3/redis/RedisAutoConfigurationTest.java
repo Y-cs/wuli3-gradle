@@ -5,6 +5,8 @@ import static org.mockito.Mockito.mock;
 
 import com.kjs.wuli3.redis.autoconfigure.RedisAutoConfiguration;
 import com.kjs.wuli3.redis.autoconfigure.RedisProperties;
+import com.kjs.wuli3.redis.codec.JsonRedisCodec;
+import com.kjs.wuli3.redis.codec.RedisCodec;
 import com.kjs.wuli3.redis.lock.RedisLockExecutor;
 import com.kjs.wuli3.redis.operation.HashRedisOperations;
 import com.kjs.wuli3.redis.operation.ObjectRedisOperations;
@@ -29,6 +31,8 @@ class RedisAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(RedisProperties.class);
                     assertThat(context).hasSingleBean(RedisSupport.class);
+                    assertThat(context).hasSingleBean(RedisCodec.class);
+                    assertThat(context.getBean(RedisCodec.class)).isSameAs(JsonRedisCodec.INSTANCE);
                     assertThat(context).doesNotHaveBean(StringRedisOperations.class);
                     assertThat(context).doesNotHaveBean(ObjectRedisOperations.class);
                     assertThat(context).doesNotHaveBean(HashRedisOperations.class);
@@ -63,6 +67,7 @@ class RedisAutoConfigurationTest {
                 .withPropertyValues("wuli3.redis.operations.enabled=false", "wuli3.redis.lock.enabled=false")
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(RedisSupport.class);
+                    assertThat(context).doesNotHaveBean(RedisCodec.class);
                     assertThat(context).doesNotHaveBean(StringRedisOperations.class);
                     assertThat(context).doesNotHaveBean(ObjectRedisOperations.class);
                     assertThat(context).doesNotHaveBean(HashRedisOperations.class);
@@ -86,6 +91,18 @@ class RedisAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).getBean(RedisSupport.class).isSameAs(redisSupport);
                     assertThat(context).getBean(RedisLockExecutor.class).isSameAs(lockExecutor);
+                });
+    }
+
+    @Test
+    void usesApplicationProvidedCodec() {
+        final RedisCodec codec = mock(RedisCodec.class);
+        this.contextRunner
+                .withBean(StringRedisTemplate.class, () -> mock(StringRedisTemplate.class))
+                .withBean(RedisCodec.class, () -> codec)
+                .run(context -> {
+                    assertThat(context.getBean(RedisCodec.class)).isSameAs(codec);
+                    assertThat(context.getBean(RedisSupport.class).codec()).isSameAs(codec);
                 });
     }
 }

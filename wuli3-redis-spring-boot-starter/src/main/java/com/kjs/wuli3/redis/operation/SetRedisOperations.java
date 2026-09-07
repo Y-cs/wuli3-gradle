@@ -1,8 +1,9 @@
 package com.kjs.wuli3.redis.operation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.kjs.wuli3.json.core.Jsons;
 import com.kjs.wuli3.redis.RedisKey;
+import com.kjs.wuli3.redis.codec.JsonRedisCodec;
+import com.kjs.wuli3.redis.codec.RedisCodec;
 import java.time.Duration;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -20,16 +21,24 @@ public final class SetRedisOperations {
 
     private final StringRedisTemplate redisTemplate;
     private final SetOperations<String, String> setOperations;
+    private final RedisCodec codec;
 
+    /** 使用标准 JSON Codec 创建 Set 操作入口。 */
     public SetRedisOperations(final StringRedisTemplate redisTemplate) {
+        this(redisTemplate, JsonRedisCodec.INSTANCE);
+    }
+
+    /** 使用指定 Codec 创建 Set 操作入口。 */
+    public SetRedisOperations(final StringRedisTemplate redisTemplate, final RedisCodec codec) {
         this.redisTemplate = Objects.requireNonNull(redisTemplate, "redisTemplate");
+        this.codec = Objects.requireNonNull(codec, "codec");
         this.setOperations = this.redisTemplate.opsForSet();
     }
 
     /** 添加成员，并在实际新增成员后刷新 key 的过期时间。 */
     public long add(final RedisKey key, final Object... values) {
         Objects.requireNonNull(key, "key");
-        final String[] encodedValues = SetRedisOperations.encodeValues(values);
+        final String[] encodedValues = this.encodeValues(values);
         final Long added = this.setOperations.add(key.value(), encodedValues);
         final long addedCount = added == null ? 0L : added;
         this.refreshAfterMutation(key, addedCount);
@@ -39,7 +48,7 @@ public final class SetRedisOperations {
     /** 删除成员并返回实际删除数量。 */
     public long remove(final RedisKey key, final Object... values) {
         Objects.requireNonNull(key, "key");
-        final String[] encodedValues = SetRedisOperations.encodeValues(values);
+        final String[] encodedValues = this.encodeValues(values);
         final Long removed = this.setOperations.remove(key.value(), (Object[]) encodedValues);
         return removed == null ? 0L : removed;
     }
@@ -48,19 +57,19 @@ public final class SetRedisOperations {
     public boolean contains(final RedisKey key, final Object value) {
         Objects.requireNonNull(key, "key");
         return Boolean.TRUE.equals(
-                this.setOperations.isMember(key.value(), Jsons.toJson(Objects.requireNonNull(value, "value"))));
+                this.setOperations.isMember(key.value(), this.codec.encode(Objects.requireNonNull(value, "value"))));
     }
 
     /** 按具体类型读取全部成员。 */
     public <T> Set<T> members(final RedisKey key, final Class<T> type) {
         Objects.requireNonNull(type, "type");
-        return this.decodeMembers(key, json -> Jsons.fromJson(json, type));
+        return this.decodeMembers(key, encodedValue -> this.codec.decode(encodedValue, type));
     }
 
     /** 按泛型类型读取全部成员。 */
     public <T> Set<T> members(final RedisKey key, final TypeReference<T> typeReference) {
         Objects.requireNonNull(typeReference, "typeReference");
-        return this.decodeMembers(key, json -> Jsons.fromJson(json, typeReference));
+        return this.decodeMembers(key, encodedValue -> this.codec.decode(encodedValue, typeReference));
     }
 
     /** 返回成员数量。 */
@@ -99,14 +108,14 @@ public final class SetRedisOperations {
         }
     }
 
-    private static String[] encodeValues(final Object[] values) {
+    private String[] encodeValues(final Object[] values) {
         Objects.requireNonNull(values, "values");
         if (values.length == 0) {
             throw new IllegalArgumentException("Redis Set 操作至少需要一个成员");
         }
         final String[] encodedValues = new String[values.length];
         for (int index = 0; index < values.length; index++) {
-            encodedValues[index] = Jsons.toJson(Objects.requireNonNull(values[index], "value"));
+            encodedValues[index] = this.codec.encode(Objects.requireNonNull(values[index], "value"));
         }
         return encodedValues;
     }

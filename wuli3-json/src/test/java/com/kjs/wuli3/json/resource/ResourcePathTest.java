@@ -5,11 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kjs.wuli3.json.datatype.resource.CompositeResourcePathResolver;
 import com.kjs.wuli3.json.datatype.resource.DefaultResourcePathResolver;
 import com.kjs.wuli3.json.datatype.resource.ResourcePath;
 import com.kjs.wuli3.json.datatype.resource.ResourcePathResolver;
 import com.kjs.wuli3.json.provider.JsonMapperFactory;
 import com.kjs.wuli3.json.provider.JsonMapperResourcePathAssembly;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ResourcePathTest {
@@ -93,6 +95,20 @@ class ResourcePathTest {
                 .hasMessageContaining("@ResourcePath can only be used on String values");
     }
 
+    @Test
+    void compositeResolverUsesFirstSupportingResolverAndKeepsUnsupportedValues() throws Exception {
+        final ResourcePathResolver first = new PrefixResolver("image", "image:");
+        final ResourcePathResolver second = new PrefixResolver("image", "second:");
+        final ObjectMapper objectMapper =
+                ResourcePathTest.resourcePathObjectMapper(new CompositeResourcePathResolver(List.of(first, second)));
+
+        final CdnSample sample = objectMapper.readValue("{\"path\":\"image:/files/demo.png\"}", CdnSample.class);
+
+        assertThat(sample.path()).isEqualTo("/files/demo.png");
+        assertThat(objectMapper.writeValueAsString(new UnsupportedSample("files/demo.png")))
+                .contains("\"path\":\"files/demo.png\"");
+    }
+
     record DefaultSample(@ResourcePath String path) {}
 
     record CdnSample(@ResourcePath(type = CdnResolver.TYPE) String path) {}
@@ -136,6 +152,31 @@ class ResourcePathTest {
                 return url;
             }
             return url.substring(CdnResolver.DOMAIN.length());
+        }
+    }
+
+    private static final class PrefixResolver implements ResourcePathResolver {
+        private final String type;
+        private final String prefix;
+
+        private PrefixResolver(final String type, final String prefix) {
+            this.type = type;
+            this.prefix = prefix;
+        }
+
+        @Override
+        public boolean supports(final String type) {
+            return this.type.equals(type);
+        }
+
+        @Override
+        public String serialize(final String type, final String path) {
+            return this.prefix + path;
+        }
+
+        @Override
+        public String deserialize(final String type, final String url) {
+            return url.startsWith(this.prefix) ? url.substring(this.prefix.length()) : url;
         }
     }
 

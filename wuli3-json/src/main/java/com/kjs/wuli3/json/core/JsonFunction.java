@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author GuoYang create on 2026/8/17 11:53
  */
 @FunctionalInterface
-public interface JsonFunction<T> {
+interface JsonFunction<T> {
 
     /** 使用指定映射器执行 JSON 操作。 */
     T apply(ObjectMapper objectMapper) throws Exception;

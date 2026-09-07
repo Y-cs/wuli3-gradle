@@ -50,7 +50,7 @@ public final class ObjectRedisOperations {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(type, "type");
         final String json = this.valueOperations.get(key.value());
-        return json == null ? Optional.empty() : Optional.of(Jsons.fromJson(json, type));
+        return json == null ? Optional.empty() : Optional.ofNullable(Jsons.fromJson(json, type));
     }
 
     /** 按泛型类型读取对象。 */
@@ -58,6 +58,6 @@ public final class ObjectRedisOperations {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(typeReference, "typeReference");
         final String json = this.valueOperations.get(key.value());
-        return json == null ? Optional.empty() : Optional.of(Jsons.fromJson(json, typeReference));
+        return json == null ? Optional.empty() : Optional.ofNullable(Jsons.fromJson(json, typeReference));
     }
 }

@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -76,14 +77,19 @@ public final class SetRedisOperations {
         this.redisTemplate.expire(key.value(), timeToLive);
     }
 
-    private <T> Set<T> decodeMembers(final RedisKey key, final Function<String, T> decoder) {
+    private <T> Set<T> decodeMembers(final RedisKey key, final Function<String, @Nullable T> decoder) {
         Objects.requireNonNull(key, "key");
         final Set<String> encodedMembers = this.setOperations.members(key.value());
         if (encodedMembers == null || encodedMembers.isEmpty()) {
             return Set.of();
         }
         final Set<T> decodedMembers = new LinkedHashSet<>();
-        encodedMembers.forEach(json -> decodedMembers.add(decoder.apply(json)));
+        encodedMembers.forEach(json -> {
+            final @Nullable T decoded = decoder.apply(json);
+            if (decoded != null) {
+                decodedMembers.add(decoded);
+            }
+        });
         return Set.copyOf(decodedMembers);
     }
 

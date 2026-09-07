@@ -62,7 +62,7 @@ class JacksonProviderTest {
     void featureExportsIncludeSerializationAndDeserializationConfigs() {
         assertThat(JacksonProvider.featuresToEnable())
                 .contains(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
-        assertThat(JacksonProvider.featuresToDisabled())
+        assertThat(JacksonProvider.featuresToDisable())
                 .contains(
                         DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                         SerializationFeature.FAIL_ON_EMPTY_BEANS,

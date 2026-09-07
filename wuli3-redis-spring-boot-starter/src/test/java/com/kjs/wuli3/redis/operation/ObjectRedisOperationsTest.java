@@ -66,6 +66,14 @@ class ObjectRedisOperationsTest {
     }
 
     @Test
+    void mapsJsonNullToEmpty() {
+        final RedisKey key = RedisKey.persistent("orders:null");
+        when(this.valueOperations.get(key.value())).thenReturn("null");
+
+        assertThat(this.operations.get(key, Sample.class)).isEmpty();
+    }
+
+    @Test
     void appliesExpirationDuringSetAndSetIfAbsent() {
         final Duration timeToLive = Duration.ofMinutes(5);
         final RedisKey key = RedisKey.expiring("orders:1", timeToLive);

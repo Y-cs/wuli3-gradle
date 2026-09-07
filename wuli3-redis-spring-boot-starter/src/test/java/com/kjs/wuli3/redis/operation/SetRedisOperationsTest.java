@@ -65,6 +65,14 @@ class SetRedisOperationsTest {
     }
 
     @Test
+    void ignoresJsonNullMembers() {
+        final RedisKey key = RedisKey.persistent("order:states:null");
+        when(this.setOperations.members(key.value())).thenReturn(Set.of("null"));
+
+        assertThat(this.operations.members(key, Sample.class)).isEmpty();
+    }
+
+    @Test
     void reportsSetSize() {
         final RedisKey key = RedisKey.persistent("order:states");
         when(this.setOperations.size(key.value())).thenReturn(2L);

@@ -51,7 +51,7 @@ Boot 管理的 `RestClient.Builder` 和 `RestTemplateBuilder` 会自动安装出
 ## JSON 配置
 
 starter 会增量注册 wuli3 Java Time、`@ResourcePath` 和 `@Desensitized` Jackson 模块，不覆盖业务自己的
-`Module` Bean。
+`Module` Bean。项目默认日期时间、Locale、时区和 Jackson feature 只在 `spring.jackson.*` 未显式配置时生效。
 
 资源类型到域名的默认映射：
 
@@ -63,6 +63,9 @@ wuli3.web.json.resource.path.file=https://files.example.com
 应用注册的 `DesensitizationStrategy` Bean 会覆盖同名内置策略；注册
 `DesensitizationVisibilityPolicy` Bean 可以控制何时允许输出原值。详细 JSON API 见
 [wuli3-json](wuli3-json.md)。
+
+`ResourcePathResolver` 支持注册多个 Bean，starter 会按 Spring `@Order` 排序组合；同一资源类型由排序靠前的
+解析器处理。没有匹配解析器时，资源路径保持原值。
 
 ## 统一响应启用方式
 

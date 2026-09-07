@@ -8,8 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.kjs.wuli3.core.error.ErrorCodeException;
@@ -68,6 +70,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootTest(
+        properties = {
+            "spring.jackson.time-zone=UTC",
+            "spring.jackson.locale=zh_CN",
+            "spring.jackson.deserialization.FAIL_ON_UNKNOWN_PROPERTIES=true"
+        },
         classes = {
             WebAutoConfigurationTest.TestApplication.class,
             WebAutoConfigurationTest.ControllerConfiguration.class,
@@ -79,6 +86,9 @@ class WebAutoConfigurationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private InvocationContextAccessor invocationContextAccessor;
@@ -149,6 +159,16 @@ class WebAutoConfigurationTest {
         mockMvc.perform(get("/json-time"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.dateTime").value("2026-06-22 10:30:05"));
+    }
+
+    @Test
+    void webObjectMapperKeepsExplicitSpringJacksonSettings() {
+        assertThat(this.objectMapper.getSerializationConfig().getTimeZone().getID())
+                .isEqualTo("UTC");
+        assertThat(this.objectMapper.getSerializationConfig().getLocale())
+                .isEqualTo(java.util.Locale.SIMPLIFIED_CHINESE);
+        assertThat(this.objectMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES))
+                .isTrue();
     }
 
     @Test

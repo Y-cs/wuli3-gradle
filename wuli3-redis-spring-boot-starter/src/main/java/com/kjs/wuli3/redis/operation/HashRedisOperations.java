@@ -62,7 +62,7 @@ public final class HashRedisOperations {
         HashRedisOperations.validateKeyAndField(key, field);
         Objects.requireNonNull(type, "type");
         final String json = this.hashOperations.get(key.value(), field);
-        return json == null ? Optional.empty() : Optional.of(Jsons.fromJson(json, type));
+        return json == null ? Optional.empty() : Optional.ofNullable(Jsons.fromJson(json, type));
     }
 
     /** 按泛型类型读取字段值。 */
@@ -70,7 +70,7 @@ public final class HashRedisOperations {
         HashRedisOperations.validateKeyAndField(key, field);
         Objects.requireNonNull(typeReference, "typeReference");
         final String json = this.hashOperations.get(key.value(), field);
-        return json == null ? Optional.empty() : Optional.of(Jsons.fromJson(json, typeReference));
+        return json == null ? Optional.empty() : Optional.ofNullable(Jsons.fromJson(json, typeReference));
     }
 
     /** 按具体类型读取全部字段。 */
@@ -78,9 +78,12 @@ public final class HashRedisOperations {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(type, "type");
         final Map<String, T> decodedValues = new LinkedHashMap<>();
-        this.hashOperations
-                .entries(key.value())
-                .forEach((field, json) -> decodedValues.put(field, Jsons.fromJson(json, type)));
+        this.hashOperations.entries(key.value()).forEach((field, json) -> {
+            final T value = Jsons.fromJson(json, type);
+            if (value != null) {
+                decodedValues.put(field, value);
+            }
+        });
         return Map.copyOf(decodedValues);
     }
 
@@ -89,9 +92,12 @@ public final class HashRedisOperations {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(typeReference, "typeReference");
         final Map<String, T> decodedValues = new LinkedHashMap<>();
-        this.hashOperations
-                .entries(key.value())
-                .forEach((field, json) -> decodedValues.put(field, Jsons.fromJson(json, typeReference)));
+        this.hashOperations.entries(key.value()).forEach((field, json) -> {
+            final T value = Jsons.fromJson(json, typeReference);
+            if (value != null) {
+                decodedValues.put(field, value);
+            }
+        });
         return Map.copyOf(decodedValues);
     }
 

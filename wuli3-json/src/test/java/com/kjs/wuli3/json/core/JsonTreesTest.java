@@ -11,12 +11,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 
 class JsonTreesTest {
     @Test
     void readsJsonTree() {
-        final JsonNode node = JsonTrees.readTree("{\"name\":\"demo\",\"enabled\":true}");
+        final JsonNode node = Objects.requireNonNull(JsonTrees.readTree("{\"name\":\"demo\",\"enabled\":true}"));
 
         assertThat(node.path("name").asText()).isEqualTo("demo");
         assertThat(node.path("enabled").asBoolean()).isTrue();
@@ -37,8 +38,8 @@ class JsonTreesTest {
     @Test
     void convertsBetweenValueAndTree() {
         final Sample source = Sample.create();
-        final JsonNode node = JsonTrees.valueToTree(source);
-        final Sample sample = JsonTrees.treeToValue(node, Sample.class);
+        final JsonNode node = Objects.requireNonNull(JsonTrees.valueToTree(source));
+        final Sample sample = Objects.requireNonNull(JsonTrees.treeToValue(node, Sample.class));
 
         assertThat(node.path("date").asText()).isEqualTo("2026-06-22");
         assertThat(node.path("time").asText()).isEqualTo("10:30:05");
@@ -48,10 +49,11 @@ class JsonTreesTest {
 
     @Test
     void convertsTreeToParameterizedValue() {
-        final JsonNode node = JsonTrees.readTree("[{\"name\":\"demo\",\"date\":\"2026-06-22\",\"time\":\"10:30:05\","
-                + "\"dateTime\":\"2026-06-22 10:30:05\"}]");
+        final JsonNode node = Objects.requireNonNull(
+                JsonTrees.readTree("[{\"name\":\"demo\",\"date\":\"2026-06-22\",\"time\":\"10:30:05\","
+                        + "\"dateTime\":\"2026-06-22 10:30:05\"}]"));
         final TypeReference<List<Sample>> typeReference = new TypeReference<>() {};
-        final List<Sample> samples = JsonTrees.treeToValue(node, typeReference);
+        final List<Sample> samples = Objects.requireNonNull(JsonTrees.treeToValue(node, typeReference));
 
         assertThat(samples)
                 .singleElement()

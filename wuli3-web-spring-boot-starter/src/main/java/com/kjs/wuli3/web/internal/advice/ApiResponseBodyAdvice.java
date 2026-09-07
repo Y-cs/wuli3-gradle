@@ -3,6 +3,7 @@ package com.kjs.wuli3.web.internal.advice;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kjs.wuli3.core.error.ErrorCodeException;
+import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import com.kjs.wuli3.json.core.JsonErrors;
 import com.kjs.wuli3.web.response.ApiResponse;
 import com.kjs.wuli3.web.response.WebResponseProperties;
@@ -116,7 +117,7 @@ public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         try {
             return this.objectMapper.writeValueAsString(body);
         } catch (JsonProcessingException ex) {
-            throw new ErrorCodeException(JsonErrors.SERIALIZATION_FAILED, ex);
+            throw new ErrorCodeException(JsonErrors.SERIALIZATION_FAILED, ex).withVisibility(ErrorVisibility.INTERNAL);
         }
     }
 

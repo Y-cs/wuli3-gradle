@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import com.kjs.wuli3.json.provider.JacksonProvider;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 基于标准 Jackson {@link ObjectMapper} 的项目级 JSON 工具入口。
@@ -24,20 +25,24 @@ public final class Jsons {
         return Jsons.execute(JsonErrors.SERIALIZATION_FAILED, objectMapper -> objectMapper.writeValueAsBytes(value));
     }
 
-    public static <T> T fromJson(final String json, final Class<T> type) {
+    /** 将 JSON 文本反序列化为指定类型；顶层 JSON 为 {@code null} 时返回 {@code null}。 */
+    public static <T> @Nullable T fromJson(final String json, final Class<T> type) {
         return Jsons.execute(JsonErrors.DESERIALIZATION_FAILED, objectMapper -> objectMapper.readValue(json, type));
     }
 
-    public static <T> T fromJson(final String json, final TypeReference<T> typeReference) {
+    /** 将 JSON 文本按泛型类型反序列化；顶层 JSON 为 {@code null} 时返回 {@code null}。 */
+    public static <T> @Nullable T fromJson(final String json, final TypeReference<T> typeReference) {
         return Jsons.execute(
                 JsonErrors.DESERIALIZATION_FAILED, objectMapper -> objectMapper.readValue(json, typeReference));
     }
 
-    public static <T> T fromJsonBytes(final byte[] json, final Class<T> type) {
+    /** 将 JSON 字节反序列化为指定类型；顶层 JSON 为 {@code null} 时返回 {@code null}。 */
+    public static <T> @Nullable T fromJsonBytes(final byte[] json, final Class<T> type) {
         return Jsons.execute(JsonErrors.DESERIALIZATION_FAILED, objectMapper -> objectMapper.readValue(json, type));
     }
 
-    public static <T> T fromJsonBytes(final byte[] json, final TypeReference<T> typeReference) {
+    /** 将 JSON 字节按泛型类型反序列化；顶层 JSON 为 {@code null} 时返回 {@code null}。 */
+    public static <T> @Nullable T fromJsonBytes(final byte[] json, final TypeReference<T> typeReference) {
         return Jsons.execute(
                 JsonErrors.DESERIALIZATION_FAILED, objectMapper -> objectMapper.readValue(json, typeReference));
     }

@@ -78,6 +78,14 @@ class HashRedisOperationsTest {
     }
 
     @Test
+    void ignoresJsonNullEntries() {
+        final RedisKey key = RedisKey.persistent("orders:null");
+        when(this.hashOperations.entries(key.value())).thenReturn(Map.of("empty", "null"));
+
+        assertThat(this.operations.entries(key, Sample.class)).isEmpty();
+    }
+
+    @Test
     void supportsFieldMetadataAndDeletion() {
         final RedisKey key = RedisKey.persistent("orders");
         when(this.hashOperations.delete(key.value(), "1", "2")).thenReturn(2L);

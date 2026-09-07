@@ -36,6 +36,11 @@ class JsonsTest {
     }
 
     @Test
+    void deserializesJsonNullAsNull() {
+        assertThat(Jsons.fromJson("null", Sample.class)).isNull();
+    }
+
+    @Test
     void deserializesParameterizedJson() {
         final TypeReference<List<Sample>> typeReference = new TypeReference<>() {};
         final List<Sample> samples = Jsons.fromJson(

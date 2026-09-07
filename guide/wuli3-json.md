@@ -25,6 +25,9 @@ final List<Order> orders = Jsons.fromJson(
         new TypeReference<List<Order>>() {});
 ```
 
+反序列化方法允许 JSON 顶层值为空：输入 `null` 时可能返回 Java `null`，调用方应在非空场景使用
+`Objects.requireNonNull` 或显式判断。解析失败统一抛出 `ErrorCodeException`，并将底层异常标记为内部可见性。
+
 `Jsons` 使用模块内固定的标准 Mapper，适合不需要应用级定制的读写。需要注入自定义模块、资源解析器或脱敏策略时，使用独立 Mapper。
 
 ## JSON Tree
@@ -84,6 +87,9 @@ final class AppResourcePathResolver implements ResourcePathResolver {
     }
 }
 ```
+
+多个解析器可以通过 `CompositeResourcePathResolver` 组合；同一资源类型按列表顺序使用第一个支持它的解析器，
+没有匹配项时原样保留值。
 
 Spring MVC 应用使用 Web starter 时，可以注册 `ResourcePathResolver` Bean；Web starter 会把它装配到 Boot 管理的 `ObjectMapper`。
 

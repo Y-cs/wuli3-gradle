@@ -4,14 +4,10 @@ import com.kjs.wuli3.audit.AuditLogRecorder;
 import com.kjs.wuli3.audit.annotation.AuditLog;
 import com.kjs.wuli3.audit.internal.AuditLogInterceptor;
 import com.kjs.wuli3.audit.internal.DefaultAuditLogRecorder;
-import com.kjs.wuli3.core.id.IdGenerator;
-import com.kjs.wuli3.core.id.UuidStringIdGenerator;
-import com.kjs.wuli3.core.time.ClockProvider;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.autoconfigure.EventAutoConfiguration;
 import com.kjs.wuli3.opentelemetry.trace.TraceContextAccessor;
 import com.kjs.wuli3.propagation.store.ContextReader;
-import java.time.Clock;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
@@ -44,10 +40,7 @@ public class AuditLogAutoConfiguration {
             final Environment environment) {
         final String application = environment.getProperty("spring.application.name", "application");
         return new DefaultAuditLogRecorder(
-                application,
-                eventPublisher,
-                contextReaders.getIfAvailable(),
-                traceContextAccessors.getIfAvailable());
+                application, eventPublisher, contextReaders.getIfAvailable(), traceContextAccessors.getIfAvailable());
     }
 
     @Bean

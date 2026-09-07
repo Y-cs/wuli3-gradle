@@ -58,6 +58,9 @@ redisSupport.delete(RedisKey.persistent("orders:" + orderId));
 
 `ObjectRedisOperations` 使用 `wuli3-json` 的标准 `Jsons` 配置，将值保存为 UTF-8 JSON 字符串。JSON 中不写入 Java 类名，读取时必须显式提供目标类型。
 
+读取到 Redis 中的 JSON 顶层值 `null` 时，`get` 返回 `Optional.empty()`；Hash 的 `entries` 和 Set 的 `members`
+会忽略反序列化为 `null` 的成员。写入 API 仍拒绝 Java `null`，以避免把“缺失值”和“显式空值”混为一谈。
+
 ```java
 final Optional<List<Order>> orders = redisSupport.objectOperations().get(
         RedisKey.persistent("orders:pending"),

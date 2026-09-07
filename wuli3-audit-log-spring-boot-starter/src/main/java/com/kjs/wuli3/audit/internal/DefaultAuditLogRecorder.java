@@ -8,7 +8,6 @@ import com.kjs.wuli3.audit.payload.AuditLogRuntimeSnapshot;
 import com.kjs.wuli3.audit.protocol.AuditLogProtocolConstants;
 import com.kjs.wuli3.audit.protocol.AuditLogPublishOptions;
 import com.kjs.wuli3.core.assertion.Asserts;
-import com.kjs.wuli3.core.time.ClockProvider;
 import com.kjs.wuli3.event.EventPublisher;
 import com.kjs.wuli3.event.envelope.EventEnvelope;
 import com.kjs.wuli3.event.envelope.EventEnvelopeTemplate;
@@ -18,11 +17,9 @@ import com.kjs.wuli3.propagation.context.AuthContext;
 import com.kjs.wuli3.propagation.context.Context;
 import com.kjs.wuli3.propagation.context.InvocationContext;
 import com.kjs.wuli3.propagation.store.ContextReader;
-import org.jspecify.annotations.Nullable;
-
-import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 默认的上下文感知审计日志记录器。
@@ -32,8 +29,7 @@ import java.util.Optional;
 public final class DefaultAuditLogRecorder implements AuditLogRecorder {
 
     private static final EventEnvelopeTemplate ENVELOPE_TEMPLATE =
-            EventEnvelopeTemplate.of(
-                    AuditLogProtocolConstants.TOPIC, AuditLogProtocolConstants.EVENT_TYPE);
+            EventEnvelopeTemplate.of(AuditLogProtocolConstants.TOPIC, AuditLogProtocolConstants.EVENT_TYPE);
 
     private final String application;
     private final EventPublisher eventPublisher;

@@ -2,8 +2,8 @@ package com.kjs.wuli3.audit.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.kjs.wuli3.audit.payload.AuditLog;
 import com.kjs.wuli3.audit.AuditLogRecorder;
+import com.kjs.wuli3.audit.payload.AuditLog;
 import com.kjs.wuli3.audit.payload.AuditLogPayload;
 import com.kjs.wuli3.audit.protocol.AuditLogPublishOptions;
 import com.kjs.wuli3.audit.protocol.AuditLogStore;

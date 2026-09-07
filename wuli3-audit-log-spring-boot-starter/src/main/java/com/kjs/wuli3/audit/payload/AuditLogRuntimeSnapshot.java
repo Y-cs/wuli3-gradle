@@ -2,9 +2,8 @@ package com.kjs.wuli3.audit.payload;
 
 import com.kjs.wuli3.core.assertion.Asserts;
 import com.kjs.wuli3.propagation.context.PrincipalType;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 审计事件创建时由框架从当前调用上下文补全的来源快照。
@@ -40,14 +39,16 @@ public record AuditLogRuntimeSnapshot(
         }
     }
 
-    public record AuditTrace(@Nullable String traceId,@Nullable  String spanId) {
+    public record AuditTrace(
+            @Nullable String traceId, @Nullable String spanId) {
         public AuditTrace {
             AuditLogRuntimeSnapshot.requireNullOrNonBlank(traceId, "traceId");
             AuditLogRuntimeSnapshot.requireNullOrNonBlank(spanId, "spanId");
         }
     }
 
-    public record AuditInvocation(@Nullable String requestId,@Nullable  String originIp) {
+    public record AuditInvocation(
+            @Nullable String requestId, @Nullable String originIp) {
         public AuditInvocation {
             AuditLogRuntimeSnapshot.requireNullOrNonBlank(requestId, "requestId");
             AuditLogRuntimeSnapshot.requireNullOrNonBlank(originIp, "originIp");

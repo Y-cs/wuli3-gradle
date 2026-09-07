@@ -76,7 +76,7 @@ public final class JacksonProvider {
     }
 
     /** 返回需要显式禁用的 Jackson 配置项。 */
-    public static ConfigFeature[] featuresToDisabled() {
+    public static ConfigFeature[] featuresToDisable() {
         return Stream.of(JSON_MAPPER_BASE_ASSEMBLY, JSON_MAPPER_TIME_ASSEMBLY, JSON_MAPPER_ENUM_ASSEMBLY)
                 .flatMap(JacksonProvider::configEntries)
                 .filter(e -> e.getValue() == FeatureState.DISABLED)

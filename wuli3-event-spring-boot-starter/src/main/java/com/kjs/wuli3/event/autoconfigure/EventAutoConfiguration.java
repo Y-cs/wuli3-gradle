@@ -34,6 +34,7 @@ public class EventAutoConfiguration {
     }
 
     @Bean("applicationTaskExecutor")
+    @ConditionalOnMissingBean(name = "applicationTaskExecutor")
     TaskExecutor applicationTaskExecutor() {
         return new VirtualThreadTaskExecutor("event-publisher-executor");
     }

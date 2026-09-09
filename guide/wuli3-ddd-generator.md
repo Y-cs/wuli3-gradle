@@ -2,13 +2,27 @@
 
 ## 用途
 
-`wuli3-ddd-generator` 是一个独立的 Java CLI，用于生成单体多模块 DDD 服务。生成结果是普通 Gradle 工程，生成完成后不依赖 CLI 运行。
+`wuli3-ddd-generator` 同时提供 Gradle 插件和独立 Java CLI，用于生成单体多模块 DDD 服务。生成结果是普通 Gradle 工程，生成完成后不依赖生成器运行。
+
+仓库内的完整生成结果位于 [`examples/order-service`](../examples/order-service)，可以直接查看模块结构。
 
 ## Gradle 任务
 
 推荐通过 Gradle 插件提供的强类型任务生成服务：
 
 ```kotlin
+// settings.gradle.kts
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+```
+
+```kotlin
+// build.gradle.kts
 plugins {
     id("com.kjs.wuli3.ddd-generator") version "0.1.0-SNAPSHOT"
 }
@@ -25,6 +39,13 @@ plugins {
 ```
 
 `generateDddService` 是一次性脚手架任务，每次执行都会检查目标服务目录；目录非空时任务失败，不会覆盖业务代码。未传 `--output` 时，服务生成到应用该插件的根工程目录。
+
+命令需要在应用了 `com.kjs.wuli3.ddd-generator` 插件的 Gradle 工程根目录执行，而不是在 Wuli3 源码仓库根目录直接执行。前提条件如下：
+
+- 使用 JDK 21；
+- 工程包含可执行的 Gradle Wrapper；
+- `pluginManagement.repositories` 能解析插件 marker；本地开发可以使用 `mavenLocal()`；
+- Wuli3 BOM、Starter 和 `build-logic` 版本已经发布到配置的仓库；本地开发也可以先发布到 Maven Local。
 
 ## CLI
 
@@ -75,11 +96,16 @@ shared-kernel -> domain / api -> app -> infra
 - `adapter` 依赖 `api` 和 `app`，负责 HTTP 等入站协议。
 - `bootstrap` 依赖 `infra` 和 `adapter`，只负责 Spring Boot 启动和组装。
 
+根工程统一向子模块应用 `com.kjs.wuli3.java-conventions`，由该约定提供 Java 21、Wuli3 BOM、
+测试依赖、JaCoCo 和静态质量门禁。各模块构建文件只声明自己的业务依赖；`bootstrap` 再额外应用
+`org.springframework.boot`。`com.kjs.wuli3.spring-conventions` 面向 Spring Boot Starter 和自动配置模块，
+不会应用到 `domain`、`api` 或 `shared-kernel`。
+
 ## 架构门禁
 
 生成工程使用两类互补门禁：
 
-- `shared-kernel` 的 `verifySharedKernelDependencies` Gradle 任务检查生产依赖声明，只允许 Wuli3 BOM 和 `wuli3-core`；
+- `shared-kernel` 的 `verifySharedKernelDependencies` Gradle 任务检查生产依赖声明，只允许 `wuli3-core`；
 - `SharedKernelArchitectureTest` 使用 ArchUnit 检查 Shared Kernel 字节码只能依赖自身、JDK 和 `wuli3-core`；
 - `InfraArchitectureTest` 使用 ArchUnit 的依赖白名单检查 `infra` 字节码依赖。
 
@@ -101,3 +127,4 @@ shared-kernel -> domain / api -> app -> infra
 ```
 
 MySQL 选项会额外生成 MyBatis-Plus PO/Mapper；消息选项会加入对应 Wuli3 消息 starter，未选择的基础设施不会生成。
+消息中间件的连接和认证配置不会由生成器猜测，请按对应 starter 文档补充 `application.yml`。

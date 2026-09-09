@@ -43,6 +43,9 @@ final class DddProjectGenerator {
                     "SharedKernelArchitectureTest.java.tpl",
                     "shared-kernel/src/test/java/{{packagePath}}/architecture/SharedKernelArchitectureTest.java"),
             file(
+                    "SharedKernelTest.java.tpl",
+                    "shared-kernel/src/test/java/{{packagePath}}/sharedkernel/SharedKernelTest.java"),
+            file(
                     "Domain.java.tpl",
                     "domain/src/main/java/{{packagePath}}/domain/{{domainPackage}}/{{domainType}}.java"),
             file(
@@ -133,7 +136,8 @@ final class DddProjectGenerator {
         result.put("buildLogicVersion", options.buildLogicVersion());
         result.put("templateVersion", DddProjectGenerator.TEMPLATE_VERSION);
         result.put("infraDependencies", this.infraDependencies(options));
-        result.put("messagingConfiguration", this.messagingConfiguration(options));
+        result.put("bootstrapTestImports", this.bootstrapTestImports(options));
+        result.put("bootstrapTestConfiguration", this.bootstrapTestConfiguration(options));
         result.put("repositoryFields", this.repositoryFields(options));
         result.put("repositoryConstructor", this.repositoryConstructor(options));
         result.put("repositoryLoad", this.repositoryLoad(options));
@@ -155,19 +159,45 @@ final class DddProjectGenerator {
         return result.toString();
     }
 
-    private String messagingConfiguration(final GeneratorOptions options) {
-        return switch (options.messaging()) {
-            case "rocketmq" -> "  messaging: rocketmq";
-            case "rabbitmq" -> "  messaging: rabbitmq";
-            default -> "  messaging: none";
-        };
-    }
-
     private String repositoryFields(final GeneratorOptions options) {
         if (!options.persistence().equals("mysql")) {
             return "";
         }
         return "    private final " + options.domainType() + "Mapper mapper;\n";
+    }
+
+    private String bootstrapTestImports(final GeneratorOptions options) {
+        if (!options.persistence().equals("mysql")) {
+            return """
+                    import org.junit.jupiter.api.Test;
+                    import org.springframework.boot.test.context.SpringBootTest;""";
+        }
+        return String.join(
+                "\n",
+                "import " + options.basePackage() + ".infra.persistence." + options.domainType() + "Mapper;",
+                "import org.junit.jupiter.api.Test;",
+                "import org.springframework.boot.autoconfigure.ImportAutoConfiguration;",
+                "import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;",
+                "import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;",
+                "import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;",
+                "import org.springframework.boot.test.context.SpringBootTest;",
+                "import org.springframework.test.context.bean.override.mockito.MockitoBean;");
+    }
+
+    private String bootstrapTestConfiguration(final GeneratorOptions options) {
+        if (!options.persistence().equals("mysql")) {
+            return "";
+        }
+        return "\n"
+                + String.join(
+                        "\n",
+                        "@MockitoBean(types = " + options.domainType() + "Mapper.class)",
+                        "@ImportAutoConfiguration(",
+                        "        exclude = {",
+                        "            DataSourceAutoConfiguration.class,",
+                        "            DataSourceTransactionManagerAutoConfiguration.class,",
+                        "            JdbcTemplateAutoConfiguration.class",
+                        "        })");
     }
 
     private String repositoryConstructor(final GeneratorOptions options) {

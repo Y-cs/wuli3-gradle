@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
  * @author GuoYang create on 2026/9/7 15:30
  */
 @Repository
-public final class {{domainType}}RepositoryAdapter implements {{domainType}}Repository {
+public class {{domainType}}RepositoryAdapter implements {{domainType}}Repository {
 {{repositoryFields}}{{repositoryConstructor}}
     /** 加载示例聚合。 */
     @Override

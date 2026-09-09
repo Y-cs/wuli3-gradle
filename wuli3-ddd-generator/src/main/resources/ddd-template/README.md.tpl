@@ -2,6 +2,9 @@
 
 由 `wuli3-ddd-generator` 模板 `{{templateVersion}}` 生成的单体多模块 DDD 服务。
 
+根工程统一应用 `com.kjs.wuli3.java-conventions`，各模块无需重复配置 Java、测试和质量门禁；
+`bootstrap` 额外应用 Spring Boot 插件生成可执行应用。
+
 ## 模块边界
 
 ```text

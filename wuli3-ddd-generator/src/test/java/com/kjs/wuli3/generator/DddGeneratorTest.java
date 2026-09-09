@@ -49,10 +49,22 @@ final class DddGeneratorTest {
                         "\"bootstrap\"");
         assertThat(Files.readString(root.resolve("shared-kernel/build.gradle.kts")))
                 .contains("wuli3-core", "verifySharedKernelDependencies", "allowedSharedKernelDependencies")
-                .doesNotContain("spring", "project(\"");
+                .doesNotContain("spring", "project(\"", "`java-library`");
+        assertThat(root.resolve("shared-kernel/src/test/java/com/example/order/sharedkernel/SharedKernelTest.java"))
+                .exists();
         assertThat(Files.readString(root.resolve("build.gradle.kts")))
-                .contains("quality-conventions\") version \"4.5.6\"");
-        assertThat(Files.readString(root.resolve("gradle.properties"))).contains("wuli3.version=1.2.3");
+                .contains(
+                        "java-conventions\") version \"4.5.6\"",
+                        "pluginManager.apply(\"com.kjs.wuli3.java-conventions\")")
+                .doesNotContain("JavaPluginExtension", "JavaLanguageVersion", "tasks.withType<JavaCompile>");
+        assertThat(Files.readString(root.resolve("gradle.properties")))
+                .contains(
+                        "wuli3.version=1.2.3",
+                        "wuli3.conventions.bom-coordinates=com.kjs.wuli3:wuli3-dependencies:1.2.3",
+                        "wuli3.conventions.jacoco.verification.enabled=false");
+        assertThat(Files.readString(root.resolve("domain/build.gradle.kts")))
+                .contains("api(project(\":shared-kernel\"))")
+                .doesNotContain("plugins", "java-library");
         assertThat(Files.readString(root.resolve("infra/build.gradle.kts")))
                 .contains("project(\":app\")", "project(\":domain\")", "archunit-junit5")
                 .doesNotContain("wuli3-mysql");
@@ -98,7 +110,23 @@ final class DddGeneratorTest {
                         Files.readString(
                                 root.resolve(
                                         "infra/src/main/java/com/example/catalog/infra/persistence/ProductCatalogRepositoryAdapter.java")))
-                .contains("private final ProductCatalogMapper mapper", "this.mapper.selectById");
+                .contains(
+                        "public class ProductCatalogRepositoryAdapter",
+                        "private final ProductCatalogMapper mapper",
+                        "this.mapper.selectById")
+                .doesNotContain("public final class ProductCatalogRepositoryAdapter");
+        assertThat(Files.readString(root.resolve("bootstrap/src/main/resources/application.yml")))
+                .contains("name: catalog-service", "service-code: catalog-service")
+                .doesNotContain("generator:", "messaging:");
+        assertThat(Files.readString(
+                        root.resolve("bootstrap/src/test/java/com/example/catalog/BootstrapApplicationTest.java")))
+                .contains(
+                        "import com.example.catalog.infra.persistence.ProductCatalogMapper;",
+                        "@MockitoBean(types = ProductCatalogMapper.class)",
+                        "@ImportAutoConfiguration(",
+                        "exclude = {",
+                        "DataSourceAutoConfiguration.class",
+                        "JdbcTemplateAutoConfiguration.class");
     }
 
     /** 验证必填参数缺失时给出明确错误。 */

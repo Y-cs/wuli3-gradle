@@ -15,11 +15,8 @@ import com.tngtech.archunit.lang.ArchRule;
 @AnalyzeClasses(packages = "{{basePackage}}", importOptions = ImportOption.DoNotIncludeTests.class)
 final class InfraArchitectureTest {
     @ArchTest
-    static final ArchRule APP_OUTPUT_PORTS_ARE_INTERFACES = classes()
-            .that()
-            .resideInAPackage("..app.port.out..")
-            .should()
-            .beInterfaces();
+    static final ArchRule APP_OUTPUT_PORTS_ARE_INTERFACES =
+            classes().that().resideInAPackage("..app.port.out..").should().beInterfaces();
 
     @ArchTest
     static final ArchRule INFRA_ONLY_DEPENDS_ON_ALLOWED_BOUNDARIES = classes()

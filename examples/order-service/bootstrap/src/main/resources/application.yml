@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: order-service
+
+application:
+  service:
+    service-code: order-service

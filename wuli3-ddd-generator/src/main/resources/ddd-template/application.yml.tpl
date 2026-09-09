@@ -5,7 +5,3 @@ spring:
 application:
   service:
     service-code: {{service}}
-
-wuli3:
-  generator:
-{{messagingConfiguration}}

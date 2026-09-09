@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.PayloadApplicationEvent;
+import org.springframework.core.task.TaskExecutor;
 
 class EventAutoConfigurationTest {
 
@@ -56,6 +57,16 @@ class EventAutoConfigurationTest {
 
                     assertThat(transport.sent).containsExactly(EventAutoConfigurationTest.envelope());
                 });
+    }
+
+    @Test
+    void backsOffWhenApplicationTaskExecutorAlreadyExists() {
+        final TaskExecutor taskExecutor = Runnable::run;
+
+        this.contextRunner
+                .withBean("applicationTaskExecutor", TaskExecutor.class, () -> taskExecutor)
+                .run(context -> assertThat(context.getBean("applicationTaskExecutor", TaskExecutor.class))
+                        .isSameAs(taskExecutor));
     }
 
     private static EventEnvelope<String> envelope() {

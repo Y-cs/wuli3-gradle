@@ -8,6 +8,7 @@
 | --- | --- |
 | [build-logic](build-logic.md) | Gradle Java、Spring、质量和发布约定插件。 |
 | [wuli3-dependencies](wuli3-dependencies.md) | Gradle Platform 与 Maven BOM。 |
+| [wuli3-ddd-generator](wuli3-ddd-generator.md) | 生成单体多模块 DDD 服务和模块边界测试。 |
 
 ## 基础模块
 

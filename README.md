@@ -7,6 +7,7 @@ wuli3 分布式项目脚手架底座。项目使用 JDK 21、Gradle 9.6.0、多�
 | 模块 | 说明 |
 | --- | --- |
 | [`build-logic`](guide/build-logic.md) | Gradle 约定插件，统一 Java、Spring、质量检测和发布规则。 |
+| [`wuli3-ddd-generator`](guide/wuli3-ddd-generator.md) | 通过 CLI 或 Gradle 任务生成带 Shared Kernel 和架构门禁的单体多模块 DDD 服务。 |
 | [`wuli3-dependencies`](guide/wuli3-dependencies.md) | 统一依赖版本平台。 |
 | [`wuli3-core`](guide/wuli3-core.md) | 无 Spring 依赖的错误模型、断言、ID、时间和 Stream 工具。 |
 | [`wuli3-json`](guide/wuli3-json.md) | Jackson facade、Mapper 装配、资源路径和脱敏。 |

@@ -17,6 +17,7 @@ class PublishingConventionsPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         with(project) {
             pluginManager.apply("maven-publish")
+            val isGradlePluginProject = pluginManager.hasPlugin("java-gradle-plugin")
 
             extensions.configure<JavaPluginExtension> {
                 withJavadocJar()
@@ -31,27 +32,29 @@ class PublishingConventionsPlugin : Plugin<Project> {
 
             extensions.configure<PublishingExtension> {
                 publications {
-                    create<MavenPublication>("mavenJava") {
-                        from(components["java"])
-                        pom {
-                            name.set(project.name)
-                            description.set(project.description ?: "Wuli3 component ${project.name}")
-                            url.set("https://github.com/kjs/wuli3")
-                            licenses {
-                                license {
-                                    name.set("Apache License, Version 2.0")
-                                    url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
-                                }
-                            }
-                            scm {
-                                connection.set("scm:git:https://github.com/kjs/wuli3.git")
-                                developerConnection.set("scm:git:ssh://git@github.com/kjs/wuli3.git")
+                    if (!isGradlePluginProject) {
+                        create<MavenPublication>("mavenJava") {
+                            from(components["java"])
+                            pom {
+                                name.set(project.name)
+                                description.set(project.description ?: "Wuli3 component ${project.name}")
                                 url.set("https://github.com/kjs/wuli3")
-                            }
-                            developers {
-                                developer {
-                                    id.set("wuli3-maintainers")
-                                    name.set("Wuli3 Maintainers")
+                                licenses {
+                                    license {
+                                        name.set("Apache License, Version 2.0")
+                                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                                    }
+                                }
+                                scm {
+                                    connection.set("scm:git:https://github.com/kjs/wuli3.git")
+                                    developerConnection.set("scm:git:ssh://git@github.com/kjs/wuli3.git")
+                                    url.set("https://github.com/kjs/wuli3")
+                                }
+                                developers {
+                                    developer {
+                                        id.set("wuli3-maintainers")
+                                        name.set("Wuli3 Maintainers")
+                                    }
                                 }
                             }
                         }

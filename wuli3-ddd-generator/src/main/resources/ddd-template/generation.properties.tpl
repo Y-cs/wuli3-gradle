@@ -1,0 +1,9 @@
+generator=wuli3-ddd-generator
+template.version={{templateVersion}}
+service={{service}}
+base.package={{basePackage}}
+domain={{domain}}
+persistence={{persistence}}
+messaging={{messaging}}
+wuli3.version={{wuli3Version}}
+build-logic.version={{buildLogicVersion}}

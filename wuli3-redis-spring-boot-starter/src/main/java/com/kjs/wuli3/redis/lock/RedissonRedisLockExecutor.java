@@ -61,8 +61,8 @@ public final class RedissonRedisLockExecutor implements RedisLockExecutor {
     }
 
     @Override
-    public <T> T execute(final RedisLock lock, final Supplier<T> action) {
-        return this.tryExecute(lock, action).orElseThrow(() -> new RedisLockAcquisitionException(lock.key()));
+    public <T> T execute(final RedisLock request, final Supplier<T> action) {
+        return this.tryExecute(request, action).orElseThrow(() -> new RedisLockAcquisitionException(request.key()));
     }
 
     private boolean tryLock(final RLock lock, final RedisLock request) {

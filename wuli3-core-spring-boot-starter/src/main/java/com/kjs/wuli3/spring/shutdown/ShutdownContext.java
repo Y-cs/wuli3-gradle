@@ -10,7 +10,7 @@ import java.util.Objects;
  * <p>上下文对象在每个关闭阶段开始时创建，并传递给该阶段的所有钩子。
  * 钩子可以通过 {@link #remaining()} 方法查询剩余时间，以便在超时前完成工作。
  *
- * <h3>使用示例</h3>
+ * <h2>使用示例</h2>
  * <pre>{@code
  * @Override
  * public void shutdown(ShutdownContext context) throws InterruptedException {

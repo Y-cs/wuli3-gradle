@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * 验证 DDD 生成器的模块边界、选项渲染和写入保护。
@@ -127,6 +129,45 @@ final class DddGeneratorTest {
                         "exclude = {",
                         "DataSourceAutoConfiguration.class",
                         "JdbcTemplateAutoConfiguration.class");
+    }
+
+    /** 验证关键字和字面量不能用于包名，且拒绝输入时不创建工程。 */
+    @ParameterizedTest
+    @CsvSource({
+        "com.example.class, order",
+        "class.example, order",
+        "com.true.example, order",
+        "com.example.null, order",
+        "com.example.order, class",
+        "com.example.order, int",
+        "com.example.order, true",
+        "com.example.order, false",
+        "com.example.order, null"
+    })
+    void rejectsInvalidJavaNamesBeforeWriting(final String basePackage, final String domain) {
+        assertThatThrownBy(() -> DddGenerator.main(new String[] {
+                    "generate",
+                    "--service",
+                    "order-service",
+                    "--package",
+                    basePackage,
+                    "--domain",
+                    domain,
+                    "--output",
+                    this.output.toString()
+                }))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThat(this.output.resolve("order-service")).doesNotExist();
+    }
+
+    /** 验证合法的上下文关键字包段和带连字符的领域名仍可使用。 */
+    @ParameterizedTest
+    @CsvSource({"com.example.record, record", "com.example.module, product-catalog", "com.example.var, class-order"})
+    void acceptsLegalJavaPackageNames(final String basePackage, final String domain) {
+        final GeneratorOptions options = GeneratorOptions.parse(
+                new String[] {"--service", "order-service", "--package", basePackage, "--domain", domain});
+        assertThat(options.basePackage()).isEqualTo(basePackage);
+        assertThat(options.domain()).isEqualTo(domain);
     }
 
     /** 验证必填参数缺失时给出明确错误。 */

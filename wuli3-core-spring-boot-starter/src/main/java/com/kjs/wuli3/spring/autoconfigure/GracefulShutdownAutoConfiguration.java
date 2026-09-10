@@ -21,20 +21,20 @@ import org.springframework.context.annotation.Bean;
  *   <li>{@link GracefulShutdownCoordinator} - 阶段协调器</li>
  * </ul>
  *
- * <h3>启用条件</h3>
+ * <h2>启用条件</h2>
  * <p>默认启用，可通过以下配置禁用：
  * <pre>
  * wuli3.spring.shutdown.enabled=false
  * </pre>
  *
- * <h3>配置属性</h3>
+ * <h2>配置属性</h2>
  * <p>支持通过 {@link GracefulShutdownProperties} 配置：
  * <ul>
  *   <li>{@code wuli3.spring.shutdown.phase-timeout} - 默认阶段超时时间（默认 30 秒）</li>
  *   <li>{@code wuli3.spring.shutdown.phases.<阶段>.timeout} - 特定阶段的超时时间</li>
  * </ul>
  *
- * <h3>使用示例</h3>
+ * <h2>使用示例</h2>
  * <pre>{@code
  * @Component
  * @RegisterShutdownHook(phase = ShutdownPhase.DRAIN_ASYNC_TASKS, priority = 100)

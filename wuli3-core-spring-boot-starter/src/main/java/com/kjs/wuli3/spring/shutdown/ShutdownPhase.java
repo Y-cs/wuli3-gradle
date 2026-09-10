@@ -6,7 +6,7 @@ package com.kjs.wuli3.spring.shutdown;
  * <p>各阶段按照枚举声明顺序依次执行，确保资源按正确的依赖顺序释放。
  * 每个阶段对应关闭流程中的一个逻辑步骤，可以注册多个钩子在同一阶段执行。
  *
- * <h3>阶段执行顺序与用途</h3>
+ * <h2>阶段执行顺序与用途</h2>
  * <ol>
  *   <li>{@link #DRAIN_ASYNC_TASKS} - 排空本地异步任务</li>
  *   <li>{@link #AWAIT_REMOTE_ACK} - 等待远程系统确认</li>

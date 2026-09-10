@@ -14,7 +14,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  * {@link RegisterShutdownHook} 注解的 Bean，并根据注解声明的阶段和优先级
  * 自动注册到 {@link ShutdownHookRegistry}。
  *
- * <h3>工作流程</h3>
+ * <h2>工作流程</h2>
  * <ol>
  *   <li>Spring 容器完成所有 Bean 的初始化</li>
  *   <li>通过构造函数注入获取所有 {@link ShutdownHook} Bean</li>
@@ -23,7 +23,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
  *   <li>记录注册日志，便于问题排查</li>
  * </ol>
  *
- * <h3>注册规则</h3>
+ * <h2>注册规则</h2>
  * <ul>
  *   <li>只注册带 {@link RegisterShutdownHook} 注解的钩子</li>
  *   <li>不带注解的钩子需要手动注册</li>

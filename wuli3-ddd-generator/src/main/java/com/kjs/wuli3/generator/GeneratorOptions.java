@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.lang.model.SourceVersion;
 
 /**
  * DDD 服务生成参数及其合法性约束。
@@ -57,10 +58,12 @@ record GeneratorOptions(
         if (!service.matches("[a-z][a-z0-9]*(?:-[a-z0-9]+)*")) {
             throw new IllegalArgumentException("service 必须是小写字母、数字和单个连字符组成的名称");
         }
-        if (!domain.matches("[a-z][a-z0-9]*(?:-[a-z0-9]+)*")) {
-            throw new IllegalArgumentException("domain 必须是小写字母、数字和单个连字符组成的名称");
+        if (!domain.matches("[a-z][a-z0-9]*(?:-[a-z0-9]+)*")
+                || !SourceVersion.isName(domain.replace('-', '_'), SourceVersion.RELEASE_21)) {
+            throw new IllegalArgumentException("domain 必须是小写字母、数字和单个连字符组成的名称，且转换后必须是合法 Java 包名");
         }
-        if (!basePackage.matches("[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*")) {
+        if (!basePackage.matches("[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*")
+                || !SourceVersion.isName(basePackage, SourceVersion.RELEASE_21)) {
             throw new IllegalArgumentException("package 必须是合法的小写 Java 包名");
         }
 

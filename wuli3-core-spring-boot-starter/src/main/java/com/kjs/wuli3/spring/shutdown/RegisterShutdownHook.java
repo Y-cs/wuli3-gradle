@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * <p>使用此注解可以避免在各模块的自动配置中手动调用 {@link ShutdownHookRegistry#register}。
  * Spring 容器会自动发现所有带此注解的 Bean，并根据注解中声明的阶段和优先级进行注册。
  *
- * <h3>使用示例</h3>
+ * <h2>使用示例</h2>
  * <pre>{@code
  * @RegisterShutdownHook(phase = ShutdownPhase.DRAIN_ASYNC_TASKS, priority = 100)
  * public class MyShutdownHook implements ShutdownHook {
@@ -28,14 +28,14 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * <h3>注册流程</h3>
+ * <h2>注册流程</h2>
  * <ol>
  *   <li>Spring 容器启动时扫描所有 Bean</li>
  *   <li>{@link ShutdownHookAutoRegistrar} 收集所有带此注解的 {@link ShutdownHook}</li>
  *   <li>根据注解声明的 {@link #phase()} 和 {@link #priority()} 自动注册</li>
  * </ol>
  *
- * <h3>与手动注册的关系</h3>
+ * <h2>与手动注册的关系</h2>
  * <p>使用此注解和手动调用 {@link ShutdownHookRegistry#register} 可以共存：
  * <ul>
  *   <li>推荐使用注解方式 - 声明式、解耦、易维护</li>

@@ -54,8 +54,7 @@ class RedissonRedisLockExecutorTest {
 
     @Test
     void usesFixedLeaseAndReturnsSupplierValue() throws InterruptedException {
-        final RedisLock request =
-                RedisLock.fixedLease("orders:1", Duration.ofSeconds(2), Duration.ofSeconds(5));
+        final RedisLock request = RedisLock.fixedLease("orders:1", Duration.ofSeconds(2), Duration.ofSeconds(5));
         when(this.lock.tryLock(2_000L, 5_000L, TimeUnit.MILLISECONDS)).thenReturn(true);
         when(this.lock.isHeldByCurrentThread()).thenReturn(true);
 

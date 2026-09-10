@@ -18,7 +18,7 @@ import org.springframework.boot.convert.DurationUnit;
  * <p>此类绑定 {@code wuli3.spring.shutdown} 前缀下的配置属性，
  * 用于控制优雅关闭的行为和超时设置。
  *
- * <h3>配置示例</h3>
+ * <h2>配置示例</h2>
  * <pre>
  * # 全局配置
  * wuli3.spring.shutdown.enabled=true
@@ -29,7 +29,7 @@ import org.springframework.boot.convert.DurationUnit;
  * wuli3.spring.shutdown.phases.AWAIT_REMOTE_ACK.timeout=45s
  * </pre>
  *
- * <h3>超时配置策略</h3>
+ * <h2>超时配置策略</h2>
  * <p>每个关闭阶段都有时间预算，钩子应在预算内主动完成：
  * <ul>
  *   <li>使用 {@link #phaseTimeout} 作为所有阶段的默认超时</li>

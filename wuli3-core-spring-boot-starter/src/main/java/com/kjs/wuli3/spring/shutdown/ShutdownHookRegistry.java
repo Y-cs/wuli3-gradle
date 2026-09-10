@@ -15,17 +15,17 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>注册表是纯粹的存储层，不包含执行逻辑。钩子按阶段和优先级组织，
  * 提供线程安全的注册接口和只读的查询接口。
  *
- * <h3>注册规则</h3>
+ * <h2>注册规则</h2>
  * <ul>
  *   <li>同一阶段内，优先级数值较小的钩子先执行</li>
  *   <li>相同优先级的钩子按注册顺序执行</li>
  *   <li>关闭开始后（{@link #closeRegistration()}）不允许继续注册</li>
  * </ul>
  *
- * <h3>线程安全</h3>
+ * <h2>线程安全</h2>
  * <p>注册和查询操作都是线程安全的。查询返回的列表是快照，不会被后续注册影响。
  *
- * <h3>使用示例</h3>
+ * <h2>使用示例</h2>
  * <pre>{@code
  * @Component
  * public class MyComponent {

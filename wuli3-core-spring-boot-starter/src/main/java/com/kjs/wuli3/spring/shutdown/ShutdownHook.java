@@ -6,7 +6,7 @@ package com.kjs.wuli3.spring.shutdown;
  * <p>关闭钩子在应用停止过程中被调用，用于释放资源、完成正在进行的工作、
  * 或通知外部系统。钩子必须在给定的时间预算内完成，并应该响应线程中断。
  *
- * <h3>实现指南</h3>
+ * <h2>实现指南</h2>
  * <ul>
  *   <li>尊重 {@link ShutdownContext#remaining()} 提供的剩余时间</li>
  *   <li>响应线程中断信号 ({@link Thread#isInterrupted()})</li>
@@ -15,7 +15,7 @@ package com.kjs.wuli3.spring.shutdown;
  *   <li>钩子应该是幂等的，多次调用不应产生副作用</li>
  * </ul>
  *
- * <h3>使用示例</h3>
+ * <h2>使用示例</h2>
  * <pre>{@code
  * public class ConnectionPoolShutdownHook implements ShutdownHook {
  *     private final ConnectionPool pool;

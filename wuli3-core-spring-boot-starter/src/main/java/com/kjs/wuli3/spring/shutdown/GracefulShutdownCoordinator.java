@@ -16,7 +16,7 @@ import org.springframework.context.SmartLifecycle;
  * <p>协调器是优雅关闭的顶层组件，集成到 Spring 容器的生命周期中。
  * 当容器关闭时，协调器会按照 {@link ShutdownPhase} 的声明顺序依次执行各个阶段。
  *
- * <h3>执行流程</h3>
+ * <h2>执行流程</h2>
  * <ol>
  *   <li>容器关闭时触发 {@link #stop()}</li>
  *   <li>关闭注册表，禁止新钩子注册</li>
@@ -25,11 +25,11 @@ import org.springframework.context.SmartLifecycle;
  *   <li>无论成功失败，都继续下一阶段</li>
  * </ol>
  *
- * <h3>执行时机</h3>
+ * <h2>执行时机</h2>
  * <p>协调器的关闭阶段设置为 {@link #SHUTDOWN_PHASE}，位于 Spring Boot Web graceful
  * lifecycle 之后；Web Server、服务摘除和入口流量治理不属于本协调器的内部阶段。
  *
- * <h3>线程安全</h3>
+ * <h2>线程安全</h2>
  * <p>使用 {@link AtomicBoolean} 确保关闭流程只执行一次，
  * 即使在并发关闭场景下也不会重复执行。
  *

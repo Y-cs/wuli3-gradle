@@ -29,6 +29,7 @@ final class DddProjectGenerator {
             file("build.gradle.kts.tpl", "build.gradle.kts"),
             file("gradle.properties.tpl", "gradle.properties"),
             file("README.md.tpl", "README.md"),
+            file("AGENTS.md.tpl", "AGENTS.md"),
             file("generation.properties.tpl", ".wuli3/generation.properties"),
             file("shared-kernel.gradle.kts.tpl", "shared-kernel/build.gradle.kts"),
             file("domain.gradle.kts.tpl", "domain/build.gradle.kts"),

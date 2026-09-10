@@ -40,6 +40,9 @@ final class DddGeneratorPluginTest {
 
         final Path generated = this.projectDirectory.resolve("billing-service");
         assertThat(generated.resolve("settings.gradle.kts")).exists();
+        assertThat(Files.readString(generated.resolve("AGENTS.md")))
+                .contains("# billing-service 项目协作规范", "`com.example.billing`")
+                .doesNotContain("{{");
         assertThat(Files.readString(generated.resolve(".wuli3/generation.properties")))
                 .contains(
                         "persistence=" + GeneratorOptions.DEFAULT_PERSISTENCE,
@@ -76,5 +79,6 @@ final class DddGeneratorPluginTest {
 
         assertThat(generatedTask.getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(output.resolve("order-service/settings.gradle.kts")).exists();
+        assertThat(output.resolve("order-service/AGENTS.md")).isRegularFile();
     }
 }

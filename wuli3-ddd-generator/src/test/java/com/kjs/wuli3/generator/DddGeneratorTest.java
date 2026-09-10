@@ -39,6 +39,22 @@ final class DddGeneratorTest {
         });
 
         final Path root = this.output.resolve("order-service");
+        assertThat(Files.readString(root.resolve("AGENTS.md")))
+                .contains(
+                        "# order-service 项目协作规范",
+                        "`com.example.order`",
+                        "初始领域为 `order`",
+                        "## 项目结构与模块边界",
+                        "## 构建风格",
+                        "## 编码风格",
+                        "## 测试指南",
+                        "## 提交与 Pull Request 规范",
+                        "## Git 使用",
+                        "## 注释使用说明",
+                        "./gradlew clean check",
+                        "git add <path>",
+                        "yyyy/M/d HH:mm")
+                .doesNotContain("{{", "/Users/", "OMX", "com.kjs.wuli3.generator");
         assertThat(root.resolve("gradlew")).isExecutable();
         assertThat(Files.readString(root.resolve("settings.gradle.kts")))
                 .contains(

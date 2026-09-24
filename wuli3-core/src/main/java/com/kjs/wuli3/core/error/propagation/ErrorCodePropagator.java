@@ -20,6 +20,9 @@ public final class ErrorCodePropagator {
     /** 错误码字段；值为 {@link ErrorCodeCarrier#code()}。 */
     public static final String CODE = "X-Wuli3-Error-Code";
 
+    /** 原始错误码字段；值为 {@link ErrorCodeCarrier#originalCode()}。 */
+    public static final String ORIGINAL_CODE = "X-Wuli3-Error-Original-Code";
+
     /** 错误消息字段；值为 {@link ErrorCodeCarrier#message()}。 */
     public static final String MESSAGE = "X-Wuli3-Error-Message";
 
@@ -42,6 +45,7 @@ public final class ErrorCodePropagator {
         final ErrorCodeCarrier actualProtocol = Objects.requireNonNull(protocol, "protocol");
         final BiConsumer<String, String> actualFieldWriter = Objects.requireNonNull(fieldWriter, "fieldWriter");
         actualFieldWriter.accept(ErrorCodePropagator.CODE, actualProtocol.code());
+        actualFieldWriter.accept(ErrorCodePropagator.ORIGINAL_CODE, actualProtocol.originalCode());
         actualFieldWriter.accept(ErrorCodePropagator.MESSAGE, actualProtocol.message());
         actualFieldWriter.accept(
                 ErrorCodePropagator.ORIGIN, actualProtocol.origin().name());
@@ -61,15 +65,17 @@ public final class ErrorCodePropagator {
     public Optional<ErrorCodeCarrier> extract(final Function<String, @Nullable String> fieldReader) {
         final Function<String, @Nullable String> actualFieldReader = Objects.requireNonNull(fieldReader, "fieldReader");
         final @Nullable String code = actualFieldReader.apply(ErrorCodePropagator.CODE);
+        final @Nullable String originalCode = actualFieldReader.apply(ErrorCodePropagator.ORIGINAL_CODE);
         final @Nullable String message = actualFieldReader.apply(ErrorCodePropagator.MESSAGE);
         final @Nullable String originName = actualFieldReader.apply(ErrorCodePropagator.ORIGIN);
         final @Nullable String severityName = actualFieldReader.apply(ErrorCodePropagator.SEVERITY);
-        if (code == null || message == null || originName == null || severityName == null) {
+        if (code == null || originalCode == null || message == null || originName == null || severityName == null) {
             return Optional.empty();
         }
         final @Nullable String sourceService = actualFieldReader.apply(ErrorCodePropagator.SOURCE_SERVICE);
         try {
             return Optional.of(new ErrorCodeCarrier(
+                    originalCode,
                     code,
                     message,
                     ErrorOrigin.valueOf(originName),

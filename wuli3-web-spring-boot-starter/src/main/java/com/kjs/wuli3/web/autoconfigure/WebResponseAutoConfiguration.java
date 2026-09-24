@@ -1,7 +1,7 @@
 package com.kjs.wuli3.web.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kjs.wuli3.core.error.resolver.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.resolver.ErrorResolver;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
 import com.kjs.wuli3.web.error.WebErrorStatusResolver;
@@ -29,9 +29,9 @@ public class WebResponseAutoConfiguration {
     @ConditionalOnMissingBean
     ApiResponseFactory apiResponseFactory(
             final InvocationContextAccessor accessor,
-            final ErrorCodeResolver errorCodeResolver,
+            final ErrorResolver errorResolver,
             final WebResponseProperties properties) {
-        return new ApiResponseFactory(accessor, errorCodeResolver, properties);
+        return new ApiResponseFactory(accessor, errorResolver, properties);
     }
 
     @Bean

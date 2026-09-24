@@ -35,6 +35,7 @@ public interface ContextProxy {
      * @return 绑定捕获快照的任务包装器
      * @throws NullPointerException 当 {@code task} 为 {@code null} 时
      */
+    @SuppressWarnings("try")
     default Runnable wrap(final Runnable task) {
         Objects.requireNonNull(task, "task");
         final ContextSnapshot snapshot = this.capture();
@@ -53,6 +54,7 @@ public interface ContextProxy {
      * @return 绑定捕获快照的可调用任务包装器
      * @throws NullPointerException 当 {@code task} 为 {@code null} 时
      */
+    @SuppressWarnings("try")
     default <T> Callable<T> wrap(final Callable<T> task) {
         Objects.requireNonNull(task, "task");
         final ContextSnapshot snapshot = this.capture();
@@ -71,6 +73,7 @@ public interface ContextProxy {
      * @return 绑定捕获快照的供应器包装器
      * @throws NullPointerException 当 {@code supplier} 为 {@code null} 时
      */
+    @SuppressWarnings("try")
     default <T> Supplier<T> wrapSupplier(final Supplier<T> supplier) {
         Objects.requireNonNull(supplier, "supplier");
         final ContextSnapshot snapshot = this.capture();

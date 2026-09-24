@@ -47,25 +47,19 @@ Maven 依赖示例：
 
 ### 3.1 包职责
 
-核心错误模型位于 `com.kjs.wuli3.core.error` 根包；内置错误码、编解码和解析器按功能划分到子包。
+错误声明、传播值与协议适配分开组织：
 
 | 包 | 主要类型 | 职责 |
 | --- | --- | --- |
-| `error` | `ErrorCode`、`ErrorCodeException`、`ErrorMetadata`、`ErrorModule`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility`、`ErrorCodeCarrier` | 稳定的核心错误模型和公共语义。 |
-| `error.builtin` | `CommonErrors`、`SystemErrors`、`ErrorFrameworkErrors` | 提供框架内置错误码。 |
-| `error.codec` | `ErrorCodeCarrierCodec`、`DefaultErrorCodeCarrierCodec`、`ErrorCodePropagator` | 在本地异常、传播协议和传输字段之间编解码。 |
-| `error.resolver` | `ErrorCodeResolver`、`DefaultErrorCodeResolver`、`ErrorMetadataResolver` | 解析稳定错误码字符串及声明式元数据。 |
+| `error` | `ErrorCodeException` | 携带本地错误声明或传播值的统一异常。 |
+| `error.model` | `ErrorCode`、`ErrorMetadata`、`ErrorModule`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility` | 基础错误模型与声明式元数据。 |
+| `error.builtin` | `CommonErrors`、`SystemErrors`、`ErrorFrameworkErrors` | 框架内置错误码。 |
+| `error.propagation` | `ErrorCodeCarrier`、`ErrorCodePropagator` | 服务间错误传播值与字段读写。 |
+| `error.resolver` | `ErrorResolver`、`ErrorMetadataResolver` | 统一生成经过可见性处理的传播值，以及读取声明式元数据。 |
 
-本次拆包会改变原有导入路径。升级时按下表替换：
+`ErrorResolver` 合并原 `ErrorCodeResolver`、`DefaultErrorCodeResolver` 和 `ErrorCodeCarrierCodec` 的职责，不再保留这些旧类型。`resolveBoundary(ErrorCodeException)` 是边界输出入口；`resolveCode(ErrorCode)` 仅用于格式化错误标识，不执行异常级可见性处理。
 
-| 原路径中的类型 | 新包 |
-| --- | --- |
-| `ErrorCode`、`ErrorCodeException`、`ErrorMetadata`、`ErrorModule`、`ErrorOrigin`、`ErrorSeverity`、`ErrorVisibility`、`ErrorCodeCarrier` | `com.kjs.wuli3.core.error` |
-| `CommonErrors`、`SystemErrors`、`ErrorFrameworkErrors` | `com.kjs.wuli3.core.error.builtin` |
-| `ErrorCodeCarrierCodec`、`DefaultErrorCodeCarrierCodec`、`ErrorCodePropagator` | `com.kjs.wuli3.core.error.codec` |
-| `ErrorCodeResolver`、`DefaultErrorCodeResolver`、`ErrorMetadataResolver` | `com.kjs.wuli3.core.error.resolver` |
-
-错误来源和严重程度属于错误码固有元数据，通过 `@ErrorMetadata` 声明；可见性属于边界输出策略，通过 `withVisibility(...)` 或 `ErrorCodeCarrierCodec` 参数指定。结构化响应明细应在具体协议边界定义。
+错误来源和严重程度属于错误码固有元数据，通过 `@ErrorMetadata` 声明；可见性属于边界输出策略，可通过 `withVisibility(...)` 覆盖。结构化响应明细在具体协议边界定义。
 
 原 `SystemErrors.ILLEGAL_ARGUMENT`、`SystemErrors.ILLEGAL_STATE` 和 `SystemErrors.UNSUPPORTED_OPERATION` 已迁移为 `CommonErrors` 中的同名常量；`SystemErrors` 现在只保留系统级错误。
 
@@ -171,31 +165,36 @@ final ErrorSeverity severity = ErrorMetadataResolver.instance().getSeverity(Orde
 
 ### 3.6 本地声明与错误传播
 
-错误模型明确区分本地声明和跨边界传播态：
-
-- `ErrorCode` 是统一错误标识契约。本地错误通常由带 `@ErrorModule` 的业务枚举实现，远程错误由 `ErrorCodeCarrier` 实现。
-- `ErrorCodeException` 是项目唯一错误异常，可持有本地枚举或远程传播值。
-- `ErrorCodeCarrier` 是可跨进程传播的 `ErrorCode` 实现，包含稳定字符串错误码、消息、来源、严重程度和来源服务。
-
-协议适配层使用 `DefaultErrorCodeCarrierCodec` 将 `ErrorCodeException` 序列化为 `ErrorCodeCarrier`：
-
-| 输入 | 映射结果 |
-| --- | --- |
-| `ErrorCodeException`（本地枚举） | 保留完整字符串错误码、消息、来源和严重程度。 |
-| `ErrorCodeException`（远程传播值） | 保留已有完整码和最初来源，支持多跳调用。 |
-| 其他异常 | 由具体协议边界先包装为 `SystemErrors.INTERNAL_ERROR`，再按 `INTERNAL` 序列化，不暴露原始类型和消息。 |
-
-`ErrorCodePropagator` 使用字段读写函数在传播协议和字符串字段之间转换：
+- `ErrorCode` 是统一错误标识契约，本地通常由带 `@ErrorModule` 的业务枚举实现。
+- `ErrorCodeException` 持有本地枚举或远程 `ErrorCodeCarrier`。
+- `ErrorCodeCarrier` 包含 `originalCode`、`code`、`message`、`origin`、`severity` 和 `sourceService`。`originalCode` 是内部诊断标识，`code/message` 是可对外展示的值；不得将整个传播对象直接作为公开 HTTP 响应。
 
 ```java
-final ErrorPropagationEncoder encoder = new ErrorPropagationEncoder();
-encoder.writeTo(protocol, fieldWriter);
-final Optional<ErrorPropagationProtocol> decoded = encoder.readFrom(fieldReader);
+final ErrorResolver resolver = new ErrorResolver("order");
+final ErrorCodeCarrier protocol = resolver.resolveBoundary(exception);
+final ErrorCodeException restored = new ErrorCodeException(protocol);
 ```
 
-HTTP、Dubbo 等协议统一使用 `X-Wuli3-Error-Code`、`X-Wuli3-Error-Message`、
-`X-Wuli3-Error-Origin`、`X-Wuli3-Error-Severity` 和 `X-Wuli3-Error-Source-Service`。
-适配层只提供 `BiConsumer<String, String>` 写入函数和允许返回空值的字段读取函数，不重复实现字段校验和枚举解析。
+| 可见性 | 展示错误码 | 展示消息 |
+| --- | --- | --- |
+| `PUBLIC` | 当前错误码 | 当前消息 |
+| `CODE_ONLY` | 当前错误码 | `SystemErrors.INTERNAL_ERROR` 的消息 |
+| `MESSAGE_ONLY` | 当前服务的 `SYSTEM.INTERNAL_ERROR` | 当前消息 |
+| `INTERNAL` | 当前服务的 `SYSTEM.INTERNAL_ERROR` | `SystemErrors.INTERNAL_ERROR` 的消息 |
+
+本地错误的 `originalCode` 是完整的 `SERVICE.MODULE.ERROR_NAME`。远程错误再次传播时，保留最初的 `originalCode/sourceService` 以及 `origin/severity`，默认继续转发展示码和已过滤消息，不会从原始错误码恢复被隐藏的展示码。消费方可用 `withVisibility(...)` 再次过滤；若再次隐藏错误码，兜底码使用当前服务前缀。消息被过滤后不保留原始消息。
+
+`ErrorCodePropagator` 只负责内部服务间协议字段，不承担可见性策略：
+
+```java
+final ErrorCodePropagator propagator = new ErrorCodePropagator();
+propagator.inject(protocol, fieldWriter);
+final Optional<ErrorCodeCarrier> decoded = propagator.extract(fieldReader);
+```
+
+内部传播字段为 `X-Wuli3-Error-Original-Code`、`X-Wuli3-Error-Code`、`X-Wuli3-Error-Message`、`X-Wuli3-Error-Origin`、`X-Wuli3-Error-Severity` 和 `X-Wuli3-Error-Source-Service`。原始错误码为必填字段，旧协议不再兼容；缺失或非法时拒绝解码，Dubbo 消费方保留原有异常。来源服务缺失时使用空字符串。
+
+Web 复用同一个传播模型，但只将 `code/message` 投影到 `ApiResponse` 或 `ProblemDetail`，自行处理 HTTP 状态、请求 ID、验证明细和告警。其他异常由协议边界先包装为 `SystemErrors.INTERNAL_ERROR` 并指定 `INTERNAL` 后交给解析器。
 
 该兜底规则只应由 Dubbo、HTTP、消息消费等外部协议边界使用，不是全局异常转换规则。启动配置校验、纯 Java API 契约和编程错误仍应保留合适的 JDK 异常；可预期的业务失败应显式抛出 `ErrorCodeException`；数据库、缓存、消息 SDK 等基础设施异常应在对应适配器中包装为模块自己的系统错误。
 

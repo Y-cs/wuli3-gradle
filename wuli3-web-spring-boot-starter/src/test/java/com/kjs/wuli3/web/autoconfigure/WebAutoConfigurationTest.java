@@ -309,7 +309,10 @@ class WebAutoConfigurationTest {
         assertThat(errorAlertNotifier.error()).isInstanceOf(ErrorCodeException.class);
         assertThat(errorAlertNotifier.requestUri()).isEqualTo("/critical");
         assertThat(errorAlertNotifier.status()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(errorAlertNotifier.responseCode()).isEqualTo(SystemErrors.INTERNAL_ERROR);
+        assertThat(errorAlertNotifier.responseCode())
+                .isInstanceOfSatisfying(
+                        ErrorCodeCarrier.class,
+                        carrier -> assertThat(carrier.getName()).isEqualTo("INTERNAL_ERROR"));
     }
 
     @Test
@@ -363,7 +366,7 @@ class WebAutoConfigurationTest {
     void messageOnlyExceptionHidesCode() throws Exception {
         mockMvc.perform(get("/message-only").header(RequestIds.HEADER_NAME, "rid-4"))
                 .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.code").value("SYSTEM.INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value("visible message"))
                 .andExpect(jsonPath("$.requestId").value("rid-4"));
     }
@@ -372,7 +375,7 @@ class WebAutoConfigurationTest {
     void internalExceptionHidesCodeAndMessage() throws Exception {
         mockMvc.perform(get("/internal").header(RequestIds.HEADER_NAME, "rid-5"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("WEB.INTERNAL_ERROR"))
+                .andExpect(jsonPath("$.code").value("SYSTEM.INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.message").value(WebErrors.INTERNAL_ERROR.getMessage()))
                 .andExpect(jsonPath("$.requestId").value("rid-5"));
     }
@@ -608,13 +611,19 @@ class WebAutoConfigurationTest {
         @GetMapping("/propagated-error")
         String propagatedError() {
             throw new ErrorCodeException(new ErrorCodeCarrier(
-                    "GROUP.PERMISSION.DENIED", "denied", ErrorOrigin.CALLER, ErrorSeverity.NORMAL, "group"));
+                    "GROUP.PERMISSION.DENIED",
+                    "GROUP.PERMISSION.DENIED",
+                    "denied",
+                    ErrorOrigin.CALLER,
+                    ErrorSeverity.NORMAL,
+                    "group"));
         }
 
         /** 构造必须隐藏实现详情的远程系统错误。 */
         @GetMapping("/propagated-internal-error")
         String propagatedInternalError() {
             throw new ErrorCodeException(new ErrorCodeCarrier(
+                    "GROUP.SECRET.FAILURE",
                     "GROUP.SYSTEM.INTERNAL_ERROR",
                     "provider details",
                     ErrorOrigin.SERVER,

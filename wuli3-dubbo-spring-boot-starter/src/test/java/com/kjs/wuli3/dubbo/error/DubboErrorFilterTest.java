@@ -25,6 +25,99 @@ import org.junit.jupiter.api.Test;
  * @author GuoYang create on 2026/8/28 17:59
  */
 class DubboErrorFilterTest {
+    /** 验证四种可见性策略在 provider 边界同时过滤展示码和消息，并保留原始诊断码。 */
+    @Test
+    void providerAppliesAllVisibilityPolicies() {
+        final DubboProperties properties = new DubboProperties();
+        final Invocation invocation = mock(Invocation.class);
+        for (final ErrorVisibility visibility : ErrorVisibility.values()) {
+            final ErrorCodeException exception =
+                    new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT, "denied").withVisibility(visibility);
+            final Result wireResult =
+                    DubboErrorFilterTest.invokeProvider(properties, invocation, "policy-service", exception);
+            assertThat(wireResult.getAttachment(ErrorCodePropagator.ORIGINAL_CODE))
+                    .isEqualTo("POLICY-SERVICE.COMMON.ILLEGAL_ARGUMENT");
+            if (visibility == ErrorVisibility.MESSAGE_ONLY || visibility == ErrorVisibility.INTERNAL) {
+                assertThat(wireResult.getAttachment(ErrorCodePropagator.CODE))
+                        .isEqualTo("POLICY-SERVICE.SYSTEM.INTERNAL_ERROR");
+            } else {
+                assertThat(wireResult.getAttachment(ErrorCodePropagator.CODE))
+                        .isEqualTo("POLICY-SERVICE.COMMON.ILLEGAL_ARGUMENT");
+            }
+            if (visibility == ErrorVisibility.PUBLIC || visibility == ErrorVisibility.MESSAGE_ONLY) {
+                assertThat(wireResult.getAttachment(ErrorCodePropagator.MESSAGE))
+                        .isEqualTo("denied");
+            } else {
+                assertThat(wireResult.getAttachment(ErrorCodePropagator.MESSAGE))
+                        .isEqualTo("内部错误");
+            }
+            final String visibleCode = wireResult.getAttachment(ErrorCodePropagator.CODE);
+            final String visibleMessage = wireResult.getAttachment(ErrorCodePropagator.MESSAGE);
+            final Invoker<?> consumerInvoker = mock(Invoker.class);
+            when(consumerInvoker.invoke(invocation)).thenReturn(wireResult);
+            final DubboErrorConsumerFilter consumer = new DubboErrorConsumerFilter();
+            consumer.setDubboProperties(properties);
+            final Result localResult = consumer.invoke(consumerInvoker, invocation);
+            assertThat(localResult.getException()).isInstanceOfSatisfying(ErrorCodeException.class, translated -> {
+                assertThat(translated.getErrorCode()).isInstanceOfSatisfying(ErrorCodeCarrier.class, carrier -> {
+                    assertThat(carrier.originalCode()).isEqualTo("POLICY-SERVICE.COMMON.ILLEGAL_ARGUMENT");
+                    assertThat(carrier.code()).isEqualTo(visibleCode);
+                    assertThat(carrier.message()).isEqualTo(visibleMessage);
+                    assertThat(carrier.origin()).isEqualTo(ErrorOrigin.CALLER);
+                    assertThat(carrier.severity()).isEqualTo(ErrorSeverity.NORMAL);
+                    assertThat(carrier.sourceService()).isEqualTo("policy-service");
+                });
+            });
+        }
+    }
+
+    /** 验证第二个 provider 只转发已过滤的展示码，不能从原始码恢复被隐藏的错误码。 */
+    @Test
+    void secondProviderHopPreservesOriginalAndNeverRestoresMaskedCode() {
+        final DubboProperties properties = new DubboProperties();
+        final Invocation invocation = mock(Invocation.class);
+        final Result firstWire = DubboErrorFilterTest.invokeProvider(
+                properties,
+                invocation,
+                "first-service",
+                new ErrorCodeException(CommonErrors.ILLEGAL_ARGUMENT, "denied")
+                        .withVisibility(ErrorVisibility.MESSAGE_ONLY));
+        final Invoker<?> consumerInvoker = mock(Invoker.class);
+        when(consumerInvoker.invoke(invocation)).thenReturn(firstWire);
+        final DubboErrorConsumerFilter consumer = new DubboErrorConsumerFilter();
+        consumer.setDubboProperties(properties);
+        final ErrorCodeException remote = (ErrorCodeException)
+                consumer.invoke(consumerInvoker, invocation).getException();
+
+        final Result secondWire = DubboErrorFilterTest.invokeProvider(properties, invocation, "second-service", remote);
+        assertThat(secondWire.getAttachment(ErrorCodePropagator.CODE)).isEqualTo("FIRST-SERVICE.SYSTEM.INTERNAL_ERROR");
+        assertThat(secondWire.getAttachment(ErrorCodePropagator.ORIGINAL_CODE))
+                .isEqualTo("FIRST-SERVICE.COMMON.ILLEGAL_ARGUMENT");
+        assertThat(secondWire.getAttachment(ErrorCodePropagator.MESSAGE)).isEqualTo("denied");
+        assertThat(secondWire.getAttachment(ErrorCodePropagator.SOURCE_SERVICE)).isEqualTo("first-service");
+        assertThat(secondWire.getAttachment(ErrorCodePropagator.ORIGIN)).isEqualTo("CALLER");
+        assertThat(secondWire.getAttachment(ErrorCodePropagator.SEVERITY)).isEqualTo("NORMAL");
+    }
+
+    /** 缺少原始错误码字段时保留 Dubbo 原始异常，避免根据不完整附件重建错误。 */
+    @Test
+    void consumerRejectsPropagationWithoutOriginalCode() {
+        final DubboProperties properties = new DubboProperties();
+        final Invocation invocation = mock(Invocation.class);
+        final RuntimeException original = new RuntimeException("wire failure");
+        final AppResponse response = new AppResponse(original);
+        response.setAttachment(ErrorCodePropagator.CODE, "SERVICE.SYSTEM.INTERNAL_ERROR");
+        response.setAttachment(ErrorCodePropagator.MESSAGE, "内部错误");
+        response.setAttachment(ErrorCodePropagator.ORIGIN, "SERVER");
+        response.setAttachment(ErrorCodePropagator.SEVERITY, "CRITICAL");
+        final Invoker<?> invoker = mock(Invoker.class);
+        when(invoker.invoke(invocation)).thenReturn(response);
+        final DubboErrorConsumerFilter consumer = new DubboErrorConsumerFilter();
+        consumer.setDubboProperties(properties);
+
+        assertThat(consumer.invoke(invoker, invocation).getException()).isSameAs(original);
+    }
+
     /** 验证消费方无需提供方业务枚举即可恢复完整错误码和生效策略。 */
     @Test
     void providerAndConsumerTranslateErrorWithoutSharingBusinessEnum() {
@@ -45,7 +138,9 @@ class DubboErrorFilterTest {
                 .hasMessage("Remote service invocation failed");
         assertThat(wireResult.getAttachment(ErrorCodePropagator.CODE))
                 .isEqualTo("GROUP-SERVICE.COMMON.ILLEGAL_ARGUMENT");
-        assertThat(wireResult.getAttachment(ErrorCodePropagator.MESSAGE)).isEqualTo("Internal server error");
+        assertThat(wireResult.getAttachment(ErrorCodePropagator.ORIGINAL_CODE))
+                .isEqualTo("GROUP-SERVICE.COMMON.ILLEGAL_ARGUMENT");
+        assertThat(wireResult.getAttachment(ErrorCodePropagator.MESSAGE)).isEqualTo("内部错误");
         assertThat(wireResult.getAttachment(ErrorCodePropagator.ORIGIN)).isEqualTo("CALLER");
         assertThat(wireResult.getAttachment(ErrorCodePropagator.SEVERITY)).isEqualTo("NORMAL");
         assertThat(wireResult.getAttachment(ErrorCodePropagator.SOURCE_SERVICE)).isEqualTo("group-service");
@@ -59,7 +154,8 @@ class DubboErrorFilterTest {
         assertThat(localResult.getException()).isInstanceOfSatisfying(ErrorCodeException.class, exception -> {
             assertThat(exception.getErrorCode()).isInstanceOfSatisfying(ErrorCodeCarrier.class, propagated -> {
                 assertThat(propagated.code()).isEqualTo("GROUP-SERVICE.COMMON.ILLEGAL_ARGUMENT");
-                assertThat(propagated.message()).isEqualTo("Internal server error");
+                assertThat(propagated.originalCode()).isEqualTo("GROUP-SERVICE.COMMON.ILLEGAL_ARGUMENT");
+                assertThat(propagated.message()).isEqualTo("内部错误");
                 assertThat(propagated.origin()).isEqualTo(ErrorOrigin.CALLER);
                 assertThat(propagated.severity()).isEqualTo(ErrorSeverity.NORMAL);
                 assertThat(propagated.sourceService()).isEqualTo("group-service");
@@ -91,7 +187,8 @@ class DubboErrorFilterTest {
         assertThat(localResult.getException()).isInstanceOfSatisfying(ErrorCodeException.class, exception -> {
             assertThat(exception.getErrorCode()).isInstanceOfSatisfying(ErrorCodeCarrier.class, propagated -> {
                 assertThat(propagated.code()).isEqualTo("GROUP.SYSTEM.INTERNAL_ERROR");
-                assertThat(propagated.message()).isEqualTo("Internal server error");
+                assertThat(propagated.originalCode()).isEqualTo("GROUP.SYSTEM.INTERNAL_ERROR");
+                assertThat(propagated.message()).isEqualTo("内部错误");
                 assertThat(propagated.origin()).isEqualTo(ErrorOrigin.SERVER);
                 assertThat(propagated.severity()).isEqualTo(ErrorSeverity.CRITICAL);
             });
@@ -158,5 +255,19 @@ class DubboErrorFilterTest {
 
         assertThat(filter.invoke(invoker, invocation)).isSameAs(original);
         assertThat(original.getException()).isInstanceOf(ErrorCodeException.class);
+    }
+
+    /** 使用真实 provider Filter 生成指定服务的错误传播附件。 */
+    private static Result invokeProvider(
+            final DubboProperties properties,
+            final Invocation invocation,
+            final String service,
+            final ErrorCodeException exception) {
+        final Invoker<?> invoker = mock(Invoker.class);
+        when(invoker.getUrl()).thenReturn(URL.valueOf("dubbo://localhost/service?application=" + service));
+        when(invoker.invoke(invocation)).thenReturn(new AppResponse(exception));
+        final DubboErrorProviderFilter provider = new DubboErrorProviderFilter();
+        provider.setDubboProperties(properties);
+        return provider.invoke(invoker, invocation);
     }
 }

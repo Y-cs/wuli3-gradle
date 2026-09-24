@@ -45,7 +45,7 @@ wuli3:
 | `wuli3.dubbo.error.enabled` | `true` | 是否启用 provider/consumer 错误转换。 |
 
 应用可以注册自己的 `ContextPropagator` Bean 控制传播字段。错误来源服务固定读取 Dubbo provider URL 中的
-`application` 参数，并由 core 的 `DefaultErrorCodeResolver` 生成 `SERVICE.MODULE.ERROR_NAME`；缺少
+`application` 参数，并由 core 的 `ErrorResolver` 生成 `SERVICE.MODULE.ERROR_NAME`；缺少
 `application` 参数时来源服务为空，错误码不添加服务前缀。
 
 ## 4. 上下文传播
@@ -63,11 +63,11 @@ consumer Filter 捕获当前 `ContextSnapshot`，通过 Dubbo invocation attachm
 `ErrorCode` 和 `ErrorCodeException` 是统一错误模型。跨服务边界只传播 core 的 `ErrorCodeCarrier` 字段：
 
 ```text
-code + message + origin + severity + sourceService
+originalCode + code + message + origin + severity + sourceService
 ```
 
 这些字段通过 core 的 `ErrorCodePropagator` 写入 Dubbo response attachments，固定使用
-`X-Wuli3-Error-Code`、`X-Wuli3-Error-Message`、`X-Wuli3-Error-Origin`、
+`X-Wuli3-Error-Original-Code`、`X-Wuli3-Error-Code`、`X-Wuli3-Error-Message`、`X-Wuli3-Error-Origin`、
 `X-Wuli3-Error-Severity` 和 `X-Wuli3-Error-Source-Service`。Dubbo Filter 只向编码器提供
 `Result::setAttachment` 和 `Result::getAttachment`，不重复实现字段校验和枚举解析。
 
@@ -75,8 +75,8 @@ code + message + origin + severity + sourceService
 
 | provider 结果 | 边界行为 |
 | --- | --- |
-| `ErrorCodeException`（本地错误） | 解析完整字符串错误码、消息、来源和严重程度后传播。 |
-| `ErrorCodeException`（已有远程错误） | 保留已有 `ErrorCodeCarrier` 的完整码和最初来源，支持多跳调用继续传播。 |
+| `ErrorCodeException`（本地错误） | 保留完整原始错误码，由 core 按可见性过滤展示码和消息后传播。 |
+| `ErrorCodeException`（已有远程错误） | 保留原始码、已过滤的展示码和消息及最初来源，支持多跳调用；不恢复被隐藏的信息。 |
 | 其他运行时异常或 RPC 结果异常 | 收敛为 `SYSTEM.INTERNAL_ERROR`，不传播原始异常类型、消息或业务栈。 |
 | 正常结果 | 不写入错误 attachments，不做转换。 |
 
@@ -86,11 +86,13 @@ code + message + origin + severity + sourceService
 - 数据库、缓存、消息等 SDK 异常应在对应基础设施适配器中包装为模块错误。
 - 启动参数、配置绑定和纯 Java API 契约错误应保留原生异常，让调用点和启动日志保有诊断信息。
 
+`originalCode` 仅供内部诊断，完整 attachments 只能用于内部服务间传播，不能复制到公开 HTTP 响应。新增字段为破坏性协议变更，需协调升级提供方和消费方。
+
 消费方若同时使用 Web starter，携带 `ErrorCodeCarrier` 的 `ErrorCodeException` 会直接进入现有 HTTP 错误处理链路，根据远程错误的 `origin` 确定 400/500，并根据边界可见性策略控制错误码和消息是否对外可见。
 
 ### 5.2 降级行为
 
-错误 attachments 缺失或枚举策略字段非法时，consumer 不会根据不完整数据构造 `ErrorCodeException`，而是保留 Dubbo 原始异常。未安装该 starter 的消费方只会看到 provider 设置的通用远程调用失败异常，不会得到提供方的业务类或内部异常详情。
+错误 attachments 缺失（包括新增的原始错误码字段）或枚举策略字段非法时，consumer 不会根据不完整数据构造 `ErrorCodeException`，而是保留 Dubbo 原始异常。未安装该 starter 的消费方只会看到 provider 设置的通用远程调用失败异常，不会得到提供方的业务类或内部异常详情。
 
 ## 6. 限制
 

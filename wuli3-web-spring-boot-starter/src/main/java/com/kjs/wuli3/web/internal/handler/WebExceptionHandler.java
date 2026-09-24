@@ -3,6 +3,7 @@ package com.kjs.wuli3.web.internal.handler;
 import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.model.ErrorCode;
 import com.kjs.wuli3.core.error.model.ErrorSeverity;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
 import com.kjs.wuli3.propagation.accessor.InvocationContextAccessor;
 import com.kjs.wuli3.web.error.ErrorAlertContext;
 import com.kjs.wuli3.web.error.ErrorAlertNotifier;
@@ -13,6 +14,7 @@ import com.kjs.wuli3.web.internal.advice.NativeResponseSupport;
 import com.kjs.wuli3.web.internal.advice.ValidationErrorDetailsFactory;
 import com.kjs.wuli3.web.internal.error.ErrorAlertNotifiers;
 import com.kjs.wuli3.web.internal.error.WebErrorResponseMapper;
+import com.kjs.wuli3.web.response.ApiResponse;
 import com.kjs.wuli3.web.response.WebResponseProperties;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -41,13 +43,12 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
  * <p><strong>核心职责：异常到 HTTP 响应的边界转换</strong></p>
  * <p>本类是 Spring MVC 全局异常处理的入口，负责捕获 Controller 层抛出的异常并转换为统一的
  * {@link com.kjs.wuli3.web.response.ApiResponse} 或 {@link org.springframework.http.ProblemDetail} 响应。
- * 错误可见性过滤委托给 {@link WebErrorResponseMapper}，HTTP 状态码判定委托给 {@link WebErrorStatusResolver}。
+ * 错误可见性过滤委托给 core 错误解析器，HTTP 状态码判定委托给 {@link WebErrorStatusResolver}。
  *
  * <h2>业务异常处理（ErrorCodeException）</h2>
  * <p>对于 {@link ErrorCodeException}，处理流程为：
  * <ol>
- *   <li>通过 {@link WebErrorResponseMapper#visibleErrorCode} 和 {@link WebErrorResponseMapper#visibleMessage}
- *       根据 {@link com.kjs.wuli3.core.error.model.ErrorVisibility} 过滤敏感信息</li>
+ *   <li>通过 core 错误解析器根据 {@link com.kjs.wuli3.core.error.model.ErrorVisibility} 过滤敏感信息</li>
  *   <li>通过 {@link WebErrorStatusResolver#resolve} 根据 {@link com.kjs.wuli3.core.error.model.ErrorOrigin}
  *       决定 HTTP 状态码（CALLER → 400, SERVER → 500）</li>
  *   <li>通过 {@link #shouldAlert} 判断是否需要告警（5xx 或 CRITICAL/FATAL 严重度）</li>
@@ -106,16 +107,16 @@ public class WebExceptionHandler {
 
     @ExceptionHandler(ErrorCodeException.class)
     public ResponseEntity<?> handleErrorCodeException(final ErrorCodeException ex, final HttpServletRequest request) {
-        final ErrorCode responseCode = WebErrorResponseMapper.visibleErrorCode(ex);
-        final String message = WebErrorResponseMapper.visibleMessage(ex);
-        final HttpStatus status = this.webErrorStatusResolver.resolve(ex, responseCode);
+        final ErrorCodeCarrier responseCode = this.responseFactory.resolve(ex);
+        final ApiResponse<?> response = this.responseFactory.fail(responseCode);
+        final HttpStatus status =
+                this.webErrorStatusResolver.resolve(new ErrorCodeException(responseCode), responseCode);
         this.alert(ex, request, status, responseCode);
         if (NativeResponseSupport.isAll(request)) {
             // NativeResponseMode.ALL 只跳过 ApiResponse 外壳，错误仍使用 Spring 标准 ProblemDetail。
-            return WebErrorResponseMapper.nativeError(
-                    status, responseCode, message, this.requestId(), this.responseFactory);
+            return WebErrorResponseMapper.nativeError(status, response);
         }
-        return ResponseEntity.status(status).body(this.responseFactory.fail(responseCode, message));
+        return ResponseEntity.status(status).body(response);
     }
 
     /*

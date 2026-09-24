@@ -144,7 +144,7 @@ final class BizErrorAlertNotifier implements ErrorAlertNotifier {
 
 | 字段 | 说明 |
 | --- | --- |
-| `code` | 外部错误码。成功固定为 `0`；失败由 `WebErrorCodeResolver` 解析。 |
+| `code` | 外部错误码。成功固定为 `0`；失败由 `ErrorResolver` 解析。 |
 | `message` | 成功时使用 `wuli3.web.response.success-message`；失败时使用错误消息或框架映射消息。 |
 | `timestamp` | 响应生成时间，Unix 毫秒时间戳。 |
 | `requestId` | 当前请求 ID，来自 `X-Request-Id` 或 starter 自动生成的 ID；上下文缺失时可能为 `null`。 |
@@ -263,12 +263,13 @@ wuli3-core 错误模型使用 `@ErrorMetadata` 注解声明错误的语义属性
 
 可见性策略优先级：运行时覆盖（`withVisibility()`）> 字段级 `@ErrorMetadata` > 类级 `@ErrorMetadata` > 模块默认
 
-Web 层的 `WebErrorResponseMapper` 是可见性过滤的单一真实来源（Single Source of Truth），
-确保所有错误响应都经过统一的边界过滤，防止敏感内部信息泄露。
+core 的 `ErrorResolver` 统一执行错误码和消息的可见性策略，隐藏码使用 `SystemErrors.INTERNAL_ERROR`。
+Web 层复用其生成的 `ErrorCodeCarrier`，仅输出 `code/message`；`originalCode`、来源服务与诊断元数据不进入公开响应。
+`WebErrorResponseMapper` 只承担 HTTP 响应映射，HTTP 状态、请求 ID 和验证明细仍由 Web 层处理。
 
 普通业务错误可以使用默认的 `CALLER`。数据库、缓存、消息投递、JSON 序列化等只能由服务端修复的错误，应在错误码类型或常量的 `@ErrorMetadata` 中声明 `origin = ErrorOrigin.SERVER`。应用可以注册 `WebErrorStatusResolver` 覆盖默认 400/500 映射。
 
-错误码格式由 `WebErrorCodeResolver` 生成：
+错误码格式由 `ErrorResolver` 生成：
 
 ```text
 SERVICE_CODE.ERROR_MODULE.ERROR_NAME
@@ -276,10 +277,10 @@ SERVICE_CODE.ERROR_MODULE.ERROR_NAME
 
 `SERVICE_CODE` 来自 `application.service.service-code`，未配置时省略。
 
-Dubbo 等协议适配层接收到跨边界传播的错误时会抛出携带 `ErrorCodeCarrier` 的 `ErrorCodeException`。`ErrorCodeCarrier` 是 `ErrorCode` 的远程实现，携带 core 定义的稳定字符串错误码、**已经过提供方可见性过滤的消息**、来源和严重程度，不需要在消费端伪造业务枚举。Web starter 会沿用现有 `ErrorCodeException` 链路：
+Dubbo 等协议适配层接收到跨边界传播的错误时会抛出携带 `ErrorCodeCarrier` 的 `ErrorCodeException`。`ErrorCodeCarrier` 是 `ErrorCode` 的远程实现，携带原始错误码、**已经过提供方可见性过滤的展示码和消息**、来源和严重程度，不需要在消费端伪造业务枚举。Web starter 会沿用现有 `ErrorCodeException` 链路：
 
 - `ErrorOrigin.CALLER` 默认返回 400，`ErrorOrigin.SERVER` 默认返回 500（origin 在传播时保留）
-- `ErrorCodeCarrier` 始终使用 `PUBLIC` visibility，因为它携带的消息已经是提供方过滤后的结果
+- `ErrorCodeCarrier` 默认使用 `PUBLIC` visibility，因为展示码和消息均已经过滤；消费方仍可通过 `withVisibility(...)` 再次过滤，原始码不会自动恢复为展示码
 - `ErrorSeverity.CRITICAL` 和 `FATAL` 仍会触发错误告警（severity 在传播时保留）
 - 消费方不需要依赖提供方的业务错误枚举，远程完整错误码也不会被替换为 Dubbo 自己的错误码
 

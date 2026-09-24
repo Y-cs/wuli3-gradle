@@ -52,7 +52,9 @@ public final class DefaultWebErrorStatusResolver implements WebErrorStatusResolv
         if (securityStatus != null) {
             return securityStatus;
         }
-        if (responseCode == WebErrors.PAYLOAD_TOO_LARGE) {
+        if (responseCode == WebErrors.PAYLOAD_TOO_LARGE
+                || (error instanceof ErrorCodeException exception
+                        && exception.getErrorCode() == WebErrors.PAYLOAD_TOO_LARGE)) {
             return HttpStatus.PAYLOAD_TOO_LARGE;
         }
         switch (error) {

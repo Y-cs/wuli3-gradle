@@ -4,9 +4,8 @@ import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.builtin.SystemErrors;
 import com.kjs.wuli3.core.error.model.ErrorVisibility;
 import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
-import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrierCodec;
 import com.kjs.wuli3.core.error.propagation.ErrorCodePropagator;
-import com.kjs.wuli3.core.error.resolver.DefaultErrorCodeResolver;
+import com.kjs.wuli3.core.error.resolver.ErrorResolver;
 import com.kjs.wuli3.dubbo.autoconfigure.DubboProperties;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,8 +34,8 @@ import org.jspecify.annotations.Nullable;
 public final class DubboErrorProviderFilter implements Filter {
     private static final ErrorCodePropagator ERROR_PROPAGATION_ENCODER = new ErrorCodePropagator();
 
-    /** 按 provider application 隔离并复用线程安全的错误编解码器。 */
-    private final ConcurrentMap<String, ErrorCodeCarrierCodec> errorCodecs = new ConcurrentHashMap<>();
+    /** 按 provider application 隔离并复用线程安全的错误解析器。 */
+    private final ConcurrentMap<String, ErrorResolver> errorResolvers = new ConcurrentHashMap<>();
 
     /**
      * 接收 Spring 容器中的 Dubbo 错误传播配置。
@@ -81,9 +80,8 @@ public final class DubboErrorProviderFilter implements Filter {
                 ? errorCodeException
                 : new ErrorCodeException(SystemErrors.INTERNAL_ERROR, exception)
                         .withVisibility(ErrorVisibility.INTERNAL);
-        final ErrorCodeCarrierCodec errorCodeCarrierCodec = this.errorCodecs.computeIfAbsent(
-                sourceService, (final String key) -> new ErrorCodeCarrierCodec(new DefaultErrorCodeResolver(key), key));
-        final ErrorCodeCarrier protocol = errorCodeCarrierCodec.encode(local);
+        final ErrorResolver errorResolver = this.errorResolvers.computeIfAbsent(sourceService, ErrorResolver::new);
+        final ErrorCodeCarrier protocol = errorResolver.resolveBoundary(local);
         DubboErrorProviderFilter.ERROR_PROPAGATION_ENCODER.inject(protocol, result::setAttachment);
         result.setException(new RuntimeException("Remote service invocation failed"));
     }

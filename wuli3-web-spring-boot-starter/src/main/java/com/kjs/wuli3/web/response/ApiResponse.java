@@ -1,7 +1,9 @@
 package com.kjs.wuli3.web.response;
 
+import com.kjs.wuli3.core.error.ErrorCodeException;
 import com.kjs.wuli3.core.error.model.ErrorCode;
-import com.kjs.wuli3.core.error.resolver.ErrorCodeResolver;
+import com.kjs.wuli3.core.error.propagation.ErrorCodeCarrier;
+import com.kjs.wuli3.core.error.resolver.ErrorResolver;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
@@ -36,17 +38,22 @@ public record ApiResponse<T>(
             final ErrorCode errorCode,
             final String message,
             final @Nullable String requestId,
-            final ErrorCodeResolver errorCodeResolver) {
-        return ApiResponse.failure(errorCode, message, requestId, errorCodeResolver, null);
+            final ErrorResolver errorResolver) {
+        return ApiResponse.failure(errorCode, message, requestId, errorResolver, null);
     }
 
     public static <T> ApiResponse<T> failure(
             final ErrorCode errorCode,
             final String message,
             final @Nullable String requestId,
-            final ErrorCodeResolver errorCodeResolver,
+            final ErrorResolver errorResolver,
             final @Nullable T data) {
-        return new ApiResponse<>(
-                errorCodeResolver.resolve(errorCode), message, System.currentTimeMillis(), requestId, data);
+        final ErrorCodeCarrier carrier = errorResolver.resolveBoundary(new ErrorCodeException(errorCode, message));
+        return ApiResponse.failure(carrier, requestId, data);
+    }
+    /** 仅向外投影已解析错误的展示码和消息，诊断字段留在服务内部。 */
+    public static <T> ApiResponse<T> failure(
+            final ErrorCodeCarrier carrier, final @Nullable String requestId, final @Nullable T data) {
+        return new ApiResponse<>(carrier.code(), carrier.message(), System.currentTimeMillis(), requestId, data);
     }
 }

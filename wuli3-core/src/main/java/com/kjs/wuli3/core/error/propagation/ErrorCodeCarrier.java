@@ -8,7 +8,8 @@ import java.util.Objects;
 /**
  * 跨服务边界传输的错误值，同时也是接收方可携带的 {@link ErrorCode}。
  *
- * @param code 完整稳定错误码
+ * @param originalCode 原始错误码，用于诊断身份识别
+ * @param code 按可见性处理后的稳定错误码
  * @param message 按边界可见性处理后的消息
  * @param origin 错误责任归属
  * @param severity 错误严重程度
@@ -16,16 +17,25 @@ import java.util.Objects;
  * @author GuoYang create on 2026/8/28 20:00
  */
 public record ErrorCodeCarrier(
-        String code, String message, ErrorOrigin origin, ErrorSeverity severity, String sourceService)
+        String originalCode,
+        String code,
+        String message,
+        ErrorOrigin origin,
+        ErrorSeverity severity,
+        String sourceService)
         implements ErrorCode {
 
     /** 校验传输值字段完整且错误码非空。 */
     public ErrorCodeCarrier {
+        Objects.requireNonNull(originalCode, "originalCode");
         Objects.requireNonNull(code, "code");
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(origin, "origin");
         Objects.requireNonNull(severity, "severity");
         Objects.requireNonNull(sourceService, "sourceService");
+        if (originalCode.isBlank()) {
+            throw new IllegalArgumentException("originalCode must not be blank");
+        }
         if (code.isBlank()) {
             throw new IllegalArgumentException("code must not be blank");
         }
@@ -40,8 +50,8 @@ public record ErrorCodeCarrier(
     /** 从完整错误码提取末段错误名称。 */
     @Override
     public String getName() {
-        final int lastDot = this.code.lastIndexOf('.');
-        return lastDot < 0 ? this.code : this.code.substring(lastDot + 1);
+        final int lastDot = this.originalCode.lastIndexOf('.');
+        return lastDot < 0 ? this.originalCode : this.originalCode.substring(lastDot + 1);
     }
 
     /** 返回传播协议类型，避免接收方尝试加载提供方业务枚举。 */

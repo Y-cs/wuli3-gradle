@@ -30,6 +30,7 @@ class ErrorCodePropagatorTest {
         assertThat(fields)
                 .containsExactlyInAnyOrderEntriesOf(Map.of(
                         ErrorCodePropagator.CODE, protocol.code(),
+                        ErrorCodePropagator.ORIGINAL_CODE, protocol.originalCode(),
                         ErrorCodePropagator.MESSAGE, protocol.message(),
                         ErrorCodePropagator.ORIGIN, protocol.origin().name(),
                         ErrorCodePropagator.SEVERITY, protocol.severity().name(),
@@ -56,7 +57,12 @@ class ErrorCodePropagatorTest {
 
         assertThat(this.encoder.extract(fields::get))
                 .contains(new ErrorCodeCarrier(
-                        "ORDER.ORDER.NOT_FOUND", "not found", ErrorOrigin.CALLER, ErrorSeverity.NORMAL, ""));
+                        "ORDER.ORDER.NOT_FOUND",
+                        "ORDER.ORDER.NOT_FOUND",
+                        "not found",
+                        ErrorOrigin.CALLER,
+                        ErrorSeverity.NORMAL,
+                        ""));
     }
 
     @Test
@@ -68,6 +74,10 @@ class ErrorCodePropagatorTest {
         assertThat(this.encoder.extract(fields::get)).isEmpty();
 
         fields.put(ErrorCodePropagator.MESSAGE, "not found");
+        fields.remove(ErrorCodePropagator.ORIGINAL_CODE);
+        assertThat(this.encoder.extract(fields::get)).isEmpty();
+
+        fields.put(ErrorCodePropagator.ORIGINAL_CODE, "ORDER.ORDER.NOT_FOUND");
         fields.put(ErrorCodePropagator.ORIGIN, "UNKNOWN");
         assertThat(this.encoder.extract(fields::get)).isEmpty();
 
@@ -89,6 +99,11 @@ class ErrorCodePropagatorTest {
 
     private static ErrorCodeCarrier protocol() {
         return new ErrorCodeCarrier(
-                "ORDER.ORDER.NOT_FOUND", "not found", ErrorOrigin.CALLER, ErrorSeverity.NORMAL, "order");
+                "ORDER.ORDER.NOT_FOUND",
+                "ORDER.ORDER.NOT_FOUND",
+                "not found",
+                ErrorOrigin.CALLER,
+                ErrorSeverity.NORMAL,
+                "order");
     }
 }
